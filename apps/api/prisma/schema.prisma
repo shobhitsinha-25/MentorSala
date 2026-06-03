@@ -1,0 +1,452 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================
+// ENUMS
+// =====================================================
+
+enum Role {
+  STUDENT
+  MENTOR
+  ADMIN
+}
+
+enum ExamType {
+  JEE
+  WBJEE
+  BOARDS
+}
+
+enum ApplicationStatus {
+  NOT_STARTED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  MISSED
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+// =====================================================
+// USER MODEL
+// =====================================================
+
+model User {
+  id String @id @default(cuid())
+
+  // Basic Info
+  name     String
+  email    String  @unique
+  password String?
+  avatar   String?
+
+  role                Role    @default(STUDENT)
+  onboardingCompleted Boolean @default(false)
+
+  // Student Info
+  targetExam        ExamType?
+  currentClass      String?
+  targetYear        String?
+  preferredLanguage String?
+  studyHours        String?
+
+  // Gamification
+  xp               Int       @default(0)
+  streak           Int       @default(0)
+  level            String    @default("Rookie")
+  lastPotdSolvedAt DateTime?
+  lastActiveAt     DateTime?
+
+  // Soft Delete
+  isDeleted Boolean @default(false)
+
+  // Relations
+  mentorProfile     Mentor?
+  subscriptions     UserSubscription[]
+  bookedSessions    MentorshipSession[]       @relation("StudentSessions")
+  questionAttempts  QuestionAttempt[]
+  mentorPreferences StudentMentorPreference[]
+  mentorReviews     MentorReview[]            @relation("StudentReviews") // ✅ FIXED: Explicit relational map
+  tasks             Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([role])
+}
+
+// =====================================================
+// MENTOR MODEL
+// =====================================================
+
+model Mentor {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Approval
+  status          ApplicationStatus @default(NOT_STARTED)
+  isVerified      Boolean           @default(false)
+  verifiedAt      DateTime?
+  rejectionReason String?
+  approvedById    String?
+
+  // Contact
+  phoneNumber String?
+
+  // Resume/Profile
+  resumeUrl       String?
+  bio             String?
+  profileHeadline String?
+  profileImage    String?
+  qualification   String?
+  experienceYears Int?
+  expertise       String[]
+  skills          String[]
+  languages       String[]
+
+  // Social Links
+  youtubeUrl  String?
+  linkedinUrl String?
+  websiteUrl  String?
+  twitterUrl  String?
+
+  // Metrics
+  rating                 Float   @default(0)
+  totalStudents          Int     @default(0)
+  totalSessions          Int     @default(0)
+  totalReviews           Int     @default(0)
+  earnings               Float   @default(0)
+  availableForMentorship Boolean @default(true)
+  isDeleted              Boolean @default(false)
+
+  // Relations
+  subjects            SubjectMentor[]
+  sessions            MentorshipSession[]       @relation("MentorSessions")
+  availabilities      MentorAvailability[]
+  blockedDates        MentorBlockedDate[]
+  reviews             MentorReview[]            @relation("MentorReviews") // ✅ FIXED: Explicit relational map
+  preferredByStudents StudentMentorPreference[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([isVerified])
+}
+
+// =====================================================
+// SUBJECT MODEL
+// =====================================================
+
+model Subject {
+  id        String  @id @default(cuid())
+  name      String
+  slug      String  @unique
+  published Boolean @default(true)
+
+  // Relations
+  mentors  SubjectMentor[]
+  chapters Chapter[]
+
+  mentorPreferences StudentMentorPreference[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =====================================================
+// CHAPTER MODEL
+// =====================================================
+
+model Chapter {
+  id        String  @id @default(cuid())
+  title     String
+  slug      String  @unique
+  order     Int
+  published Boolean @default(true)
+
+  // Subject
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  // Relations
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([subjectId])
+}
+
+// =====================================================
+// SUBJECT ↔ MENTOR RELATION (Many-to-Many Bridge)
+// =====================================================
+
+model SubjectMentor {
+  id        String  @id @default(cuid())
+  subjectId String
+  mentorId  String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  mentor    Mentor  @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([subjectId, mentorId])
+  @@index([subjectId])
+  @@index([mentorId])
+}
+
+// =====================================================
+// STUDENT MENTOR PREFERENCE
+// =====================================================
+
+model StudentMentorPreference {
+  id        String @id @default(cuid())
+  userId    String
+  subjectId String
+  mentorId  String
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  mentor  Mentor  @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, subjectId])
+  @@index([userId])
+  @@index([subjectId])
+  @@index([mentorId])
+}
+
+// =====================================================
+// SUBSCRIPTION PLAN
+// =====================================================
+
+model SubscriptionPlan {
+  id                     String             @id @default(cuid())
+  title                  String
+  description            String?
+  examType               ExamType
+  price                  Float
+  durationInDays         Int
+  sessionsPerMonth       Int
+  practiceQuestionsLimit Int?
+  unlimitedPractice      Boolean            @default(false)
+  prioritySupport        Boolean            @default(false)
+  mentorSelectionEnabled Boolean            @default(true)
+  isPopular              Boolean            @default(false)
+  isActive               Boolean            @default(true)
+  subscriptions          UserSubscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =====================================================
+// USER SUBSCRIPTION
+// =====================================================
+
+model UserSubscription {
+  id                String             @id @default(cuid())
+  userId            String
+  planId            String
+  remainingSessions Int
+  status            SubscriptionStatus @default(ACTIVE)
+  startsAt          DateTime
+  expiresAt         DateTime
+
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
+}
+
+// =====================================================
+// MENTOR AVAILABILITY
+// =====================================================
+
+model MentorAvailability {
+  id        String  @id @default(cuid())
+  mentorId  String
+  dayOfWeek Int // 0 = Sunday, 1 = Monday...
+  startTime String
+  endTime   String
+  isActive  Boolean @default(true)
+  mentor    Mentor  @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([mentorId, dayOfWeek, startTime, endTime])
+  @@index([mentorId])
+}
+
+// =====================================================
+// MENTOR BLOCKED DATES
+// =====================================================
+
+model MentorBlockedDate {
+  id          String   @id @default(cuid())
+  mentorId    String
+  blockedDate DateTime
+  reason      String?
+  mentor      Mentor   @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([mentorId])
+  @@index([blockedDate])
+}
+
+// =====================================================
+// MENTORSHIP SESSION
+// =====================================================
+
+model MentorshipSession {
+  id                 String        @id @default(cuid())
+  mentorId           String
+  studentId          String
+  scheduledAt        DateTime
+  duration           Int
+  meetingLink        String?
+  mentorNotes        String?
+  studentFeedback    String?
+  cancellationReason String?
+  status             SessionStatus @default(SCHEDULED)
+
+  mentor  Mentor @relation("MentorSessions", fields: [mentorId], references: [id], onDelete: Cascade)
+  student User   @relation("StudentSessions", fields: [studentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([mentorId, scheduledAt])
+  @@index([mentorId])
+  @@index([studentId])
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+// =====================================================
+// PRACTICE QUESTIONS
+// =====================================================
+
+model PracticeQuestion {
+  id            String          @id @default(cuid())
+  question      String
+  options       Json?
+  answer        String
+  solution      String?
+  difficulty    DifficultyLevel
+  year          Int?
+  examType      ExamType
+  marks         Int?
+  negativeMarks Float?
+  isPremium     Boolean         @default(false)
+  published     Boolean         @default(true)
+
+  subject String
+  chapter String
+
+  attempts QuestionAttempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([subject])
+  @@index([chapter])
+  @@index([difficulty])
+  @@index([examType])
+}
+
+// =====================================================
+// QUESTION ATTEMPTS
+// =====================================================
+
+model QuestionAttempt {
+  id String @id @default(cuid())
+
+  userId     String
+  questionId String
+
+  isCorrect      Boolean
+  selectedAnswer String?
+  timeTaken      Int?
+
+  attemptedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question PracticeQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([userId])
+  @@index([questionId])
+}
+
+// =====================================================
+// MENTOR REVIEWS
+// =====================================================
+
+model MentorReview {
+  id        String  @id @default(cuid())
+  rating    Int
+  comment   String?
+  mentorId  String
+  studentId String
+
+  // ✅ FIXED: Explicit named relation blocks applied to both sides
+  mentor  Mentor @relation("MentorReviews", fields: [mentorId], references: [id], onDelete: Cascade)
+  student User   @relation("StudentReviews", fields: [studentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([mentorId, studentId])
+  @@index([mentorId])
+  @@index([studentId])
+}
+
+// =====================================================
+// TASK MODEL
+// =====================================================
+
+model Task {
+  id     String  @id @default(cuid()) // ✅ FIXED: Updated generation rule strategy from uuid() to cuid()
+  title  String
+  done   Boolean @default(false)
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

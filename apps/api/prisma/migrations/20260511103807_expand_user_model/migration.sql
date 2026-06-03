@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "avatar" TEXT,
+ADD COLUMN     "level" TEXT NOT NULL DEFAULT 'Rookie',
+ADD COLUMN     "streak" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "targetExam" TEXT,
+ADD COLUMN     "xp" INTEGER NOT NULL DEFAULT 0;
