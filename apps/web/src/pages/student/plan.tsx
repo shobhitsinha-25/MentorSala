@@ -40,7 +40,7 @@ const Subscriptions = () => {
 
   const purchasePlan = async (planId: string) => {
     try {
-      const res = await api.post("/plans/purchase", {
+      await api.post("/plans/purchase", {
         planId,
       });
 

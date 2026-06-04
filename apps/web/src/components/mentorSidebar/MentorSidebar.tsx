@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   CalendarDays,
-  Users,
   User,
   LogOut,
   Calendar,

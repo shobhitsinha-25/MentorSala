@@ -103,21 +103,7 @@ export default function Leaderboard() {
 
   ];
 
-  const currentUser = {
-
-    rank: 128,
-
-    name: "Shobhit Sinha",
-
-    exam: "JEE",
-
-    xp: 820,
-
-    change: "up",
-
-    avatar: "SS",
-
-  };
+  
 
   const tabs = [
 

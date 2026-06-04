@@ -1,5 +1,5 @@
 import { useAuthStore } from "../../store/auth.store";
-import { Video, Calendar } from "lucide-react";
+
 
 export default function MentorDashboard() {
   const user = useAuthStore((state) => state.user);

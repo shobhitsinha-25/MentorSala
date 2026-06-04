@@ -99,7 +99,7 @@ export default function HowItWorksSection() {
                       "Physics Revision",
                       "Mock Analysis",
                       "Organic Chemistry",
-                    ].map((task, i) => (
+                    ].map((task) => (
 
                       <div
                         key={task}

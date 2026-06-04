@@ -2,7 +2,6 @@ import { useState } from "react";
 import api from "../../lib/axios";
 import { PlusCircle, HelpCircle, FileText, Layers, CheckCircle2 } from "lucide-react";
 import {
-  MathJax,
   MathJaxContext,
 } from "better-react-mathjax";
 import MathField from "../../components/MathField";
