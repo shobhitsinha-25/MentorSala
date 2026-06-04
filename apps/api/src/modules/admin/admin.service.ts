@@ -1,6 +1,6 @@
 import prisma from "../../config/prisma";
 
-import {
+/*import {
   CourseCategory,
 } from "@prisma/client";
 
@@ -23,7 +23,7 @@ interface CreateCourseInput {
 
 }
 
-export const createCourseService =
+/*export const createCourseService =
   async (
     data: CreateCourseInput
   ) => {
@@ -134,7 +134,7 @@ export const createSubjectService =
 
     return subject;
 
-  };
+  };*/
 
 interface AssignMentorInput {
 

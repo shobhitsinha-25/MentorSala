@@ -11,8 +11,7 @@ import {
 } from "../../middleware/role.middleware";
 
 import {
-  getAssignedSubjects,
-  createChapter,
+  
   getMentorsController,
   getMentorByIdController,
 } from "./mentor.controller";
@@ -46,33 +45,9 @@ router.post(
 // GET ASSIGNED SUBJECTS
 // ==========================================
 
-router.get(
 
-  "/subjects",
 
-  protect,
 
-  authorizeRoles(
-    "MENTOR"
-  ),
-
-  getAssignedSubjects
-
-);
-
-router.post(
-
-  "/chapters",
-
-  protect,
-
-  authorizeRoles(
-    "MENTOR"
-  ),
-
-  createChapter
-
-);
 
 
 // ======================================================

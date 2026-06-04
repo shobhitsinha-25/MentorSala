@@ -10,13 +10,13 @@ import {
   authorizeRoles,
 } from "../../middleware/role.middleware";
 
-import {
+/*import {
   createCourse,
 } from "./admin.controller";
 
 import {
   createSubject,
-} from "./admin.controller";
+} from "./admin.controller";*/
 
 import {
   assignMentor,
@@ -29,7 +29,7 @@ const router =
 // CREATE COURSE
 // ==========================================
 
-router.post(
+/*router.post(
 
   "/courses",
 
@@ -55,7 +55,7 @@ router.post(
 
   createSubject
 
-);
+);*/
 
 router.post(
 

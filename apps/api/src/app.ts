@@ -4,9 +4,7 @@ import cookieParser from "cookie-parser";
 
 // Route Module Imports
 import authRoutes from "./modules/auth/auth.routes";
-import courseRoutes from "./modules/course/course.routes";
 import userRoutes from "./modules/user/user.routes";
-import lectureRoutes from "./modules/lecture/lecture.routes";
 import taskRoutes from "./modules/task/task.routes";
 import mentorRoutes
 from "./modules/mentor/mentor.routes";
@@ -40,9 +38,7 @@ app.get("/", (req, res) => {
 
 // Primary Endpoint Matrices
 app.use("/api/auth", authRoutes);       
-app.use("/api/courses", courseRoutes);
 app.use("/api/user", userRoutes);       
-app.use("/api/lectures", lectureRoutes);
 app.use("/api/tasks", taskRoutes);
 
 app.use(

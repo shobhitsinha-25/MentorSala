@@ -21,13 +21,9 @@ from "nodemailer";
 import { Resend } from "resend";
 
 import {
-  getAssignedSubjectsService,
   getMentors,
 } from "./mentor.service";
 
-import {
-  createChapterService,
-} from "./mentor.service";
 
 import {
   getMentorById,
@@ -414,116 +410,3 @@ export const submitMentorApplication =
 
 
 
-export const getAssignedSubjects =
-  asyncHandler(
-
-    async (
-      req: Request,
-      res: Response
-    ) => {
-
-      const userId =
-        req.user?.userId;
-
-      if (!userId) {
-
-        return res
-          .status(401)
-          .json({
-
-            success: false,
-
-            message:
-              "Unauthorized",
-
-          });
-
-      }
-
-      const subjects =
-        await getAssignedSubjectsService(
-
-          userId
-
-        );
-
-      return res
-        .status(200)
-        .json({
-
-          success: true,
-
-          subjects,
-
-        });
-
-    }
-
-  );
-
-  export const createChapter =
-  asyncHandler(
-
-    async (
-      req: Request,
-      res: Response
-    ) => {
-
-      const userId =
-        req.user?.userId;
-
-      if (!userId) {
-
-        return res
-          .status(401)
-          .json({
-
-            success: false,
-
-            message:
-              "Unauthorized",
-
-          });
-
-      }
-
-      const {
-
-        title,
-
-        description,
-
-        subjectId,
-
-        order,
-
-      } = req.body;
-
-      const chapter =
-        await createChapterService({
-
-          title,
-
-          description,
-
-          subjectId,
-
-          order,
-
-          userId,
-
-        });
-
-      return res
-        .status(201)
-        .json({
-
-          success: true,
-
-          chapter,
-
-        });
-
-    }
-
-  );

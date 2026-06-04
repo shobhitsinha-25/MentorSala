@@ -5,18 +5,18 @@ import {
 
 
 import {
-  assignMentorService,
-  createCourseService,
+  assignMentorService
 } from "./admin.service";
-
+/*
 import{
   createSubjectService,
-} from "./admin.service";
+} from "./admin.service";*/
+
 import { asyncHandler } from "../../utils/asyncHandler";
 
 
 
-export const createCourse =
+/*export const createCourse =
   asyncHandler(
 
     async (
@@ -85,7 +85,7 @@ export const createSubject =
 
     }
 
-  );
+  );*/
 
 export const assignMentor =
   asyncHandler(
