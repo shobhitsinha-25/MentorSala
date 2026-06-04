@@ -79,10 +79,10 @@ export default function Login() {
     setErrorMessage(null);
     try {
       const res = await api.post(
-        "http://localhost:5000/api/auth/login",
-        formData,
-        { withCredentials: true }
-      );
+  "/auth/login",
+  formData,
+  { withCredentials: true }
+);
 
       if (res.data.success) {
         // =========================================
@@ -193,7 +193,7 @@ export default function Login() {
                   setErrorMessage(null);
                   try {
                     const res = await api.post(
-                      "http://localhost:5000/api/auth/google",
+                      "/auth/google",
                       { credential: credentialResponse.credential },
                       { withCredentials: true }
                     );
