@@ -1,14 +1,27 @@
-
 // Configuration Reference (for your Header Navigation links map context):
 // {
 //   label: "Success Stories",
 //   href: "#hero",
 // }
 
+import { 
+  TrendingUp, 
+  Calendar, 
+  Clock, 
+  Trophy, 
+  Atom, 
+  FlaskConical, 
+  Calculator, 
+  Users, 
+  Target, 
+  Star, 
+  GraduationCap 
+} from "lucide-react";
+
 export default function HeroSection() {
   return (
     <section 
-      id="hero" // Fixed: Removed the "#" character prefix from the id string attribute
+      id="hero" 
       className="relative overflow-hidden bg-[#F7F5FF] px-6 pt-28 pb-24"
     >
       {/* Background Mesh */}
@@ -55,176 +68,190 @@ export default function HeroSection() {
             </a>
           </div>
 
-          {/* Dashboard Visualizer */}
+          {/* Dashboard Visualizer Layout Mesh workspace */}
           <div className="relative mt-24 max-w-5xl mx-auto overflow-visible">
             
-            {/* Floating Card Left */}
-            <div className="absolute -left-20 top-16 z-30 hidden xl:flex items-center gap-4 rounded-2xl border border-[#E9E5FF] bg-white px-5 py-4 shadow-2xl animate-[float_4s_ease-in-out_infinite]">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100 text-2xl">
-                🏆
-              </div>
-              <div className="text-left">
-                <p className="text-sm text-[#64748B]">
-                  Achievement Unlocked
-                </p>
-                <h4 className="font-bold text-[#0F172A]">
-                  7-Day Study Streak
-                </h4>
-              </div>
-            </div>
-
-            {/* Floating Card Right */}
-            <div className="absolute -right-20 top-36 z-30 hidden xl:flex items-center gap-4 rounded-2xl border border-[#E9E5FF] bg-white px-5 py-4 shadow-2xl animate-[float_5s_ease-in-out_infinite]">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-2xl">
-                📈
-              </div>
-              <div className="text-left">
-                <p className="text-sm text-[#64748B]">
-                  Mock Test Result
-                </p>
-                <h4 className="font-bold text-[#0F172A]">
-                  AIR Prediction: 3,200
-                </h4>
-              </div>
-            </div>
-
             {/* Main Dashboard Card */}
-            <div className="relative z-10 rounded-[36px] border border-[#E8E5F5] bg-white/90 p-8 shadow-[0_20px_80px_rgba(124,58,237,0.08)] backdrop-blur-xl">
+            <div className="relative z-10 rounded-[32px] border border-[#E8E5F5]/60 bg-white p-8 shadow-[0_20px_60px_rgba(124,58,237,0.04)] text-left">
+              
               {/* Profile Bar */}
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-5">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#2563EB] text-2xl font-bold text-white shadow-lg">
-                    RK
+              <div className="flex flex-row items-center justify-between border-b border-[#F1F3F9] pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4F46E5] to-[#2563EB] text-xl font-bold text-white shadow-md">
+                    AV
                   </div>
-                  <div className="text-left">
-                    <h3 className="text-2xl font-bold text-[#0F172A]">
-                      Rahul Kumar
+                  <div>
+                    <h3 className="text-2xl font-bold text-[#0A0E25]">
+                      Achal Vidhu
                     </h3>
-                    <p className="text-[#64748B]">
+                    <p className="text-sm font-medium text-[#8F9CAE] mt-0.5">
                       JEE Advanced Aspirant
                     </p>
                   </div>
                 </div>
 
-                {/* Score Counter */}
-                <div className="text-center">
-                  <p className="text-sm text-[#64748B] mb-1">
-                    Global Rank
-                  </p>
-                  <h2 className="text-5xl font-black text-[#7C3AED]">
-                    #847
-                  </h2>
+                {/* Score Counter / Global Rank Display elements */}
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-[11px] font-bold text-[#94A3B8] tracking-wider uppercase">Global Rank</p>
+                    <h4 className="text-3xl font-black text-[#5046E5] mt-0.5">#600</h4>
+                  </div>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#F0EEFF] text-[#6366F1]">
+                    <Trophy size={20} />
+                  </div>
                 </div>
               </div>
 
-              {/* Core Metrics Grid */}
-              <div className="mt-10 grid md:grid-cols-3 gap-5">
+              {/* Core Metrics Grid Workspace */}
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   {
                     label: "XP This Week",
-                    value: "2,840",
+                    value: "1,005",
+                    icon: <TrendingUp size={20} className="text-[#6366F1]" />,
+                    iconBg: "bg-[#F3F0FF]",
+                    cardStyles: "bg-[#F8F7FF] text-[#5046E5]"
                   },
                   {
                     label: "Current Streak",
-                    value: "14 Days",
+                    value: "6 Days",
+                    icon: <Calendar size={20} className="text-[#10B981]" />,
+                    iconBg: "bg-[#E6F9F3]",
+                    cardStyles: "bg-[#F4FBF9] text-[#10B981]"
                   },
                   {
                     label: "Completion",
-                    value: "78%",
+                    value: "82%",
+                    icon: <Clock size={20} className="text-[#EA580C]" />,
+                    iconBg: "bg-[#FFF4ED]",
+                    cardStyles: "bg-[#FFF9F5] text-[#EA580C]"
                   },
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-2xl border border-[#EEF0F7] bg-[#FAFBFF] p-6 text-center"
+                    className={`rounded-2xl p-5 flex items-center gap-4 ${item.cardStyles}`}
                   >
-                    <p className="text-sm text-[#64748B] mb-2">
-                      {item.label}
-                    </p>
-                    <h3 className="text-3xl font-black text-[#0F172A]">
-                      {item.value}
-                    </h3>
+                    <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 ${item.iconBg}`}>
+                      {item.icon}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-[#8C9BAE]">
+                        {item.label}
+                      </p>
+                      <h3 className="text-2xl font-black mt-0.5">
+                        {item.value}
+                      </h3>
+                    </div>
                   </div>
                 ))}
               </div>
 
-              {/* Subject Performance Bars */}
-              <div className="mt-10 space-y-6">
+              {/* Subject Performance Component Box List */}
+              <div className="mt-6 rounded-2xl border border-[#ECEFF6] p-6 space-y-6 bg-white">
                 {[
                   {
                     subject: "Physics",
                     value: "78%",
                     width: "78%",
-                    color: "from-blue-500 to-cyan-400",
+                    color: "bg-[#2563EB]",
+                    icon: <Atom size={18} className="text-[#2563EB]" />,
+                    iconBg: "bg-[#EBF2FF]",
+                    textColor: "text-[#2563EB]"
                   },
                   {
                     subject: "Chemistry",
                     value: "86%",
                     width: "86%",
-                    color: "from-purple-500 to-pink-400",
+                    color: "bg-[#D946EF]",
+                    icon: <FlaskConical size={18} className="text-[#D946EF]" />,
+                    iconBg: "bg-[#FDF2FF]",
+                    textColor: "text-[#D946EF]"
                   },
                   {
                     subject: "Mathematics",
                     value: "69%",
                     width: "69%",
-                    color: "from-yellow-400 to-orange-400",
+                    color: "bg-[#EA580C]",
+                    icon: <Calculator size={18} className="text-[#EA580C]" />,
+                    iconBg: "bg-[#FFF4ED]",
+                    textColor: "text-[#EA580C]"
                   },
                 ].map((item) => (
-                  <div key={item.subject}>
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="font-medium text-[#0F172A]">
-                        {item.subject}
-                      </span>
-                      <span className="text-[#64748B]">
-                        {item.value}
-                      </span>
+                  <div key={item.subject} className="flex items-center gap-4">
+                    <div className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ${item.iconBg}`}>
+                      {item.icon}
                     </div>
-                    <div className="h-3 rounded-full bg-[#EEF0F7] overflow-hidden">
-                      <div
-                        className={`h-full rounded-full bg-gradient-to-r ${item.color}`}
-                        style={{
-                          width: item.width,
-                        }}
-                      />
+                    <div className="flex-1">
+                      <div className="mb-2 flex items-center justify-between text-sm">
+                        <span className="font-bold text-[#0F172A]">
+                          {item.subject}
+                        </span>
+                        <span className={`font-bold ${item.textColor}`}>
+                          {item.value}
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full bg-[#F1F3F9] overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${item.color}`}
+                          style={{ width: item.width }}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
 
             </div>
-          </div>
 
-          {/* Platform Performance Statistics Row */}
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              {
-                value: "3K+",
-                label: "Students",
-              },
-              {
-                value: "90%",
-                label: "Success Rate",
-              },
-              {
-                value: "10+",
-                label: "Mentors",
-              },
-              {
-                value: "100k+",
-                label: "Problems Solved",
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-3xl border border-[#E8E5F5] bg-white/70 px-6 py-8 shadow-sm backdrop-blur-xl"
-              >
-                <h3 className="text-4xl font-black text-[#0F172A]">
-                  {item.value}
-                </h3>
-                <p className="mt-2 text-[#64748B] text-lg">
-                  {item.label}
-                </p>
-              </div>
-            ))}
+            {/* Platform Performance Statistics Row Component Workspace */}
+            <div className="mt-5 grid grid-cols-1 md:grid-cols-4 rounded-3xl border border-[#E8E5F5]/60 bg-white p-2 shadow-[0_12px_40px_rgba(124,58,237,0.03)]">
+              {[
+                {
+                  value: "3K+",
+                  label: "Students Mentored",
+                  icon: <Users size={18} className="text-[#6366F1]" />,
+                  iconBg: "bg-[#EEF2FF]",
+                },
+                {
+                  value: "90%",
+                  label: "Success Rate",
+                  icon: <Target size={18} className="text-[#10B981]" />,
+                  iconBg: "bg-[#E6F9F3]",
+                },
+                {
+                  value: "10+",
+                  label: "Years of Mentorship",
+                  icon: <Star size={18} className="text-[#F59E0B]" />,
+                  iconBg: "bg-[#FEF3C7]",
+                },
+                {
+                  value: "100k+",
+                  label: "Hours of Teaching",
+                  icon: <GraduationCap size={18} className="text-[#2563EB]" />,
+                  iconBg: "bg-[#EFF6FF]",
+                },
+              ].map((item, index) => (
+                <div
+                  key={item.label}
+                  className={`flex items-center gap-4 px-6 py-5 text-left ${
+                    index !== 0 ? "md:border-l border-[#F1F3F9]" : ""
+                  }`}
+                >
+                  <div className={`h-11 w-11 rounded-full flex items-center justify-center shrink-0 ${item.iconBg}`}>
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-[#0F172A] leading-none">
+                      {item.value}
+                    </h3>
+                    <p className="mt-1.5 text-[#8E9CAE] text-xs font-semibold whitespace-nowrap">
+                      {item.label}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
           </div>
 
         </div>

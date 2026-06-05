@@ -52,26 +52,25 @@ const [
 
   // Target MCQ metadata layout definitions
 const dailyProblem = {
-  id: "potd-2026-06-05",
-  subject: "Chemistry",
-  topic: "Lewis Dot Structure & Molecular Geometry",
+  id: "potd-2026-06-06",
+  subject: "Physics",
+  topic: "Waves & Sound (Organ Pipes)",
 
   question:
-    "Identify the molecule (X) with maximum number of lone pairs of electrons (obtained using Lewis dot structure) among HNO₃, H₂SO₄, NF₃ and O₃. Choose the correct bond angle made by the central atom of the molecule (X).",
+    "The fifth harmonic of a closed organ pipe is found to be in unison with the first harmonic of an open pipe. The ratio of lengths of closed pipe to that of the open pipe is 5/x. The value of x is ______.",
 
   options: [
-    "116°",
-    "102°",
-    "107°",
-    "120°"
+    "3",
+    "4",
+    "1",
+    "2"
   ],
 
-  correctIndex: 1,
+  correctIndex: 3,
 
   explanation:
-    "By drawing the Lewis dot structures, we find the total lone pairs: HNO₃ (7), H₂SO₄ (8), NF₃ (10), and O₃ (6). The molecule with the maximum number of lone pairs is NF₃ (molecule X). NF₃ has a trigonal pyramidal geometry due to 3 bond pairs and 1 lone pair on the central nitrogen. The lone pair repels the bond pairs, compressing the standard tetrahedral angle (109.5°) down significantly. Highly electronegative fluorine atoms pull electron density away, further closing the F–N–F bond angle to 102°."
+    "For a closed organ pipe (closed at one end), only odd harmonics exist. The frequency of the nth harmonic is given by $f_c = \frac{n \cdot v}{4L_c}$, where $n = 1, 3, 5, \dots$. Thus, the frequency of its fifth harmonic ($n = 5$) is $f_c = \frac{5v}{4L_c}$. For an open organ pipe (open at both ends), all harmonics exist, and the frequency of the mth harmonic is given by $f_o = \frac{m \cdot v}{2L_o}$, where $m = 1, 2, 3, \dots$. The frequency of its first harmonic ($m = 1$) is $f_o = \frac{v}{2L_o}$. Since they are in unison, their frequencies are equal: $\frac{5v}{4L_c} = \frac{v}{2L_o}$. Simplifying this equation gives $\frac{5}{2L_c} = \frac{1}{L_o}$, which rearranges to the ratio of lengths $\frac{L_c}{L_o} = \frac{5}{2}$. Comparing this to the given ratio $5/x$, we find $x = 2$."
 };
- 
 
   useEffect(() => {
     const fetchUserTasks = async () => {
