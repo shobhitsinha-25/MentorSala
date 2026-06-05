@@ -51,21 +51,26 @@ const [
 ] = useState(true);
 
   // Target MCQ metadata layout definitions
-  const dailyProblem = {
-    id: "potd-2026-05-21",
-    subject: "Mathematics",
-    topic: "Definite Integration",
-    question: "Evaluate the following limit property of integrals:\n\n$$\\lim_{n \\to \\infty} \\sum_{r=1}^{n} \\frac{1}{n} \\sqrt{\\frac{n+r}{n-r}}$$",
-    options: [
-      "$$\\frac{\\pi}{2} + 1$$",
-      "$$\\frac{\\pi}{2} - 1$$",
-      "$$\\pi + 1$$",
-      "$$\\pi - 1$$"
-    ],
-    correctIndex: 0,
-    explanation: "By converting the limit of the Riemann sum into a definite integral from $0$ to $1$ of $\\sqrt{(1+x)/(1-x)}\\,dx$, and substituting $x = \\sin(\\theta)$, the total value computes strictly to $\\frac{\\pi}{2} + 1$."
-  };
+const dailyProblem = {
+  id: "potd-2026-06-05",
+  subject: "Chemistry",
+  topic: "Lewis Dot Structure & Molecular Geometry",
 
+  question:
+    "Identify the molecule (X) with maximum number of lone pairs of electrons (obtained using Lewis dot structure) among HNO₃, H₂SO₄, NF₃ and O₃. Choose the correct bond angle made by the central atom of the molecule (X).",
+
+  options: [
+    "116°",
+    "102°",
+    "107°",
+    "120°"
+  ],
+
+  correctIndex: 1,
+
+  explanation:
+    "By drawing the Lewis dot structures, we find the total lone pairs: HNO₃ (7), H₂SO₄ (8), NF₃ (10), and O₃ (6). The molecule with the maximum number of lone pairs is NF₃ (molecule X). NF₃ has a trigonal pyramidal geometry due to 3 bond pairs and 1 lone pair on the central nitrogen. The lone pair repels the bond pairs, compressing the standard tetrahedral angle (109.5°) down significantly. Highly electronegative fluorine atoms pull electron density away, further closing the F–N–F bond angle to 102°."
+};
  
 
   useEffect(() => {
