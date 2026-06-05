@@ -20,8 +20,8 @@ const Profile = () => {
           <div className="relative shrink-0">
             <img
               src={
-                user?.avatar ||
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  user?.avatar ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
                   user?.name || "Student"
                 )}&background=4f46e5&color=fff`
               }

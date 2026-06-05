@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import api from "../../lib/axios";
 import { useAuthStore } from "../../store/auth.store";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, GraduationCap, TrendingUp, Trophy } from "lucide-react";
 
 export default function Login() {
   const setUser = useAuthStore((state) => state.setUser);
@@ -79,10 +79,10 @@ export default function Login() {
     setErrorMessage(null);
     try {
       const res = await api.post(
-  "/auth/login",
-  formData,
-  { withCredentials: true }
-);
+        "/auth/login",
+        formData,
+        { withCredentials: true }
+      );
 
       if (res.data.success) {
         // =========================================
@@ -154,13 +154,16 @@ export default function Login() {
 
           <div className="grid grid-cols-3 gap-3 mt-8">
             {[
-              { value: "50K+", label: "Students" },
-              { value: "1M+", label: "Problems" },
-              { value: "95%", label: "Success" },
+              { value: "3K+", label: "Students", icon: <GraduationCap size={18} className="text-blue-400 mb-2 bg-text-blue-400 mb-2" /> },
+              { value: "100K+", label: "Problems", icon: <TrendingUp size={18} className="text-white/90 mb-2" /> },
+              { value: "90%", label: "Success", icon: <Trophy size={18} className="text-amber-400 mb-2" /> },
             ].map((item) => (
-              <div key={item.label} className="rounded-xl border border-white/10 bg-white/10 p-3 backdrop-blur-xl">
-                <h3 className="text-lg font-black">{item.value}</h3>
-                <p className="mt-1 text-[10px] text-white/70">{item.label}</p>
+              <div key={item.label} className="rounded-xl border border-white/10 bg-white/10 p-3 backdrop-blur-xl flex flex-col justify-between items-start">
+                {item.icon}
+                <div>
+                  <h3 className="text-lg font-black">{item.value}</h3>
+                  <p className="mt-1 text-[10px] text-white/70">{item.label}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -254,7 +257,7 @@ export default function Login() {
 
           <p className="mt-6 text-center text-xs text-[#64748B]">
             Don't have an account?
-            <Link to="/signup" className="ml-2 font-semibold text-[#2563EB] hover:underline">
+            <Link to="/signup" className="ml-2 font-semibold !text-[#1a75ff] hover:underline">
               Signup
             </Link>
           </p>
@@ -262,4 +265,4 @@ export default function Login() {
       </div>
     </div>
   );
-}
+} 

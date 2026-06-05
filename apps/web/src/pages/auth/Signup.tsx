@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import api from "../../lib/axios"; // ✅ UPDATED: Switched to your pre-configured core API client wrapper
 import { useAuthStore } from "../../store/auth.store";
-import { User, Mail, Lock, ShieldAlert, AlertCircle, Sparkles } from "lucide-react";
+import { User, Mail, Lock, ShieldAlert, AlertCircle, Sparkles, GraduationCap, TrendingUp, Trophy } from "lucide-react";
 
 export default function Signup() {
   const setUser = useAuthStore((state) => state.setUser);
@@ -192,13 +192,16 @@ export default function Signup() {
           {/* Stats Badges */}
           <div className="grid grid-cols-3 gap-3 mt-8 relative z-10">
             {[
-              { value: "50K+", label: "Students" },
-              { value: "200+", label: "Mentors" },
-              { value: "95%", label: "Success" },
+              { value: "3K+", label: "Students", icon: <GraduationCap size={18} className="text-blue-400 mb-2" /> },
+              { value: "10+", label: "Mentors", icon: <TrendingUp size={18} className="text-white/90 mb-2" /> },
+              { value: "90%", label: "Success", icon: <Trophy size={18} className="text-amber-400 mb-2" /> },
             ].map((item) => (
-              <div key={item.label} className="rounded-xl border border-white/10 bg-white/10 p-3 backdrop-blur-xl shadow-inner">
-                <h3 className="text-lg font-black">{item.value}</h3>
-                <p className="mt-1 text-[10px] text-white/70">{item.label}</p>
+              <div key={item.label} className="rounded-xl border border-white/10 bg-white/10 p-3 backdrop-blur-xl shadow-inner flex flex-col justify-between items-start">
+                {item.icon}
+                <div>
+                  <h3 className="text-lg font-black">{item.value}</h3>
+                  <p className="mt-1 text-[10px] text-white/70">{item.label}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -365,7 +368,7 @@ export default function Signup() {
 
           <p className="mt-6 text-center text-xs text-[#64748B]">
             Already have an account?
-            <Link to="/login" className="ml-1.5 font-bold text-[#2563EB] hover:underline hover:text-blue-800 transition-colors">
+            <Link to="/login" className="ml-1.5 font-bold !text-[#1a75ff] hover:underline hover:text-blue-800 transition-colors">
               Login
             </Link>
           </p>

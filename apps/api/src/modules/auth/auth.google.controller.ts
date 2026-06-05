@@ -69,6 +69,8 @@ export const googleAuth = async (
       picture,
     } = payload;
 
+    console.log("Google picture:", picture);
+
     let user =
       await prisma.user.findUnique({
 
@@ -77,7 +79,7 @@ export const googleAuth = async (
         },
 
       });
-
+console.log("Database avatar:", user?.avatar);
     // ==========================
     // CREATE NEW USER
     // ==========================
