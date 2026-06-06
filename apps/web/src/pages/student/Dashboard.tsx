@@ -69,7 +69,16 @@ const dailyProblem = {
   correctIndex: 3,
 
   explanation:
-    "For a closed organ pipe (closed at one end), only odd harmonics exist. The frequency of the nth harmonic is given by $f_c = \frac{n \cdot v}{4L_c}$, where $n = 1, 3, 5, \dots$. Thus, the frequency of its fifth harmonic ($n = 5$) is $f_c = \frac{5v}{4L_c}$. For an open organ pipe (open at both ends), all harmonics exist, and the frequency of the mth harmonic is given by $f_o = \frac{m \cdot v}{2L_o}$, where $m = 1, 2, 3, \dots$. The frequency of its first harmonic ($m = 1$) is $f_o = \frac{v}{2L_o}$. Since they are in unison, their frequencies are equal: $\frac{5v}{4L_c} = \frac{v}{2L_o}$. Simplifying this equation gives $\frac{5}{2L_c} = \frac{1}{L_o}$, which rearranges to the ratio of lengths $\frac{L_c}{L_o} = \frac{5}{2}$. Comparing this to the given ratio $5/x$, we find $x = 2$."
+    "### **Step-by-Step Solution**\n\n" +
+    "1. **Identify the Frequency Formulas:**\n" +
+    "   * **Closed pipe (5th harmonic):** $f_c = \\frac{5v}{4L_c}$\n" +
+    "   * **Open pipe (1st harmonic):** $f_o = \\frac{v}{2L_o}$\n\n" +
+    "2. **Equate Frequencies (In Unison):**\n" +
+    "   $$\\frac{5v}{4L_c} = \\frac{v}{2L_o}$$\n\n" +
+    "3. **Simplify and Find the Ratio:**\n" +
+    "   Canceling the speed of sound ($v$) and simplifying yields:\n" +
+    "   $$\\frac{5}{2L_c} = \\frac{1}{L_o} \\implies \\frac{L_c}{L_o} = \\frac{5}{2}$$\n\n" +
+    "Comparing this with the given ratio $\\frac{5}{x}$, we get **$x = 2$**."
 };
 
   useEffect(() => {
