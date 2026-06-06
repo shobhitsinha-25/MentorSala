@@ -15,13 +15,15 @@ export default function Home() {
       <Navbar />
 
       <HeroSection />
+      <MentorsSection />
       <HowItWorksSection />
+      
 
       <FeaturedCourses />
       <FeaturesGrid />
 
       <GamificationSection />
-      <MentorsSection />
+      
 
       <PricingSection />
 

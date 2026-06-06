@@ -10,11 +10,15 @@ export default function HowItWorksSection() {
         {/* Heading */}
         <div className="text-center mb-14">
 
-          <div className="inline-flex rounded-full border border-[#D9D4FF] bg-white px-4 py-2 text-[11px] font-semibold tracking-[0.18em] text-[#7C3AED] shadow-sm mb-5">
+          <div className="relative inline-flex items-center justify-center rounded-full mb-5">
+  {/* The Ring Animation Layer (Stays behind, text won't fade) */}
+  <div className="absolute inset-0 rounded-full animate-pulse ring-3 ring-[#4d4dff] bg-[#ccccff]"></div>
 
-            HOW IT WORKS
-
-          </div>
+  {/* Your Original Div Layer (Text and background remain completely solid) */}
+  <div className="relative z-10 inline-flex items-center gap-2 rounded-full border border-[#D9D4FF] bg-white px-4 py-2 text-[11px] font-semibold tracking-[0.18em] text-[#7C3AED] shadow-sm">
+    HOW IT WORKS
+  </div>
+</div>
 
           <h2 className="text-4xl md:text-5xl font-black text-[#0F172A] leading-tight">
 

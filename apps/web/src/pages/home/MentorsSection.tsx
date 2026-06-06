@@ -82,9 +82,18 @@ export default function MentorsSection() {
 
         {/* Heading */}
         <div className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#D9D4FF] bg-white px-4 py-2 text-[11px] font-semibold tracking-[0.18em] text-[#7C3AED] shadow-sm mb-5">
-            🧑‍🏫 TOP MENTORS
-          </div>
+            <div className="relative inline-flex items-center justify-center rounded-full mb-5">
+  {/* The Ring Animation Layer (Stays behind, text won't fade) */}
+  <div className="absolute inset-0 rounded-full animate-pulse ring-3 ring-[#4d4dff] bg-[#ccccff]"></div>
+
+  {/* Your Original Div Layer (Text and background remain completely solid) */}
+  <div className="relative z-10 inline-flex items-center gap-2 rounded-full border border-[#D9D4FF] bg-white px-4 py-2 text-[11px] font-semibold tracking-[0.18em] text-[#7C3AED] shadow-sm">
+    🧑‍🏫 TOP MENTORS
+  </div>
+</div>
+
+  
+          
           <h2 className="text-4xl md:text-5xl font-black text-[#0F172A] leading-tight">
             Learn From
             <br />
@@ -100,7 +109,7 @@ export default function MentorsSection() {
           {MENTORS_DATA.map((mentor) => (
             <div
               key={mentor.name}
-              className="group rounded-[28px] border border-[#E8E5F5] bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#2563EB] hover:shadow-xl"
+              className="group rounded-[28px] border border-[#b380ff] bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#6666ff] hover:shadow-xl"
             >
               {/* Top */}
               <div className="flex items-center gap-4 mb-6">

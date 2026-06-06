@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 pb-10">
 
           {/* Brand Info */}
-          <div className="col-span-2 lg:col-span-1">
+          <div className="col-span-2 lg:col-span-1 flex flex-col items-start">
             <Link
               to="/"
               className="inline-block cursor-default"
@@ -25,6 +25,14 @@ export default function Footer() {
             <p className="mt-4 max-w-xs text-xs leading-relaxed text-[#94A3B8]">
               AI-powered mentorship platform for competitive exam preparation.
             </p>
+            
+            {/* Moved Admin Login Link */}
+            <Link
+              to="/admin/login"
+              className="mt-4 text-[13px] font-medium !text-[#a366ff] hover:!text-[#330080] transition-colors"
+            >
+              Admin Login 
+            </Link>
           </div>
 
           {/* Platform Static Links */}
@@ -100,7 +108,7 @@ export default function Footer() {
           
           {/* Copyright Statement */}
           <p className="text-[11px] text-[#64748B] cursor-default">
-            © 2026 MentorSala. All rights reserved.
+            © 2026 MentorSala.com All rights reserved.
           </p>
 
           {/* Exam Status Badges */}

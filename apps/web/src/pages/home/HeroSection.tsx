@@ -36,9 +36,15 @@ export default function HeroSection() {
         <div className="max-w-5xl mx-auto text-center">
           
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#D9D4FF] bg-white/80 px-5 py-2 text-sm font-medium text-[#5B5BD6] shadow-sm backdrop-blur-xl">
-            ✨ India's #1 AI EdTech Platform
-          </div>
+          <div className="relative inline-flex items-center justify-center rounded-full">
+  {/* The Ring Animation Layer (Stays behind, text won't fade) */}
+  <div className="absolute inset-0 rounded-full animate-pulse ring-3 ring-[#4d4dff] bg-[#ccccff]"></div>
+
+  {/* Your Original Div Layer (Text and background remain completely solid) */}
+  <div className="relative z-10 inline-flex items-center gap-2 rounded-full border border-[#D9D4FF] bg-white/80 px-5 py-2 text-sm font-medium text-[#5B5BD6] shadow-sm backdrop-blur-xl">
+    ✨ India's #1 AI EdTech Platform
+  </div>
+</div>
 
           {/* Heading */}
           <h1 className="mt-8 text-5xl md:text-7xl font-black leading-[1.05] tracking-tight text-[#0F172A]">
