@@ -1,11 +1,13 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 import AppRoutes from "./routes/AppRoutes";
-
-
 import { useAuthStore } from "./store/auth.store";
+import { initGA, trackPageView } from "./utils/analytics";
 
 function App() {
+
+  const location = useLocation();
 
   const fetchCurrentUser =
     useAuthStore(
@@ -23,6 +25,16 @@ function App() {
     fetchCurrentUser();
 
   }, []);
+
+  // Initialize Google Analytics
+  useEffect(() => {
+    initGA();
+  }, []);
+
+  // Track page views on route change
+  useEffect(() => {
+    trackPageView(location.pathname + location.search);
+  }, [location]);
 
   if (loading) {
 
