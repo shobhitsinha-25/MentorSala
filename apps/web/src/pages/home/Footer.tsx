@@ -57,25 +57,35 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Company Static Links */}
+          {/* Company Dynamic & Static Links */}
           <div>
             <h3 className="text-sm font-bold text-white mb-4">
               Company
             </h3>
             <div className="space-y-2">
               {[
-                "About Us",
-                "Careers",
-                "Blog",
-                "Press",
-              ].map((item) => (
-                <span
-                  key={item}
-                  className="block text-xs text-[#94A3B8] cursor-default"
-                >
-                  {item}
-                </span>
-              ))}
+                { label: "About Us", to: "/about", isLink: true },
+                { label: "Careers", isLink: false },
+                { label: "Blog", isLink: false },
+                { label: "Press", isLink: false },
+              ].map((item) => 
+                item.isLink ? (
+                  <Link
+                    key={item.label}
+                    to={item.to}
+                    className="block text-xs text-[#94A3B8] hover:text-white transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <span
+                    key={item.label}
+                    className="block text-xs text-[#94A3B8] cursor-default"
+                  >
+                    {item.label}
+                  </span>
+                )
+              )}
             </div>
           </div>
 

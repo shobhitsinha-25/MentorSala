@@ -369,6 +369,8 @@ export const login =
       // COOKIE OPTIONS
       // ==================================================
 
+      console.log("NODE_ENV:", process.env.NODE_ENV);
+
       const cookieOptions = {
 
         httpOnly: true,
