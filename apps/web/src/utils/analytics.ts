@@ -1,6 +1,6 @@
 import ReactGA from "react-ga4";
 
-const MEASUREMENT_ID = "G-18D06GGB1B"; // Replace with your Google Analytics Measurement ID
+const MEASUREMENT_ID = "G-RPBXL5P57B";
 
 export const initGA = () => {
   ReactGA.initialize(MEASUREMENT_ID);
