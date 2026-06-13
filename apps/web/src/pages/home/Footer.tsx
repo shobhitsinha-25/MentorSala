@@ -72,7 +72,7 @@ export default function Footer() {
                 item.isLink ? (
                   <Link
                     key={item.label}
-                    to={item.to}
+                    to={item.to!}
                     className="block text-xs text-[#94A3B8] hover:text-white transition-colors"
                   >
                     {item.label}
