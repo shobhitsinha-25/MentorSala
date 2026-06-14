@@ -226,13 +226,13 @@ export default function HeroSection() {
                 },
                 {
                   value: "10+",
-                  label: "Years of Mentorship",
+                  label: "Mentors",
                   icon: <Star size={18} className="text-[#F59E0B]" />,
                   iconBg: "bg-[#FEF3C7]",
                 },
                 {
                   value: "100k+",
-                  label: "Hours of Teaching",
+                  label: "Hours of Mentoring",
                   icon: <GraduationCap size={18} className="text-[#2563EB]" />,
                   iconBg: "bg-[#EFF6FF]",
                 },
