@@ -13,83 +13,38 @@ import toast from "react-hot-toast";
 
 const Profile = () => {
   const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-const setUser = useAuthStore(
-  (state) => state.setUser
-);
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-const fileInputRef =
-  useRef<HTMLInputElement>(null);
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5 MB.");
+      return;
+    }
 
-const handleAvatarUpload = async (
-  e: React.ChangeEvent<HTMLInputElement>
-) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG, PNG and WEBP images are allowed.");
+      return;
+    }
 
-  const file = e.target.files?.[0];
+    const formData = new FormData();
+    formData.append("avatar", file);
 
-  if (!file) return;
-
-  if (file.size > 5 * 1024 * 1024) {
-
-    toast.error("Image must be under 5 MB.");
-
-    return;
-
-  }
-
-  const allowedTypes = [
-
-    "image/jpeg",
-
-    "image/png",
-
-    "image/webp",
-
-  ];
-
-  if (!allowedTypes.includes(file.type)) {
-
-    toast.error(
-      "Only JPG, PNG and WEBP images are allowed."
-    );
-
-    return;
-
-  }
-
-  const formData = new FormData();
-
-  formData.append("avatar", file);
-
-  try {
-
-    const res = await api.patch(
-      "/user/avatar",
-      formData
-    );
-
-    setUser({
-  ...user!,
-  ...res.data.user,
-});
-
-    toast.success(
-      "Profile picture updated!"
-    );
-
-  } catch (error: any) {
-
-    toast.error(
-
-      error.response?.data?.message ||
-
-      "Upload failed"
-
-    );
-
-  }
-
-};
+    try {
+      const res = await api.patch("/user/avatar", formData);
+      setUser({
+        ...user!,
+        ...res.data.user,
+      });
+      toast.success("Profile picture updated!");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Upload failed");
+    }
+  };
 
   return (
     <div className="space-y-6 bg-[#020617] text-slate-200 min-h-screen p-6 w-full select-none">
@@ -99,49 +54,35 @@ const handleAvatarUpload = async (
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.01] via-transparent to-transparent pointer-events-none" />
         
         <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10 text-center sm:text-left">
-          <div className="relative shrink-0">
+          
+          {/* Avatar Container with Parent 'group' Class Added */}
+          <div 
+            className="relative shrink-0 group cursor-pointer" 
+            onClick={() => fileInputRef.current?.click()}
+          >
             <img
               src={
-                  user?.avatar ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                user?.avatar ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
                   user?.name || "Student"
                 )}&background=4f46e5&color=fff`
               }
               alt="profile"
-              className="w-24 h-24 rounded-2xl object-cover border border-white/[0.08] shadow-xl"
+              className="w-24 h-24 rounded-2xl object-cover border border-white/[0.08] shadow-xl group-hover:border-indigo-500/40 transition-colors duration-300"
             />
 
-            <div
-  onClick={() =>
-    fileInputRef.current?.click()
-  }
-  className="
-    absolute
-    inset-0
-    rounded-2xl
-    bg-black/60
-    opacity-0
-    group-hover:opacity-100
-    transition-all
-    duration-300
-    flex
-    items-center
-    justify-center
-  "
->
-  <Camera
-    size={28}
-    className="text-white"
-  />
-</div>
+            {/* Hover Camera HUD Overlay */}
+            <div className="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+              <Camera size={26} className="text-white scale-90 group-hover:scale-100 transition-transform duration-300" />
+            </div>
 
-<input
-  ref={fileInputRef}
-  type="file"
-  accept="image/*"
-  hidden
-  onChange={handleAvatarUpload}
-/>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleAvatarUpload}
+            />
           </div>
 
           <div className="flex-1 space-y-1">
@@ -208,15 +149,15 @@ const InfoCard = ({
   value: string;
   icon: React.ReactNode;
 }) => (
-  <div className="bg-[#1E293B]/30 border border-white/[0.02] rounded-xl p-4 flex items-center gap-4">
+  <div className="bg-[#1E293B]/30 border border-white/[0.02] rounded-xl p-4 flex items-center gap-4 hover:border-white/[0.05] transition-colors duration-300">
     <div className="text-indigo-400 p-2.5 bg-white/[0.02] border border-white/[0.04] rounded-lg shrink-0">
       {icon}
     </div>
-    <div>
+    <div className="min-w-0 flex-1">
       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
         {label}
       </p>
-      <h3 className="text-white font-bold tracking-tight mt-0.5">
+      <h3 className="text-white font-bold tracking-tight mt-0.5 truncate">
         {value}
       </h3>
     </div>
@@ -232,7 +173,7 @@ const StatCard = ({
   value: string | number;
   icon: React.ReactNode;
 }) => (
-  <div className="bg-[#0F172A]/40 border border-white/[0.04] rounded-2xl p-5 backdrop-blur-md shadow-lg">
+  <div className="bg-[#0F172A]/40 border border-white/[0.04] rounded-2xl p-5 backdrop-blur-md shadow-lg hover:border-white/[0.08] transition-colors duration-300">
     <div className="flex justify-between items-center">
       <p className="text-slate-400 text-xs font-bold uppercase tracking-wide">
         {title}
