@@ -2,11 +2,47 @@ import { useAuthStore } from "../../store/auth.store";
 import { 
   Mail, 
   Briefcase, 
-  Calendar 
+  Calendar,
+  Camera,
 } from "lucide-react";
+
+import { useRef } from "react";
+import api from "../../lib/axios";
+import toast from "react-hot-toast";
 
 const MentorDashboardProfile = () => {
   const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Max 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5 MB.");
+      return;
+    }
+
+    // Allowed formats
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG, PNG and WEBP images are allowed.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    try {
+      const res = await api.patch("/user/avatar", formData);
+      setUser(res.data.user);
+      toast.success("Profile picture updated!");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Upload failed");
+    }
+  };
 
   return (
     <div className="space-y-6 bg-[#020617] text-slate-200 min-h-screen p-6 w-full select-none">
@@ -16,7 +52,9 @@ const MentorDashboardProfile = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.01] via-transparent to-transparent pointer-events-none" />
         
         <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10 text-center sm:text-left">
-          <div className="relative shrink-0">
+          
+          {/* Avatar Wrapper with Fixed Group Class */}
+          <div className="relative shrink-0 group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
             <img
               src={
                 user?.avatar ||
@@ -25,7 +63,20 @@ const MentorDashboardProfile = () => {
                 )}&background=4f46e5&color=fff`
               }
               alt="mentor"
-              className="w-24 h-24 rounded-2xl object-cover border border-white/[0.08] shadow-xl"
+              className="w-24 h-24 rounded-2xl object-cover border border-white/[0.08] shadow-xl group-hover:border-indigo-500/50 transition-colors duration-300"
+            />
+
+            {/* Hover overlay - works perfectly now */}
+            <div className="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <Camera size={24} className="text-white scale-90 group-hover:scale-100 transition-transform duration-300" />
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleAvatarUpload}
             />
           </div>
 
@@ -36,7 +87,6 @@ const MentorDashboardProfile = () => {
             <p className="text-sm font-medium text-slate-400">
               {user?.email || "N/A"}
             </p>
-            
           </div>
         </div>
       </div>
@@ -86,7 +136,7 @@ const InfoCard = ({
   value: string;
   icon: React.ReactNode;
 }) => (
-  <div className="bg-[#1E293B]/30 border border-white/[0.02] rounded-xl p-4 flex items-center gap-4">
+  <div className="bg-[#1E293B]/30 border border-white/[0.02] rounded-xl p-4 flex items-center gap-4 hover:border-white/[0.06] transition-colors duration-300">
     <div className="text-indigo-400 p-2.5 bg-white/[0.02] border border-white/[0.04] rounded-lg shrink-0">
       {icon}
     </div>

@@ -165,28 +165,28 @@ const MentorSidebar = () => {
             "
           >
             <div
-              className="
-                h-10
-                w-10
-                rounded-xl
-                bg-gradient-to-br
-                from-[#7C3AED]
-                to-[#2563EB]
-                flex
-                items-center
-                justify-center
-                text-sm
-                font-black
-                text-white
-                shadow-md
-                shadow-indigo-500/20
-                shrink-0
-              "
-            >
-              {user?.name
-                ?.charAt(0)
-                .toUpperCase() || "M"}
-            </div>
+  className="
+    h-10
+    w-10
+    rounded-xl
+    overflow-hidden
+    border
+    border-[#E2E8F0]
+    shrink-0
+    shadow-md
+  "
+>
+  <img
+    src={
+      user?.avatar ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        user?.name || "Mentor"
+      )}&background=4f46e5&color=fff`
+    }
+    alt={user?.name}
+    className="h-full w-full object-cover"
+  />
+</div>
 
             <div className="min-w-0">
               <h2

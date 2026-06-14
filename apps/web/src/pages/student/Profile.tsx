@@ -3,11 +3,93 @@ import {
   Target, 
   Flame, 
   Zap, 
-  Award 
+  Award,
+  Camera, 
 } from "lucide-react";
+
+import { useRef } from "react";
+import api from "../../lib/axios";
+import toast from "react-hot-toast";
 
 const Profile = () => {
   const user = useAuthStore((state) => state.user);
+
+const setUser = useAuthStore(
+  (state) => state.setUser
+);
+
+const fileInputRef =
+  useRef<HTMLInputElement>(null);
+
+const handleAvatarUpload = async (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+
+  const file = e.target.files?.[0];
+
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+
+    toast.error("Image must be under 5 MB.");
+
+    return;
+
+  }
+
+  const allowedTypes = [
+
+    "image/jpeg",
+
+    "image/png",
+
+    "image/webp",
+
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+
+    toast.error(
+      "Only JPG, PNG and WEBP images are allowed."
+    );
+
+    return;
+
+  }
+
+  const formData = new FormData();
+
+  formData.append("avatar", file);
+
+  try {
+
+    const res = await api.patch(
+      "/user/avatar",
+      formData
+    );
+
+    setUser({
+  ...user!,
+  ...res.data.user,
+});
+
+    toast.success(
+      "Profile picture updated!"
+    );
+
+  } catch (error: any) {
+
+    toast.error(
+
+      error.response?.data?.message ||
+
+      "Upload failed"
+
+    );
+
+  }
+
+};
 
   return (
     <div className="space-y-6 bg-[#020617] text-slate-200 min-h-screen p-6 w-full select-none">
@@ -28,6 +110,38 @@ const Profile = () => {
               alt="profile"
               className="w-24 h-24 rounded-2xl object-cover border border-white/[0.08] shadow-xl"
             />
+
+            <div
+  onClick={() =>
+    fileInputRef.current?.click()
+  }
+  className="
+    absolute
+    inset-0
+    rounded-2xl
+    bg-black/60
+    opacity-0
+    group-hover:opacity-100
+    transition-all
+    duration-300
+    flex
+    items-center
+    justify-center
+  "
+>
+  <Camera
+    size={28}
+    className="text-white"
+  />
+</div>
+
+<input
+  ref={fileInputRef}
+  type="file"
+  accept="image/*"
+  hidden
+  onChange={handleAvatarUpload}
+/>
           </div>
 
           <div className="flex-1 space-y-1">

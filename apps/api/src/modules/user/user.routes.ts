@@ -18,8 +18,10 @@ import {
   verifyDailyProblem,
   getAllStudentsController,
   completeOnboardingController,
+  uploadAvatarController,
 
 } from "./user.controller";
+import uploadAvatar from "../../middleware/uploadAvatar";
 
 const router = Router();
 
@@ -45,6 +47,13 @@ router.patch(
 
   updateProfile
 
+);
+
+router.patch(
+  "/avatar",
+  protect,
+  uploadAvatar.single("avatar"),
+  uploadAvatarController
 );
 
 // ======================================================

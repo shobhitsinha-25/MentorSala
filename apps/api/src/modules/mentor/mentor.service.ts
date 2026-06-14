@@ -24,44 +24,73 @@ interface CreateChapterInput {
 // GET ALL APPROVED MENTORS
 // ======================================================
 
-export const getMentors = async () => {
+export const getMentors = async (
+  userId: string
+) => {
+
+  const student =
+  await prisma.user.findUnique({
+
+    where: {
+      id: userId,
+    },
+
+    select: {
+      targetExam: true,
+    },
+
+  });
+
+if (!student?.targetExam) {
+
+  throw new Error(
+    "Student has not selected a target exam."
+  );
+
+}
 
   const mentors =
-    await prisma.mentor.findMany({
+  await prisma.mentor.findMany({
 
-      where: {
+    where: {
 
-        isVerified: true,
+      isVerified: true,
 
-      },
+      status: "APPROVED",
 
-      include: {
+      isDeleted: false,
 
-        user: {
+      examType: student.targetExam,
 
-          select: {
+    },
 
-            id: true,
+    include: {
 
-            name: true,
+      user: {
 
-            avatar: true,
+        select: {
 
-            email: true,
+          id: true,
 
-          },
+          name: true,
+
+          avatar: true,
+
+          email: true,
 
         },
 
       },
 
-      orderBy: {
+    },
 
-        rating: "desc",
+    orderBy: {
 
-      },
+      rating: "desc",
 
-    });
+    },
+
+  });
 
   return mentors;
 

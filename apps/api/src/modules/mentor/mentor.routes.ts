@@ -56,6 +56,7 @@ router.post(
 
 router.get(
   "/",
+  protect,
   getMentorsController
 );
 

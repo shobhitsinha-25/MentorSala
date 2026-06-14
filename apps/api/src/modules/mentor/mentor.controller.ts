@@ -42,7 +42,7 @@ export const getMentorsController =
     ) => {
 
       const mentors =
-        await getMentors();
+        await getMentors(req.user!.userId);
 
       return res.status(200).json({
 
@@ -136,6 +136,7 @@ export const submitMentorApplication =
         bio,
 
         linkedinUrl,
+        examType,
 
       } = req.body;
 
@@ -241,6 +242,7 @@ export const submitMentorApplication =
             bio,
 
             linkedinUrl,
+            examType, 
 
             resumeUrl:
               uploadResult.secure_url,

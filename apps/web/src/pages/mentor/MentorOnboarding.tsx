@@ -24,6 +24,7 @@ export default function MentorOnboarding() {
     expertise: "",
     bio: "",
     linkedinUrl: "",
+    examType: "JEE",
   });
 
   const [resume, setResume] = useState<File | null>(null);
@@ -58,6 +59,7 @@ export default function MentorOnboarding() {
       );
       data.append("bio", formData.bio);
       data.append("linkedinUrl", formData.linkedinUrl);
+      data.append("examType", formData.examType);
 
       if (resume) {
         data.append("resume", resume);
@@ -131,6 +133,28 @@ export default function MentorOnboarding() {
                 />
               </div>
             </div>
+
+            <div className="space-y-2">
+  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+    Exam Type
+  </label>
+
+  <select
+    name="examType"
+    value={formData.examType}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        examType: e.target.value,
+      })
+    }
+    className="w-full rounded-xl border border-white/[0.08] bg-[#131926] px-4 py-3 text-sm text-slate-200 outline-none focus:border-[#6366F1]"
+  >
+    <option value="JEE">JEE</option>
+    <option value="WBJEE">WBJEE</option>
+    <option value="BOARDS">BOARDS</option>
+  </select>
+</div>
 
             {/* Scale Track Row */}
             <div className="space-y-2">

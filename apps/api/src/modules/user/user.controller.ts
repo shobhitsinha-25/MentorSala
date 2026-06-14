@@ -25,8 +25,10 @@ import {
 
   getUserActivity,
   getStudents,
+  uploadUserAvatar,
 
 } from "./user.service";
+import uploadAvatar from "../../middleware/uploadAvatar";
 
 // ======================================================
 // GET PROFILE
@@ -522,3 +524,32 @@ async (
   });
 
 };
+
+export const uploadAvatarController =
+  asyncHandler(async (req: Request, res: Response) => {
+
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Avatar image is required",
+      });
+    }
+
+    const user = await uploadUserAvatar(userId, req.file);
+
+    return res.status(200).json({
+      success: true,
+      message: "Avatar updated successfully",
+      user,
+    });
+
+  });

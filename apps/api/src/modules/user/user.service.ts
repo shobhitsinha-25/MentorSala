@@ -1,3 +1,4 @@
+import cloudinary from "../../config/cloudinary";
 import prisma from "../../config/prisma";
 
 import { levelBenefits }
@@ -5,6 +6,8 @@ from "../../utils/levelBenefits";
 import {
   ExamType,
 } from "@prisma/client";
+
+import streamifier from "streamifier";
 
 // ======================================================
 // GET USER PROFILE
@@ -401,4 +404,63 @@ export const getStudents = async () => {
       createdAt: "desc",
     },
   });
+};
+
+
+
+export const uploadUserAvatar = async (
+  userId: string,
+  file: Express.Multer.File
+) => {
+
+  const uploadResult = await new Promise<any>((resolve, reject) => {
+
+    const stream = cloudinary.uploader.upload_stream(
+
+      {
+        folder: "mentorsala/avatars",
+        public_id: `user_${userId}`,
+        overwrite: true,
+        invalidate: true,
+        resource_type: "image",
+      },
+
+      (error, result) => {
+
+        if (error) reject(error);
+
+        else resolve(result);
+
+      }
+
+    );
+
+    streamifier
+      .createReadStream(file.buffer)
+      .pipe(stream);
+
+  });
+
+  const user = await prisma.user.update({
+
+    where: {
+      id: userId,
+    },
+
+    data: {
+      avatar: `${uploadResult.secure_url}?t=${Date.now()}`,
+    },
+
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      avatar: true,
+      role: true,
+    },
+
+  });
+
+  return user;
+
 };
