@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import igLogo from "../../assets/iglogo.jpg"
+import inlogo from "../../assets/inlogo.jpg"
+import youtube from "../../assets/utube.png"
 
 export default function Footer() {
   return (
@@ -73,7 +76,7 @@ export default function Footer() {
                   <Link
                     key={item.label}
                     to={item.to!}
-                    className="block text-xs text-[#94A3B8] hover:text-white transition-colors"
+                    className="block text-xs !text-[#94A3B8] hover:!text-white transition-colors"
                   >
                     {item.label}
                   </Link>
@@ -114,15 +117,65 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 border-t border-white/10 pt-5">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 border-t border-white/10 pt-5">
           
-          {/* Copyright Statement */}
-          <p className="text-[11px] text-[#64748B] cursor-default">
+          {/* Left: Copyright Statement */}
+          <p className="text-[11px] text-[#64748B] cursor-default order-1 lg:order-none">
             © 2026 MentorSala.com All rights reserved.
           </p>
 
-          {/* Exam Status Badges */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Center: Follow Us Social Media Block with Picture Logos */}
+          <div className="flex flex-col items-center gap-2 order-3 lg:order-none mx-auto">
+            <span className="text-[10px] uppercase tracking-[0.15em] text-[#64748B] font-bold">
+              Follow Us
+            </span>
+            <div className="flex items-center gap-5">
+              {/* Instagram */}
+              <a 
+                href="https://www.instagram.com/mentorsala_?igsh=ejVpNjZlMmJtc3k3" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:scale-110 transition-transform duration-200"
+              >
+                <img 
+                  src={igLogo}
+                  alt="Instagram" 
+                  className="h-5 w-5 object-contain brightness-100"
+                />
+              </a>
+              
+              {/* LinkedIn */}
+              <a 
+                href="https://linkedin.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:scale-110 transition-transform duration-200"
+              >
+                <img 
+                  src={inlogo}
+                  alt="LinkedIn" 
+                  className="h-5 w-5 object-contain brightness-100"
+                />
+              </a>
+              
+              {/* YouTube */}
+              <a 
+                href="https://www.youtube.com/@chemistryzone9111/videos" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:scale-110 transition-transform duration-200"
+              >
+                <img 
+                  src={youtube}
+                  alt="YouTube" 
+                  className="h-5 w-5 object-contain brightness-100"
+                />
+              </a>
+            </div>
+          </div>
+
+          {/* Right: Exam Status Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-2 order-2 lg:order-none">
             {[
               {
                 label: "JEE",

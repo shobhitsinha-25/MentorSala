@@ -18,6 +18,7 @@ import Leaderboard from "../pages/student/Leaderboard";
 import Achievements from "../pages/student/Achievements";
 import Community from "../pages/student/Community";
 import Sessions from "../pages/mentor/Sessions";
+import About from "../pages/About/About";
 
 import MentorOnboarding
 from "../pages/mentor/MentorOnboarding";
@@ -70,6 +71,11 @@ function AppRoutes() {
         path="/"
         element={<Home />}
       />
+
+      <Route
+  path="/about"
+  element={<About />}
+/>
 
       <Route
   path="/signup"

@@ -74,7 +74,8 @@ export default function MentorOnboarding() {
       navigate("/mentor/under-review");
     } catch (error: any) {
       console.error("Mentor onboarding failed", error);
-      setErrorMsg(error?.response?.data?.message || "Failed to commit onboarding application metrics.");
+      // FIXED HERE: Replaced technical message leak with a generic, safe user-facing message
+      setErrorMsg(error?.response?.data?.message || "Something went wrong. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -135,26 +136,26 @@ export default function MentorOnboarding() {
             </div>
 
             <div className="space-y-2">
-  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-    Exam Type
-  </label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Exam Type
+              </label>
 
-  <select
-    name="examType"
-    value={formData.examType}
-    onChange={(e) =>
-      setFormData({
-        ...formData,
-        examType: e.target.value,
-      })
-    }
-    className="w-full rounded-xl border border-white/[0.08] bg-[#131926] px-4 py-3 text-sm text-slate-200 outline-none focus:border-[#6366F1]"
-  >
-    <option value="JEE">JEE</option>
-    <option value="WBJEE">WBJEE</option>
-    <option value="BOARDS">BOARDS</option>
-  </select>
-</div>
+              <select
+                name="examType"
+                value={formData.examType}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    examType: e.target.value,
+                  })
+                }
+                className="w-full rounded-xl border border-white/[0.08] bg-[#131926] px-4 py-3 text-sm text-slate-200 outline-none focus:border-[#6366F1]"
+              >
+                <option value="JEE">JEE</option>
+                <option value="WBJEE">WBJEE</option>
+                <option value="BOARDS">BOARDS</option>
+              </select>
+            </div>
 
             {/* Scale Track Row */}
             <div className="space-y-2">
@@ -181,7 +182,6 @@ export default function MentorOnboarding() {
                 LinkedIn Profile URL
               </label>
               <div className="relative">
-                {/* ✅ ADDED: Clean custom SVG Link icon matching your input styling sizes */}
                 <svg 
                   className="absolute left-4 top-3.5 h-4 w-4 text-slate-500" 
                   viewBox="0 0 24 24" 

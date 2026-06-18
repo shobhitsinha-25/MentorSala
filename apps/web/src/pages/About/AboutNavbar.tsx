@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export default function Navbar() {
+export default function AboutNavbar() {
   return (
     <header className="fixed top-0 w-full z-50 border-b border-[#E8E5F5] bg-white backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -18,35 +18,9 @@ export default function Navbar() {
         {/* Right-aligned Navigation Links and Buttons */}
         <div className="flex items-center gap-4 lg:gap-10">
           
-          {/* Nav Links (Now shifted right next to login) */}
-          <div className="hidden lg:flex items-center gap-10 text-black">
-            {[
-              {
-                label: "Courses",
-                href: "#courses",
-              },
-              {
-                label: "Mentors",
-                href: "#mentors",
-              },
-              {
-                label: "Success Stories",
-                href: "#hero",
-              },
-            ].map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="text-[15px] font-medium text-[#64748B] transition hover:text-[#2563EB]"
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
-
           <Link
             to="/login"
-            className="text-[15px] font-medium !text-black hover:text-[#2563EB] transition"
+            className="text-[15px] font-medium text-[#64748B] hover:text-[#2563EB] transition"
           >
             Login
           </Link>
