@@ -175,7 +175,7 @@ const About = () => {
 
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-20">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-20 !text-black">
 
             <FeatureCard
               icon={<GraduationCap size={32} />}
@@ -590,7 +590,7 @@ const FeatureCard = ({
       rounded-3xl
       border
       border-black
-      bg-white/[0.03]
+      bg-[#e0e8ff]
       p-8
       hover:border-indigo-500/30
       hover:-translate-y-1
@@ -604,7 +604,7 @@ const FeatureCard = ({
     <h3 className="mt-8 text-2xl font-bold">
       {title}
     </h3>
-    <p className="mt-5 leading-8 text-slate-400">
+    <p className="mt-5 leading-8 text-black">
       {description}
     </p>
   </div>
