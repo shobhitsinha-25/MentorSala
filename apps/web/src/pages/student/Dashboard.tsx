@@ -52,35 +52,49 @@ const [
 
   // Target MCQ metadata layout definitions
 const dailyProblem = {
-  id: "potd-2026-06-06",
-  subject: "Physics",
-  topic: "Waves & Sound (Organ Pipes)",
+  id: "potd-2026-06-07",
+  subject: "Mathematics",
+  topic: "Trigonometry (Maximum and Minimum Values)",
 
   question:
-    "The fifth harmonic of a closed organ pipe is found to be in unison with the first harmonic of an open pipe. The ratio of lengths of closed pipe to that of the open pipe is 5/x. The value of x is ______.",
+    "The least value of $(\\cos^2 \\theta - 6 \\sin \\theta \\cos \\theta + 3 \\sin^2 \\theta + 2)$ is:",
 
   options: [
-    "3",
-    "4",
+    "-1",
     "1",
-    "2"
+    "$4 - \\sqrt{10}$",
+    "$4 + \\sqrt{10}$"
   ],
 
-  correctIndex: 3,
+  correctIndex: 2,
 
   explanation:
     "### **Step-by-Step Solution**\n\n" +
-    "1. **Identify the Frequency Formulas:**\n" +
-    "   * **Closed pipe (5th harmonic):** $f_c = \\frac{5v}{4L_c}$\n" +
-    "   * **Open pipe (1st harmonic):** $f_o = \\frac{v}{2L_o}$\n\n" +
-    "2. **Equate Frequencies (In Unison):**\n" +
-    "   $$\\frac{5v}{4L_c} = \\frac{v}{2L_o}$$\n\n" +
-    "3. **Simplify and Find the Ratio:**\n" +
-    "   Canceling the speed of sound ($v$) and simplifying yields:\n" +
-    "   $$\\frac{5}{2L_c} = \\frac{1}{L_o} \\implies \\frac{L_c}{L_o} = \\frac{5}{2}$$\n\n" +
-    "Comparing this with the given ratio $\\frac{5}{x}$, we get **$x = 2$**."
+    "1. **Write down the given expression ($E$):**\n" +
+    "   $$E = \\cos^2 \\theta - 6 \\sin \\theta \\cos \\theta + 3 \\sin^2 \\theta + 2$$\n\n" +
+    "2. **Convert the expression into double angles ($2\\theta$):**\n" +
+    "   Use the standard double-angle identities:\n" +
+    "   * $\\cos^2 \\theta = \\frac{1 + \\cos 2\\theta}{2}$\n" +
+    "   * $\\sin^2 \\theta = \\frac{1 - \\cos 2\\theta}{2}$\n" +
+    "   * $2 \\sin \\theta \\cos \\theta = \\sin 2\\theta \\implies 6 \\sin \\theta \\cos \\theta = 3 \\sin 2\\theta$\n\n" +
+    "   Substitute these back into the expression:\n" +
+    "   $$E = \\left(\\frac{1 + \\cos 2\\theta}{2}\\right) - 3 \\sin 2\\theta + 3\\left(\\frac{1 - \\cos 2\\theta}{2}\\right) + 2$$\n\n" +
+    "3. **Simplify the algebraic terms:**\n" +
+    "   Separate the numerical constants from the trigonometric variables:\n" +
+    "   $$E = \\frac{1}{2} + \\frac{1}{2}\\cos 2\\theta - 3 \\sin 2\\theta + \\frac{3}{2} - \\frac{3}{2}\\cos 2\\theta + 2$$\n" +
+    "   * **Constants:** $\\frac{1}{2} + \\frac{3}{2} + 2 = 2 + 2 = 4$\n" +
+    "   * **Cos terms:** $\\frac{1}{2}\\cos 2\\theta - \\frac{3}{2}\\cos 2\\theta = -\\cos 2\\theta$\n\n" +
+    "   This yields the simplified function form:\n" +
+    "   $$E = 4 - 3 \\sin 2\\theta - \\cos 2\\theta = 4 - (3 \\sin 2\\theta + \\cos 2\\theta)$$\n\n" +
+    "4. **Analyze the range bounds:**\n" +
+    "   We know that for any expression $a \\sin x + b \\cos x$, the maximum value is $\\sqrt{a^2 + b^2}$.\n" +
+    "   Here, $a = 3$ and $b = 1$:\n" +
+    "   $$\\text{Maximum value of } (3 \\sin 2\\theta + \\cos 2\\theta) = \\sqrt{3^2 + 1^2} = \\sqrt{9 + 1} = \\sqrt{10}$$\n\n" +
+    "5. **Determine the least value:**\n" +
+    "   To minimize $E = 4 - (3 \\sin 2\\theta + \\cos 2\\theta)$, we must subtract the *maximum* possible value of the bracket group:\n" +
+    "   $$\\text{Least Value} = 4 - \\sqrt{10}$$\n\n" +
+    "Hence, the correct option is **$4 - \\sqrt{10}$** (Index 2)."
 };
-
   useEffect(() => {
     const fetchUserTasks = async () => {
       try {
