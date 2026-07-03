@@ -1,30 +1,12 @@
 import { Request, Response }
 from "express";
 
-import {
-  createQuestion,
-  getQuestionsForStudent
-} from "./question.service";
-import prisma from "../../config/prisma";
+
+import prisma from "../../../config/prisma";
 import { ExamType } from "@prisma/client";
 
-export const createQuestionController =
-async (
-  req: Request,
-  res: Response
-) => {
+import {getQuestionsForStudent} from "./student.question.service"
 
-  const question =
-    await createQuestion(
-      req.body
-    );
-
-  return res.status(201).json({
-    success: true,
-    data: question,
-  });
-
-};
 
 export const getStudentQuestionsController =
 async (

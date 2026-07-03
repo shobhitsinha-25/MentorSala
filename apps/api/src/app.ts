@@ -16,9 +16,16 @@ import adminAuthRoutes from "./modules/admin/admin.auth.routes";
 import availabilityRoutes from "./modules/mentorship/availability/availability.routes";
 import slotRoutes from "./modules/mentorship/slot/slot.routes";
 import sessionRoutes from "./modules/mentorship/session/session.routes";
-import questionRoutes from "./modules/question/question.routes";
+import adminQuestionRoutes from "./modules/question/admin/admin.question.routes"
+
+import studentQuestionRoutes from "./modules/question/student/student.question.routes";
 import subscriptionRoutes from "./modules/subscription/subscription.routes";
 
+import subjectRoutes from "./modules/subject/subject.routes";
+import chapterRoutes from "./modules/chapter/chapter.routes"
+import adminTestRoutes from "./modules/test/admin/admin.test.routes";
+import builderRoutes from "./modules/test/builder/builder.routes";
+import uploadRoutes from "./modules/upload/upload.routes";
 const app = express();
 
 
@@ -67,9 +74,22 @@ app.use(
   sessionRoutes
 );
 
+// ==========================================
+// ADMIN QUESTION BANK
+// ==========================================
+
+app.use(
+  "/api/admin/questions",
+  adminQuestionRoutes
+);
+
+// ==========================================
+// STUDENT QUESTIONS
+// ==========================================
+
 app.use(
   "/api/questions",
-  questionRoutes
+  studentQuestionRoutes
 );
 
 app.use(
@@ -77,8 +97,33 @@ app.use(
   subscriptionRoutes
 );
 
-  
+app.use(
+  "/api/admin/subjects",
+  subjectRoutes
+);
 
+app.use(
+  "/api/admin/chapters",
+  chapterRoutes
+);
+
+app.use(
+  "/api/admin/tests",
+  adminTestRoutes
+);
+
+app.use(
+  "/api/admin/tests",
+  builderRoutes
+);
+
+app.use(
+
+"/api/upload",
+
+uploadRoutes
+
+);
 
 app.use(errorHandler);
 

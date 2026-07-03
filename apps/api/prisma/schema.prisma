@@ -23,6 +23,20 @@ enum ExamType {
   BOARDS
 }
 
+enum TestType {
+  CHAPTER
+  SUBJECT 
+  MOCK
+  PYQ
+  PRACTICE
+}
+
+enum TestStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 enum ApplicationStatus {
   NOT_STARTED
   PENDING_APPROVAL
@@ -43,10 +57,24 @@ enum SessionStatus {
   MISSED
 }
 
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  AUTO_SUBMITTED
+  EXPIRED
+}
+
 enum DifficultyLevel {
   EASY
   MEDIUM
   HARD
+}
+
+enum QuestionType {
+  SINGLE_CORRECT
+  MULTIPLE_CORRECT
+  INTEGER
+  ASSERTION_REASON
 }
 
 // =====================================================
@@ -91,8 +119,10 @@ model User {
   mentorReviews     MentorReview[]            @relation("StudentReviews") // ✅ FIXED: Explicit relational map
   tasks             Task[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  testAttempts TestAttempt[]
+  createdTests Test[]
 
   @@index([email])
   @@index([role])
@@ -164,19 +194,53 @@ model Mentor {
 // =====================================================
 
 model Subject {
-  id        String  @id @default(cuid())
-  name      String
-  slug      String  @unique
+
+  id String @id @default(cuid())
+
+  name String
+
+  slug String
+
+  examType ExamType
+
   published Boolean @default(true)
 
-  // Relations
-  mentors  SubjectMentor[]
+  // ==========================================
+  // SOFT DELETE
+  // ==========================================
+
+  isDeleted Boolean @default(false)
+
+  deletedAt DateTime?
+
+  // ==========================================
+  // RELATIONS
+  // ==========================================
+
   chapters Chapter[]
 
-  mentorPreferences StudentMentorPreference[]
+  tests Test[]
+
+  mentors SubjectMentor[]
+
+  practiceQuestions PracticeQuestion[]
+
+  studentMentorPreferences StudentMentorPreference[]
+
+  // ==========================================
+  // TIMESTAMPS
+  // ==========================================
 
   createdAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
+
+  // ==========================================
+  // UNIQUE
+  // ==========================================
+
+  @@unique([examType, slug])
+
 }
 
 // =====================================================
@@ -184,22 +248,172 @@ model Subject {
 // =====================================================
 
 model Chapter {
-  id        String  @id @default(cuid())
-  title     String
-  slug      String  @unique
-  order     Int
+  id String @id @default(cuid())
+
+  title String
+
+  slug String
+
+  order Int
+
   published Boolean @default(true)
 
-  // Subject
   subjectId String
-  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
-  // Relations
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  practiceQuestions PracticeQuestion[]
 
   createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean @default(false)
+
+  tests Test[]
+}
+
+// Test Series Model....
+
+model Test {
+
+  id String @id @default(cuid())
+
+  title String
+
+  description String?
+
+  examType ExamType
+
+  classLevel String?
+
+  type TestType
+
+  subjectId String?
+
+  chapterId String?
+
+  duration Int
+
+  totalMarks Int
+
+  totalQuestions Int
+
+  negativeMarks Float @default(0)
+
+  instructions String?
+
+  maxAttempts Int @default(1)
+
+  status TestStatus @default(DRAFT)
+
+  startsAt DateTime?
+
+  endsAt DateTime?
+
+  subscriptionPlanId String?
+
+  createdBy String
+
+  isDeleted Boolean @default(false)
+
+  deletedAt DateTime?
+
+  createdAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
 
-  @@index([subjectId])
+  subject Subject? @relation(fields: [subjectId], references: [id])
+
+  chapter Chapter? @relation(fields: [chapterId], references: [id])
+
+  subscriptionPlan SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
+
+  questions TestQuestion[]
+
+  attempts TestAttempt[]
+
+  user User? @relation(fields: [userId], references: [id])
+
+  userId String?
+}
+
+model TestQuestion {
+  id String @id @default(cuid())
+
+  testId String
+
+  questionId String
+
+  displayOrder Int
+
+  marks Int?
+
+  negativeMarks Float?
+
+  test Test @relation(fields: [testId], references: [id])
+
+  question PracticeQuestion @relation(fields: [questionId], references: [id])
+
+  @@unique([testId, questionId])
+}
+
+model TestAttempt {
+  id String @id @default(cuid())
+
+  userId String
+
+  testId String
+
+  startedAt DateTime
+
+  submittedAt DateTime?
+
+  status AttemptStatus
+
+  score Float?
+
+  percentage Float?
+
+  timeTaken Int?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  test Test @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  answers AttemptAnswer[]
+}
+
+model AttemptAnswer {
+  id String @id @default(cuid())
+
+  attemptId String
+
+  questionId String
+
+  selectedAnswer String?
+
+  markedForReview Boolean
+
+  visited Boolean
+
+  timeSpent Int
+
+  attempt TestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  question PracticeQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model ChapterProgress {
+  id String @id @default(cuid())
+
+  userId String
+
+  chapterId String
+
+  completed Boolean
+
+  bestScore Float
+
+  attempts Int
 }
 
 // =====================================================
@@ -266,6 +480,7 @@ model SubscriptionPlan {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  tests     Test[]
 }
 
 // =====================================================
@@ -363,31 +578,62 @@ model MentorshipSession {
 // =====================================================
 
 model PracticeQuestion {
-  id            String          @id @default(cuid())
-  question      String
-  options       Json?
-  answer        String
-  solution      String?
-  difficulty    DifficultyLevel
-  year          Int?
-  examType      ExamType
-  marks         Int?
-  negativeMarks Float?
-  isPremium     Boolean         @default(false)
-  published     Boolean         @default(true)
 
-  subject String
-  chapter String
+  id String @id @default(cuid())
+
+  questionType QuestionType
+
+  question String
+
+  questionImageUrl String?
+
+  options Json
+
+  optionImages Json?
+
+  answer Json
+
+  solution String?
+
+  solutionImageUrl String?
+
+  difficulty DifficultyLevel
+
+  year Int?
+
+  examType ExamType
+
+  marks Int?
+
+  negativeMarks Float?
+
+  isPremium Boolean @default(false)
+
+  published Boolean @default(true)
+
+  subjectId String
+
+  chapterId String
+
+  createdBy String?
+
+  isDeleted Boolean @default(false)
+
+  deletedAt DateTime?
+
+  subject Subject @relation(fields: [subjectId], references: [id])
+
+  chapter Chapter @relation(fields: [chapterId], references: [id])
 
   attempts QuestionAttempt[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  testQuestions TestQuestion[]
 
-  @@index([subject])
-  @@index([chapter])
-  @@index([difficulty])
-  @@index([examType])
+  attemptAnswers AttemptAnswer[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
 }
 
 // =====================================================

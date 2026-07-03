@@ -13,7 +13,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import Dashboard from "../pages/student/Dashboard";
 import Subscriptions from "../pages/student/Subscriptions";
 import Analytics from "../pages/student/Analytics";
-import Tests from "../pages/student/Tests";
+import Tests from "../pages/Admin/Tests/Tests";
 import Leaderboard from "../pages/student/Leaderboard";
 import Achievements from "../pages/student/Achievements";
 import Community from "../pages/student/Community";
@@ -36,7 +36,7 @@ import MentorProtectedRoute
 from "./MentorProtectedRoute";
 
 import MentorLayout from "../layouts/MentorLayout";
-import Subjects from "../pages/mentor/Subjects";
+import Subjects from "../pages/Admin/Subjects/Subjects";
 import Lectures from "../pages/mentor/Lectures";
 import Availability from "../pages/mentor/Availability";
 import BookSession from "../pages/student/BookSession";
@@ -52,6 +52,14 @@ import PracticeProblems from "../pages/student/PracticeProblems";
 import Plans from "../pages/Admin/Plans";
 import Profile from "../pages/student/Profile";
 import MentorDashboardProfile from "../pages/mentor/MentorDashboardProfile";
+import Chapters from "../pages/Admin/Chapters/Chapters";
+import Questions from "../pages/Admin/Questions/Questions";
+import CreateQuestion from "../pages/Admin/Questions/CreateQuestion";
+import EditQuestion from "../pages/Admin/Questions/EditQuestion";
+import CreateTest from "../pages/Admin/Tests/CreateTest";
+import EditTest from "../pages/Admin/Tests/EditTest";
+import TestBuilder from "../pages/Admin/Tests/TestBuilder";
+
 
 
 
@@ -103,6 +111,51 @@ function AppRoutes() {
     path="dashboard"
     element={<AdminDashboard />}
   />
+
+  <Route
+    path="subjects"
+    element={<Subjects />}
+  />
+
+  <Route
+  path="chapters"
+  element={<Chapters />}
+/>
+
+<Route
+  path="questions"
+  element={<Questions />}
+/>
+<Route
+  path="questions/create"
+  element={<CreateQuestion />}
+/>
+
+<Route
+  path="questions/:questionId/edit"
+  element={<EditQuestion />}
+/>
+
+<Route
+  path="tests"
+  element={<Tests />}
+/>
+
+<Route
+  path="tests/create"
+  element={<CreateTest />}
+/>
+
+<Route
+    path="tests/:testId/edit"
+    element={<EditTest />}
+  />
+
+   <Route
+    path="tests/:testId/builder"
+    element={<TestBuilder />}
+  />
+
 
   <Route
     path="mentors"

@@ -6,6 +6,8 @@ import {
   getAdminProfile,
 } from "./admin.auth.controller";
 
+
+
 const router = Router();
 
 router.post(
@@ -22,5 +24,7 @@ router.get(
   "/profile",
   getAdminProfile
 );
+
+
 
 export default router;

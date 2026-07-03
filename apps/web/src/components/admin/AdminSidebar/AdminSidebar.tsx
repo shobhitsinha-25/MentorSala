@@ -4,6 +4,9 @@ import {
   GraduationCap,
   Brain,
   CreditCard,
+  BookOpen,
+  FolderTree,
+  FileText,
 } from "lucide-react";
 
 import {
@@ -16,25 +19,67 @@ const items = [
     icon: LayoutDashboard,
     path: "/admin/dashboard",
   },
+
+  // ===========================
+  // ACADEMIC
+  // ===========================
+
+  {
+    label: "Subjects",
+    icon: BookOpen,
+    path: "/admin/subjects",
+  },
+
+  {
+    label: "Chapters",
+    icon: FolderTree,
+    path: "/admin/chapters",
+  },
+
+  // ===========================
+  // QUESTION BANK
+  // ===========================
+
+  {
+    label: "Question Bank",
+    icon: Brain,
+    path: "/admin/questions",
+  },
+
+  // ===========================
+  // TESTS
+  // ===========================
+
+  {
+    label: "Tests",
+    icon: FileText,
+    path: "/admin/tests",
+  },
+
+  // ===========================
+  // USERS
+  // ===========================
+
   {
     label: "Mentors",
     icon: GraduationCap,
     path: "/admin/mentors",
   },
+
   {
     label: "Students",
     icon: Users,
     path: "/admin/students",
   },
+
+  // ===========================
+  // SUBSCRIPTION
+  // ===========================
+
   {
-  label: "Plans",
-  icon: CreditCard,
-  path: "/admin/plans",
-},
-  {
-    label: "Practice Problems",
-    icon: Brain,
-    path: "/admin/problems",
+    label: "Plans",
+    icon: CreditCard,
+    path: "/admin/plans",
   },
 ];
 

@@ -3,7 +3,7 @@ import {
 } from "react-router-dom";
 
 import AdminSidebar
-from "../components/AdminSidebar/AdminSidebar";
+from "../components/admin/AdminSidebar/AdminSidebar";
 
 const AdminLayout = () => {
 
