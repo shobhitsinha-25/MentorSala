@@ -43,7 +43,7 @@ export const createQuestionSchema = z.object({
   examType: z.enum([
     "JEE",
     "WBJEE",
-    "CBSE",
+    "BOARDS",
   ]),
 
   subjectId: z.string(),

@@ -1,4 +1,7 @@
 import prisma from "../../../config/prisma";
+import {
+  Prisma,
+} from "@prisma/client";
 
 import {
   CreateQuestionInput,GetQuestionsInput,UpdateQuestionInput
@@ -140,7 +143,8 @@ export const createQuestion = async (
 
         questionImageUrl: data.questionImageUrl,
 
-        options: data.options,
+        options:
+  data.options as unknown as Prisma.InputJsonValue,
 
         optionImages: data.optionImages,
 
@@ -226,7 +230,8 @@ export const createQuestion = async (
 
       questionImageUrl: data.questionImageUrl,
 
-      options: data.options,
+      options:
+  data.options as unknown as Prisma.InputJsonValue,
 
       optionImages: data.optionImages,
 
@@ -612,7 +617,7 @@ export const updateQuestion = async ({
           data.questionImageUrl,
 
         options:
-          data.options,
+  data.options as unknown as Prisma.InputJsonValue,
 
         optionImages:
           data.optionImages,

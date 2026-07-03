@@ -36,7 +36,7 @@ export const createQuestionController =
         await createQuestion({
           ...data,
           createdBy:
-            "ADMIN",
+            "ADMIN", 
         });
 
       return res.status(201).json({
