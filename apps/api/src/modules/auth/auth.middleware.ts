@@ -84,8 +84,6 @@ export const protect = (
     // DEBUG LOGS
     // ==================================================
 
-    console.log("AUTH HEADER:", req.headers.authorization);
-    console.log("PARSED TOKEN:", token);
 
     // ==================================================
     // NO TOKEN OR INVALID STRING CHECK
@@ -123,7 +121,6 @@ export const protect = (
     return next();
 
   } catch (error: any) {
-    console.log("AUTH ERROR VERIFICATION PIPELINE:", error.message);
 
     return res.status(401).json({
       success: false,
