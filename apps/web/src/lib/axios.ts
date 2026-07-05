@@ -64,43 +64,47 @@ api.interceptors.response.use(
 
   async (error) => {
 
-    const originalRequest =
-      error.config;
+    const originalRequest = error.config;
 
     // ==============================================
     // NETWORK ERROR
     // ==============================================
 
     if (!error.response) {
-
-      return Promise.reject(
-        error
-      );
-
+      return Promise.reject(error);
     }
 
     // ==============================================
-    // CURRENT ROUTE
+    // SKIP REFRESH FOR AUTH ENDPOINTS
     // ==============================================
 
-    const currentPath =
-      window.location.pathname;
+    const requestUrl = originalRequest?.url || "";
 
-    // ==============================================
-    // SKIP REFRESH ON LOGIN/SIGNUP
-    // ==============================================
+    const skipRefreshEndpoints = [
+
+      "/auth/login",
+
+      "/auth/register",
+
+      "/auth/refresh-token",
+
+      "/admin-auth/login",
+
+      "/admin-auth/logout",
+
+    ];
 
     if (
 
-      currentPath === "/login" ||
+      skipRefreshEndpoints.some(
 
-      currentPath === "/signup"
+        (endpoint) => requestUrl.includes(endpoint)
+
+      )
 
     ) {
 
-      return Promise.reject(
-        error
-      );
+      return Promise.reject(error);
 
     }
 
@@ -116,8 +120,7 @@ api.interceptors.response.use(
 
     ) {
 
-      originalRequest._retry =
-        true;
+      originalRequest._retry = true;
 
       try {
 
@@ -127,32 +130,21 @@ api.interceptors.response.use(
 
         );
 
-        // ==========================================
-        // REFRESH TOKEN REQUEST
-        // ==========================================
+        const res = await axios.post(
 
-        const res =
-          await axios.post(
+          `${import.meta.env.VITE_API_URL}/api/auth/refresh-token`,
 
-            `${import.meta.env.VITE_API_URL}/api/auth/refresh-token`,
+          {},
 
-            {},
+          {
 
-            {
+            withCredentials: true,
 
-              withCredentials: true,
+          }
 
-            }
+        );
 
-          );
-
-        // ==========================================
-        // SAVE NEW ACCESS TOKEN
-        // ==========================================
-
-        if (
-          res.data.accessToken
-        ) {
+        if (res.data.accessToken) {
 
           localStorage.setItem(
 
@@ -164,10 +156,6 @@ api.interceptors.response.use(
 
         }
 
-        // ==========================================
-        // UPDATE GLOBAL USER STORE
-        // ==========================================
-
         if (
 
           res.data.success &&
@@ -177,27 +165,24 @@ api.interceptors.response.use(
         ) {
 
           useAuthStore
+
             .getState()
-            .setUser(
-              res.data.user
-            );
+
+            .setUser(res.data.user);
 
         }
 
         console.log(
-          "Session restored successfully"
-        );
 
-        // ==========================================
-        // RETRY ORIGINAL REQUEST
-        // ==========================================
+          "Session restored successfully"
+
+        );
 
         originalRequest.headers.Authorization =
+
           `Bearer ${res.data.accessToken}`;
 
-        return api(
-          originalRequest
-        );
+        return api(originalRequest);
 
       } catch (refreshError) {
 
@@ -207,29 +192,25 @@ api.interceptors.response.use(
 
         );
 
-        // ==========================================
-        // CLEAR SESSION
-        // ==========================================
-
         localStorage.removeItem(
+
           "accessToken"
+
         );
 
         useAuthStore
+
           .getState()
+
           .setUser(null);
 
-        return Promise.reject(
-          refreshError
-        );
+        return Promise.reject(refreshError);
 
       }
 
     }
 
-    return Promise.reject(
-      error
-    );
+    return Promise.reject(error);
 
   }
 

@@ -1,4 +1,7 @@
 import { Router } from "express";
+import {
+  adminProtect,
+} from "./admin.auth.middleware";
 
 import {
   adminLogin,
@@ -17,11 +20,13 @@ router.post(
 
 router.post(
   "/logout",
+  adminProtect,
   adminLogout
 );
 
 router.get(
   "/profile",
+  adminProtect,
   getAdminProfile
 );
 

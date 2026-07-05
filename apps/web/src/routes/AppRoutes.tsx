@@ -8,6 +8,7 @@ import Login from "../pages/auth/Login";
 import Onboarding from "../pages/student/Onboarding";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
+import AdminProtectedRoute from "../components/admin/AdminProtectedRoute";
 
 // Student Workspace Panels
 import Dashboard from "../pages/student/Dashboard";
@@ -104,7 +105,11 @@ function AppRoutes() {
 
 <Route
   path="/admin"
-  element={<AdminLayout />}
+  element={
+    <AdminProtectedRoute>
+      <AdminLayout />
+    </AdminProtectedRoute>
+  }
 >
 
   <Route

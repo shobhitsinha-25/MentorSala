@@ -7,11 +7,17 @@ import {
   BookOpen,
   FolderTree,
   FileText,
+  LogOut,
 } from "lucide-react";
 
 import {
   NavLink,
+  useNavigate,
 } from "react-router-dom";
+
+import toast from "react-hot-toast";
+
+import api from "../../../lib/axios";
 
 const items = [
   {
@@ -84,6 +90,28 @@ const items = [
 ];
 
 const AdminSidebar = () => {
+
+  const navigate = useNavigate();
+
+const handleLogout = async () => {
+
+  try {
+
+    await api.post("/admin-auth/logout");
+
+    toast.success("Logged out successfully");
+
+    navigate("/admin/login", {
+      replace: true,
+    });
+
+  } catch {
+
+    toast.error("Logout failed");
+
+  }
+
+};
   return (
     <aside className="w-72 bg-[#020617] border-r border-white/[0.05] h-screen flex flex-col justify-between select-none shrink-0 relative z-20">
       {/* PRE-RENDERED GLOW EFFECT */}
@@ -154,24 +182,56 @@ const AdminSidebar = () => {
       </div>
 
       {/* FOOTER SYSTEM STATUS */}
-      <div className="p-6">
-        <div className="rounded-2xl bg-white/[0.02] border border-white/[0.05] p-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-slate-500 tracking-widest uppercase block">
-                Server Status
-              </span>
-              <span className="text-[11px] font-black text-slate-200">
-                Operational
-              </span>
-            </div>
-            <div className="relative flex items-center justify-center">
-              <div className="absolute w-3 h-3 bg-emerald-500/20 rounded-full animate-ping" />
-              <div className="relative w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
-            </div>
-          </div>
-        </div>
+   {/* FOOTER */}
+<div className="p-6 space-y-4">
+
+  {/* Server Status */}
+
+  <div className="rounded-2xl bg-white/[0.02] border border-white/[0.05] p-4">
+
+    <div className="flex items-center justify-between">
+
+      <div className="space-y-1">
+
+        <span className="text-[10px] font-bold text-slate-500 tracking-widest uppercase block">
+          Server Status
+        </span>
+
+        <span className="text-[11px] font-black text-slate-200">
+          Operational
+        </span>
+
       </div>
+
+      <div className="relative flex items-center justify-center">
+
+        <div className="absolute w-3 h-3 bg-emerald-500/20 rounded-full animate-ping" />
+
+        <div className="relative w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
+
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* Logout */}
+
+  <button
+
+    onClick={handleLogout}
+
+    className="w-full h-12 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 transition-all duration-300 flex items-center justify-center gap-2 text-red-400 font-bold"
+
+  >
+
+    <LogOut size={18} />
+
+    Logout
+
+  </button>
+
+</div>
     </aside>
   );
 };
