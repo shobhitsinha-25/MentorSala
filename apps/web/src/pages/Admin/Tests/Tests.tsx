@@ -29,6 +29,7 @@ getTests,
 deleteTest,
 
 } from "../../../services/admin/test.service";
+import SearchableSelect from "../../../components/ui/SearchableSelect";
 
 const Tests = () => {
 
@@ -214,151 +215,101 @@ err.response?.data?.message||
       {/* FILTERS */}
       {/* ============================================== */}
 
-      <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-5">
-
-        <div className="relative lg:col-span-2">
-
-          <Search
-
-            size={18}
-
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
-
-          />
-
-          <input
-
-            value={search}
-
-            onChange={(e)=>
-              setSearch(
-                e.target.value
-              )
-            }
-
-            placeholder="Search Test"
-
-            className="w-full rounded-xl border border-slate-700 bg-slate-900 py-3 pl-12 pr-4 text-white"
-
-          />
-
-        </div>
-
-        <select
-
-          value={examType}
-
-          onChange={(e)=>
-            setExamType(
-              e.target.value
-            )
-          }
-
-          className="rounded-xl border border-slate-700 bg-slate-900 px-4 text-white"
-
-        >
-
-          <option value="">
-
-            All Exams
-
-          </option>
-
-          <option value="JEE">
-
-            JEE
-
-          </option>
-
-          <option value="WBJEE">
-
-            WBJEE
-
-          </option>
-
-          <option value="CBSE">
-
-            CBSE
-
-          </option>
-
-        </select>
-
-        <select
-
-          value={testType}
-
-          onChange={(e)=>
-            setTestType(
-              e.target.value
-            )
-          }
-
-          className="rounded-xl border border-slate-700 bg-slate-900 px-4 text-white"
-
-        >
-
-          <option value="">
-
-            Test Type
-
-          </option>
-
-          <option value="CHAPTER">
-
-            Chapter Test
-
-          </option>
-
-          <option value="SUBJECT">
-
-            Subject Test
-
-          </option>
-
-          <option value="MOCK">
-
-            Mock Test
-
-          </option>
-
-        </select>
-
-        <select
-
-          value={published}
-
-          onChange={(e)=>
-            setPublished(
-              e.target.value
-            )
-          }
-
-          className="rounded-xl border border-slate-700 bg-slate-900 px-4 text-white"
-
-        >
-
-          <option value="">
-
-            Status
-
-          </option>
-
-          <option value="true">
-
-            Published
-
-          </option>
-
-          <option value="false">
-
-            Draft
-
-          </option>
-
-        </select>
-
-      </div>
+<div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-5">
+
+  {/* Search */}
+
+  <div className="relative lg:col-span-2">
+
+    <Search
+      size={18}
+      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+    />
+
+    <input
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      placeholder="Search Test..."
+      className="w-full rounded-xl border border-slate-800 bg-slate-950/60 py-3 pl-12 pr-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+    />
+
+  </div>
+
+  {/* Exam Type */}
+
+  <SearchableSelect
+    value={examType}
+    onChange={setExamType}
+    placeholder="All Exams"
+    options={[
+      {
+        label: "All Exams",
+        value: "",
+      },
+      {
+        label: "JEE",
+        value: "JEE",
+      },
+      {
+        label: "WBJEE",
+        value: "WBJEE",
+      },
+      {
+        label: "BOARDS",
+        value: "BOARDS",
+      },
+    ]}
+  />
+
+  {/* Test Type */}
+
+  <SearchableSelect
+    value={testType}
+    onChange={setTestType}
+    placeholder="Test Type"
+    options={[
+      {
+        label: "All Types",
+        value: "",
+      },
+      {
+        label: "Chapter Test",
+        value: "CHAPTER",
+      },
+      {
+        label: "Subject Test",
+        value: "SUBJECT",
+      },
+      {
+        label: "Mock Test",
+        value: "MOCK",
+      },
+    ]}
+  />
+
+  {/* Status */}
+
+  <SearchableSelect
+    value={published}
+    onChange={setPublished}
+    placeholder="Status"
+    options={[
+      {
+        label: "All Status",
+        value: "",
+      },
+      {
+        label: "Published",
+        value: "true",
+      },
+      {
+        label: "Draft",
+        value: "false",
+      },
+    ]}
+  />
+
+</div>
 
       {/* ============================================== */}
       {/* TABLE */}

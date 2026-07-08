@@ -29,6 +29,8 @@ import {
   getSubjects,
 } from "../../../services/admin/subject.service";
 
+import SearchableSelect from "../../../components/ui/SearchableSelect";
+
 const Chapters = () => {
 
   // ======================================================
@@ -374,27 +376,23 @@ const Chapters = () => {
 
   return (
 
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-8">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-8 antialiased">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* ============================================== */}
         {/* HEADER */}
         {/* ============================================== */}
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-900 pb-6">
 
           <div>
 
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-
+            <h1 className="text-3xl font-bold tracking-tight text-white">
               Chapters
-
             </h1>
 
-            <p className="text-slate-400 mt-2 text-sm md:text-base">
-
+            <p className="text-slate-400 mt-1.5 text-sm">
               Manage chapters for every subject.
-
             </p>
 
           </div>
@@ -403,11 +401,11 @@ const Chapters = () => {
 
             onClick={openCreate}
 
-            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 hover:shadow-indigo-500/30 px-5 py-3 rounded-xl text-white font-semibold text-sm tracking-wide whitespace-nowrap"
+            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition shadow-md px-4 py-2.5 rounded-xl text-white font-medium text-sm whitespace-nowrap"
 
           >
 
-            <Plus size={18} />
+            <Plus size={16} />
 
             Add Chapter
 
@@ -419,74 +417,49 @@ const Chapters = () => {
         {/* FILTERS */}
         {/* ============================================== */}
 
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="relative z-30 flex flex-col gap-4 sm:flex-row">
 
-          <div className="relative flex-1">
+          {/* Search */}
+
+          <div className="relative z-10 flex-1">
 
             <Search
-
-              size={18}
-
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-
+              size={16}
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
             />
 
             <input
-
               value={search}
-
               onChange={(e) =>
-                setSearch(
-                  e.target.value
-                )
+                setSearch(e.target.value)
               }
-
               placeholder="Search Chapter..."
-
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-200 placeholder-slate-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:bg-slate-900"
-
+              className="w-full rounded-xl border border-slate-900 bg-slate-900/40 py-2.5 pl-11 pr-4 text-slate-200 placeholder-slate-500 outline-none transition focus:border-slate-800 focus:bg-slate-900/80 focus:ring-1 focus:ring-slate-800"
             />
 
           </div>
 
-          <select
+          {/* Subject Filter */}
 
-            value={filterSubject}
+          <div className="relative z-20 w-full sm:w-72">
 
-            onChange={(e) =>
-              setFilterSubject(
-                e.target.value
-              )
-            }
+            <SearchableSelect
+              value={filterSubject}
+              onChange={setFilterSubject}
+              placeholder="All Subjects"
+              options={[
+                {
+                  label: "All Subjects",
+                  value: "",
+                },
+                ...subjects.map((subject) => ({
+                  label: subject.name,
+                  value: subject.id,
+                })),
+              ]}
+            />
 
-            className="w-full md:w-64 rounded-xl bg-slate-900/60 border border-slate-800 px-4 py-3 text-slate-200 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:bg-slate-900 cursor-pointer"
-
-          >
-
-            <option value="" className="bg-slate-900">
-
-              All Subjects
-
-            </option>
-
-            {subjects.map((subject) => (
-
-              <option
-
-                key={subject.id}
-
-                value={subject.id}
-                className="bg-slate-900"
-
-              >
-
-                {subject.name}
-
-              </option>
-
-            ))}
-
-          </select>
+          </div>
 
         </div>
 
@@ -494,50 +467,40 @@ const Chapters = () => {
         {/* TABLE */}
         {/* ============================================== */}
 
-        <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/20 backdrop-blur-sm shadow-xl">
+        <div className="relative z-10 overflow-hidden rounded-2xl border border-slate-900 bg-slate-900/20 shadow-sm">
           <div className="overflow-x-auto">
 
             <table className="w-full border-collapse text-left">
 
-              <thead className="bg-slate-900/80 border-b border-slate-800">
+              <thead className="bg-slate-900/60 border-b border-slate-900">
 
                 <tr>
 
-                  <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
-
+                  <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Chapter
-
                   </th>
 
-                  <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
-
+                  <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Subject
-
                   </th>
 
-                  <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
-
+                  <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Order
-
                   </th>
 
-                  <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
-
+                  <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Created
-
                   </th>
 
-                  <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400 text-center">
-
+                  <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-400 text-right">
                     Actions
-
                   </th>
 
                 </tr>
 
               </thead>
 
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-slate-900/60">
 
                 {loading ? (
 
@@ -551,8 +514,8 @@ const Chapters = () => {
 
                     >
                       <div className="flex flex-col items-center justify-center gap-3">
-                        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                        <span className="text-sm font-medium text-slate-400">Loading chapters...</span>
+                        <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-sm text-slate-400">Loading chapters...</span>
                       </div>
 
                     </td>
@@ -571,9 +534,9 @@ const Chapters = () => {
 
                     >
                       <div className="flex flex-col items-center justify-center gap-2">
-                        <BookOpen size={36} className="text-slate-600 mb-1" />
-                        <span className="text-base font-medium text-slate-400">No Chapters Found</span>
-                        <span className="text-xs text-slate-500">Try refining your search terms or subject selection filters.</span>
+                        <BookOpen size={28} className="text-slate-700 mb-1" />
+                        <span className="text-sm font-medium text-slate-400">No Chapters Found</span>
+                        <span className="text-xs text-slate-500">Try refining your search terms or subject filters.</span>
                       </div>
 
                     </td>
@@ -588,30 +551,25 @@ const Chapters = () => {
 
                       key={chapter.id}
 
-                      className="hover:bg-slate-900/40 transition-colors group"
+                      className="hover:bg-slate-900/30 transition-colors group"
 
                     >
 
-                      <td className="px-6 py-4.5 text-slate-200 font-medium">
-
+                      <td className="px-6 py-4 text-slate-200 font-medium text-sm">
                         {chapter.title}
-
                       </td>
 
-                      <td className="px-6 py-4.5 text-slate-300">
-
+                      <td className="px-6 py-4 text-slate-400 text-sm">
                         {chapter.subject.name}
-
                       </td>
 
-                      <td className="px-6 py-4.5">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-800 border border-slate-700 text-slate-300">
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400">
                           {chapter.order}
                         </span>
-
                       </td>
 
-                      <td className="px-6 py-4.5 text-slate-400 text-sm">
+                      <td className="px-6 py-4 text-slate-500 text-sm">
 
                         {new Date(
                           chapter.createdAt
@@ -619,9 +577,9 @@ const Chapters = () => {
 
                       </td>
 
-                      <td className="px-6 py-4.5">
+                      <td className="px-6 py-4">
 
-                        <div className="flex justify-center gap-2">
+                        <div className="flex justify-end gap-2">
 
                           <button
 
@@ -631,7 +589,7 @@ const Chapters = () => {
                               )
                             }
 
-                            className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-indigo-600/20 border border-slate-700 hover:border-indigo-500/30 flex items-center justify-center transition-all group/btn"
+                            className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-indigo-600/10 border border-slate-850 hover:border-indigo-500/20 flex items-center justify-center transition dynamic-btn"
                             title="Edit Chapter"
 
                           >
@@ -640,7 +598,7 @@ const Chapters = () => {
 
                               size={14}
 
-                              className="text-slate-400 group-hover/btn:text-indigo-400 transition-colors"
+                              className="text-slate-400 hover:text-indigo-400 transition-colors"
 
                             />
 
@@ -660,7 +618,7 @@ const Chapters = () => {
 
                             }}
 
-                            className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-red-600/20 border border-slate-700 hover:border-red-500/30 flex items-center justify-center transition-all group/btn"
+                            className="w-8 h-8 rounded-lg bg-slate-900 hover:bg-red-600/10 border border-slate-850 hover:border-red-500/20 flex items-center justify-center transition dynamic-btn"
                             title="Delete Chapter"
 
                           >
@@ -669,7 +627,7 @@ const Chapters = () => {
 
                               size={14}
 
-                              className="text-slate-400 group-hover/btn:text-red-400 transition-colors"
+                              className="text-slate-400 hover:text-red-400 transition-colors"
 
                             />
 
@@ -696,7 +654,7 @@ const Chapters = () => {
         {/* PAGINATION */}
         {/* ============================================== */}
 
-        <div className="flex justify-between sm:justify-end items-center gap-4 border-t border-slate-900 pt-4">
+        <div className="flex justify-between sm:justify-end items-center gap-4 border-t border-slate-900 pt-5">
 
           <button
 
@@ -706,7 +664,7 @@ const Chapters = () => {
               setPage(page - 1)
             }
 
-            className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-sm transition disabled:opacity-40 disabled:hover:bg-slate-900 disabled:hover:text-slate-300"
+            className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-850 text-slate-400 hover:text-white hover:bg-slate-850 font-medium text-sm transition disabled:opacity-30 disabled:hover:bg-slate-900 disabled:hover:text-slate-400"
 
           >
 
@@ -714,8 +672,8 @@ const Chapters = () => {
 
           </button>
 
-          <span className="text-slate-400 text-sm font-medium">
-            Page <strong className="text-slate-200">{page}</strong> of <strong className="text-slate-200">{totalPages}</strong>
+          <span className="text-slate-500 text-xs font-medium">
+            Page <strong className="text-slate-300 font-semibold">{page}</strong> of <strong className="text-slate-300 font-semibold">{totalPages}</strong>
           </span>
 
           <button
@@ -728,7 +686,7 @@ const Chapters = () => {
               setPage(page + 1)
             }
 
-            className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-sm transition disabled:opacity-40 disabled:hover:bg-slate-900 disabled:hover:text-slate-300"
+            className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-850 text-slate-400 hover:text-white hover:bg-slate-850 font-medium text-sm transition disabled:opacity-30 disabled:hover:bg-slate-900 disabled:hover:text-slate-400"
 
           >
 
@@ -744,13 +702,13 @@ const Chapters = () => {
 
         {showModal && (
 
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
 
-            <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-black/50 transform transition-all">
+            <div className="w-full max-w-md rounded-2xl border border-slate-900 bg-slate-900 p-6 shadow-xl transform transition-all">
 
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center justify-between border-b border-slate-850 pb-4">
 
-                <h2 className="text-xl font-bold text-white tracking-wide">
+                <h2 className="text-lg font-bold text-white">
 
                   {editingChapter
                     ? "Edit Chapter"
@@ -762,11 +720,11 @@ const Chapters = () => {
                   onClick={() =>
                     setShowModal(false)
                   }
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 transition"
+                  className="p-1 rounded-lg bg-slate-850 hover:bg-slate-800 transition"
                 >
 
                   <X
-                    size={18}
+                    size={16}
                     className="text-slate-400 hover:text-white transition-colors"
                   />
 
@@ -774,16 +732,14 @@ const Chapters = () => {
 
               </div>
 
-              <div className="mt-6 space-y-5">
+              <div className="mt-5 space-y-4">
 
                 {/* Chapter Name */}
 
                 <div>
 
-                  <label className="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-
+                  <label className="block mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Chapter Name
-
                   </label>
 
                   <input
@@ -796,7 +752,7 @@ const Chapters = () => {
                       )
                     }
 
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 placeholder-slate-600 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+                    className="w-full rounded-xl border border-slate-850 bg-slate-950 px-3.5 py-2 text-slate-200 placeholder-slate-600 outline-none transition focus:border-slate-800 focus:ring-1 focus:ring-slate-800 text-sm"
 
                     placeholder="e.g. Laws of Motion"
 
@@ -808,20 +764,18 @@ const Chapters = () => {
 
                 <div>
 
-                  <label className="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Exam Type
-
                   </label>
 
-                  <select
+                  <SearchableSelect
 
                     value={examType}
 
-                    onChange={(e) => {
+                    onChange={(value) => {
 
                       setExamType(
-                        e.target.value as
+                        value as
                           "JEE" |
                           "WBJEE" |
                           "BOARDS"
@@ -831,23 +785,28 @@ const Chapters = () => {
 
                     }}
 
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 cursor-pointer"
+                    placeholder="Select Exam Type"
 
-                  >
+                    options={[
 
-                    <option value="JEE">
-                      JEE
-                    </option>
+                      {
+                        label: "JEE",
+                        value: "JEE",
+                      },
 
-                    <option value="WBJEE">
-                      WBJEE
-                    </option>
+                      {
+                        label: "WBJEE",
+                        value: "WBJEE",
+                      },
 
-                    <option value="BOARDS">
-                      BOARDS
-                    </option>
+                      {
+                        label: "BOARDS",
+                        value: "BOARDS",
+                      },
 
-                  </select>
+                    ]}
+
+                  />
 
                 </div>
 
@@ -855,49 +814,36 @@ const Chapters = () => {
 
                 <div>
 
-                  <label className="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Subject
-
                   </label>
 
-                  <select
+                  <SearchableSelect
 
                     value={subjectId}
 
-                    onChange={(e) =>
-                      setSubjectId(
-                        e.target.value
-                      )
-                    }
+                    onChange={setSubjectId}
 
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 cursor-pointer"
+                    placeholder="Select Subject"
 
-                  >
+                    options={[
 
-                    <option value="">
+                      {
+                        label: "Select Subject",
+                        value: "",
+                      },
 
-                      Select Subject
+                      ...subjects.map((subject) => ({
 
-                    </option>
+                        label: subject.name,
 
-                    {subjects.map((subject) => (
+                        value: subject.id,
 
-                      <option
+                      })),
 
-                        key={subject.id}
+                    ]}
 
-                        value={subject.id}
-
-                      >
-
-                        {subject.name}
-
-                      </option>
-
-                    ))}
-
-                  </select>
+                  />
 
                 </div>
 
@@ -905,10 +851,8 @@ const Chapters = () => {
 
                 <div>
 
-                  <label className="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-
+                  <label className="block mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Chapter Order
-
                   </label>
 
                   <input
@@ -927,7 +871,7 @@ const Chapters = () => {
                       )
                     }
 
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-200 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+                    className="w-full rounded-xl border border-slate-850 bg-slate-950 px-3.5 py-2 text-slate-200 outline-none transition focus:border-slate-800 focus:ring-1 focus:ring-slate-800 text-sm"
 
                   />
 
@@ -935,7 +879,7 @@ const Chapters = () => {
 
               </div>
 
-              <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-850">
 
                 <button
 
@@ -943,12 +887,10 @@ const Chapters = () => {
                     setShowModal(false)
                   }
 
-                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-sm font-medium transition"
+                  className="px-4 py-2 rounded-xl bg-slate-850 hover:bg-slate-800 text-slate-300 hover:text-white text-sm font-medium transition"
 
                 >
-
                   Cancel
-
                 </button>
 
                 <button
@@ -971,7 +913,7 @@ const Chapters = () => {
 
                   }}
 
-                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm tracking-wide shadow-lg shadow-indigo-600/10 transition"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm transition"
 
                 >
 
@@ -995,23 +937,19 @@ const Chapters = () => {
 
         {showDelete && (
 
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
 
-            <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-black/50">
+            <div className="w-full max-w-sm rounded-2xl border border-slate-900 bg-slate-900 p-6 shadow-xl">
 
-              <h2 className="text-xl font-bold text-white tracking-wide">
-
+              <h2 className="text-lg font-bold text-white">
                 Delete Chapter
-
               </h2>
 
-              <p className="mt-3 text-slate-400 text-sm leading-relaxed border-b border-slate-800/60 pb-4">
-
+              <p className="mt-2 text-slate-400 text-sm leading-relaxed border-b border-slate-850 pb-4">
                 Are you sure you want to delete this chapter? This action cannot be undone and may clear sub-topics associated with this chapter sequence.
-
               </p>
 
-              <div className="mt-6 flex justify-end gap-3">
+              <div className="mt-5 flex justify-end gap-3">
 
                 <button
 
@@ -1019,24 +957,20 @@ const Chapters = () => {
                     setShowDelete(false)
                   }
 
-                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-sm font-medium transition"
+                  className="px-4 py-2 rounded-xl bg-slate-850 hover:bg-slate-800 text-slate-300 hover:text-white text-sm font-medium transition"
 
                 >
-
                   Cancel
-
                 </button>
 
                 <button
 
                   onClick={handleDelete}
 
-                  className="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-semibold text-sm tracking-wide shadow-lg shadow-red-600/10 transition"
+                  className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium text-sm transition"
 
                 >
-
                   Delete
-
                 </button>
 
               </div>

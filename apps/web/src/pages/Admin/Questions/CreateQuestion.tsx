@@ -71,7 +71,8 @@ const CreateQuestion = () => {
       {/* FORM WRAPPER COMPONENT */}
       {/* ============================================== */}
 
-      <div className="bg-slate-900/30 border border-slate-800/80 rounded-xl p-4 shadow-md shadow-black/10">
+      {/* Added relative position and high z-index stacking layer context to allow the internal search dropdowns to flow over boundaries */}
+      <div className="relative z-40 bg-slate-900/30 border border-slate-800/80 rounded-xl p-4 shadow-md shadow-black/10">
 
         <QuestionForm
 

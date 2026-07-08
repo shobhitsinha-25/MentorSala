@@ -35,6 +35,7 @@ import type {
 import {
   getChapters,
 } from "../../../services/admin/chapter.service";
+import SearchableSelect from "../../../components/ui/SearchableSelect";
 
 const Questions = () => {
 
@@ -351,242 +352,213 @@ const Questions = () => {
       {/* FILTERS */}
       {/* ============================================== */}
 
-      <div className="mt-8 bg-slate-900/50 rounded-2xl border border-slate-800/80 p-5 backdrop-blur-sm">
-        
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">
-          <SlidersHorizontal size={14} className="text-indigo-400" />
+      {/* Added explicit relative layout positioning and z-30 stack context to fly over the table content */}
+      <div className="relative z-30 mt-8 rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm shadow-xl">
+
+        <div className="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <SlidersHorizontal
+            size={14}
+            className="text-indigo-400"
+          />
           Filter & Search Configuration
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
 
-          <div className="relative lg:col-span-2">
+          {/* Search */}
+          <div className="relative sm:col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-2 z-10">
 
             <Search
-
               size={18}
-
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
-
             />
 
             <input
-
               value={search}
-
               onChange={(e) =>
                 setSearch(e.target.value)
               }
-
               placeholder="Search by keywords..."
-
-              className="w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 pl-11 pr-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
-
+              className="w-full rounded-xl border border-slate-800 bg-slate-950/60 py-2.5 pl-11 pr-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 h-[42px]"
             />
 
           </div>
 
-          <select
+          {/* Exam */}
+          <div className="w-full relative z-20">
+            <SearchableSelect
 
-            value={examType}
+              value={examType}
 
-            onChange={(e) =>
-              setExamType(e.target.value)
-            }
+              onChange={setExamType}
 
-            className="rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-2.5 text-sm text-slate-300 outline-none transition-all duration-200 focus:border-indigo-500"
+              placeholder="All Exams"
 
-          >
+              options={[
 
-            <option value="" className="bg-slate-900">
+                {
+                  label: "All Exams",
+                  value: "",
+                },
 
-              All Exams
+                {
+                  label: "JEE",
+                  value: "JEE",
+                },
 
-            </option>
+                {
+                  label: "WBJEE",
+                  value: "WBJEE",
+                },
 
-            <option value="JEE" className="bg-slate-900">
+                {
+                  label: "BOARDS",
+                  value: "BOARDS",
+                },
 
-              JEE
+              ]}
 
-            </option>
+            />
+          </div>
 
-            <option value="WBJEE" className="bg-slate-900">
+          {/* Subject */}
+          <div className="w-full relative z-20">
+            <SearchableSelect
 
-              WBJEE
+              value={subjectId}
 
-            </option>
+              onChange={setSubjectId}
 
-            <option value="BOARDS" className="bg-slate-900">
+              placeholder="All Subjects"
 
-              BOARDS
+              options={[
 
-            </option>
+                {
+                  label: "All Subjects",
+                  value: "",
+                },
 
-          </select>
+                ...subjects.map((subject) => ({
 
-          <select
+                  label: subject.name,
 
-            value={subjectId}
+                  value: subject.id,
 
-            onChange={(e) =>
-              setSubjectId(e.target.value)
-            }
+                })),
 
-            className="rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-2.5 text-sm text-slate-300 outline-none transition-all duration-200 focus:border-indigo-500"
+              ]}
 
-          >
+            />
+          </div>
 
-            <option value="" className="bg-slate-900">
+          {/* Chapter */}
+          <div className="w-full sm:col-span-2 md:col-span-1 lg:col-span-1 relative z-20">
+            <SearchableSelect
 
-              All Subjects
+              value={chapterId}
 
-            </option>
+              onChange={setChapterId}
 
-            {subjects.map((subject) => (
+              placeholder="All Chapters"
 
-              <option
+              options={[
 
-                key={subject.id}
+                {
+                  label: "All Chapters",
+                  value: "",
+                },
 
-                value={subject.id}
+                ...chapters.map((chapter) => ({
 
-                className="bg-slate-900"
+                  label: chapter.title,
 
-              >
+                  value: chapter.id,
 
-                {subject.name}
+                })),
 
-              </option>
+              ]}
 
-            ))}
+            />
+          </div>
 
-          </select>
+          {/* Difficulty */}
+          <div className="w-full relative z-20">
+            <SearchableSelect
 
-          <select
+              value={difficulty}
 
-            value={chapterId}
+              onChange={setDifficulty}
 
-            onChange={(e) =>
-              setChapterId(e.target.value)
-            }
+              placeholder="Difficulty"
 
-            className="rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-2.5 text-sm text-slate-300 outline-none transition-all duration-200 focus:border-indigo-500"
+              options={[
 
-          >
+                {
+                  label: "Difficulty",
+                  value: "",
+                },
 
-            <option value="" className="bg-slate-900">
+                {
+                  label: "Easy",
+                  value: "EASY",
+                },
 
-              All Chapters
+                {
+                  label: "Medium",
+                  value: "MEDIUM",
+                },
 
-            </option>
+                {
+                  label: "Hard",
+                  value: "HARD",
+                },
 
-            {chapters.map((chapter) => (
+              ]}
 
-              <option
+            />
+          </div>
 
-                key={chapter.id}
+          {/* Question Type */}
+          <div className="w-full sm:col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-2 relative z-20">
+            <SearchableSelect
 
-                value={chapter.id}
+              value={questionType}
 
-                className="bg-slate-900"
+              onChange={setQuestionType}
 
-              >
+              placeholder="Question Type"
 
-                {chapter.title}
+              options={[
 
-              </option>
+                {
+                  label: "Question Type",
+                  value: "",
+                },
 
-            ))}
+                {
+                  label: "Single Correct",
+                  value: "SINGLE_CORRECT",
+                },
 
-          </select>
+                {
+                  label: "Multiple Correct",
+                  value: "MULTIPLE_CORRECT",
+                },
 
-          <select
+                {
+                  label: "Integer",
+                  value: "INTEGER",
+                },
 
-            value={difficulty}
+                {
+                  label: "Assertion Reason",
+                  value: "ASSERTION_REASON",
+                },
 
-            onChange={(e) =>
-              setDifficulty(e.target.value)
-            }
+              ]}
 
-            className="rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-2.5 text-sm text-slate-300 outline-none transition-all duration-200 focus:border-indigo-500"
-
-          >
-
-            <option value="" className="bg-slate-900">
-
-              Difficulty
-
-            </option>
-
-            <option value="EASY" className="bg-slate-900">
-
-              Easy
-
-            </option>
-
-            <option value="MEDIUM" className="bg-slate-900">
-
-              Medium
-
-            </option>
-
-            <option value="HARD" className="bg-slate-900">
-
-              Hard
-
-            </option>
-
-          </select>
-
-        </div>
-
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
-
-          <select
-
-            value={questionType}
-
-            onChange={(e) =>
-              setQuestionType(
-                e.target.value
-              )
-            }
-
-            className="rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-2.5 text-sm text-slate-300 outline-none transition-all duration-200 focus:border-indigo-500 lg:col-span-2"
-
-          >
-
-            <option value="" className="bg-slate-900">
-
-              Question Type
-
-            </option>
-
-            <option value="SINGLE_CORRECT" className="bg-slate-900">
-
-              Single Correct
-
-            </option>
-
-            <option value="MULTIPLE_CORRECT" className="bg-slate-900">
-
-              Multiple Correct
-
-            </option>
-
-            <option value="INTEGER" className="bg-slate-900">
-
-              Integer
-
-            </option>
-
-            <option value="ASSERTION_REASON" className="bg-slate-900">
-
-              Assertion Reason
-
-            </option>
-
-          </select>
+            />
+          </div>
 
         </div>
 
@@ -596,7 +568,8 @@ const Questions = () => {
       {/* TABLE */}
       {/* ============================================== */}
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/20 backdrop-blur-sm">
+      {/* Applied relative positioning with a lower stack index (z-10) so filter elements float correctly above it */}
+      <div className="relative z-10 mt-6 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/20 backdrop-blur-sm">
 
         <div className="overflow-x-auto">
 
@@ -811,7 +784,7 @@ const Questions = () => {
       {/* ============================================== */}
 
       <div className="mt-6 flex items-center justify-between border-t border-slate-800 pt-4">
-        
+
         <div className="text-xs text-slate-400">
           Showing page <span className="text-slate-200 font-semibold">{page}</span> of <span className="text-slate-200 font-semibold">{totalPages}</span> total blocks
         </div>

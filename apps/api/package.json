@@ -21,7 +21,8 @@
 
     "test": "echo \"Error: no test specified\" && exit 1",
 
-    "create-admin": "dotenv -e .env.development -- tsx scripts/createAdmin.ts"
+    "create-admin": "tsx scripts/createAdmin.ts"
+
   },
   "keywords": [],
   "author": "",

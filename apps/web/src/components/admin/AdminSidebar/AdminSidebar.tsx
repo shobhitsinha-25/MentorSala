@@ -113,26 +113,27 @@ const handleLogout = async () => {
 
 };
   return (
-    <aside className="w-72 bg-[#020617] border-r border-white/[0.05] h-screen flex flex-col justify-between select-none shrink-0 relative z-20">
+    /* 
+      FIX: Sidebar uses 'h-full' to stretch matching the locked parent window framework layout matrix context. 
+      Added 'overflow-y-auto' as a safety constraint in case nav items exceed small monitor bounds.
+    */
+    <aside className="w-72 bg-[#020617] border-r border-white/[0.05] h-full overflow-y-auto flex flex-col justify-between select-none shrink-0 relative z-20">
       {/* PRE-RENDERED GLOW EFFECT */}
       <div className="absolute top-0 left-0 right-0 h-[200px] bg-gradient-to-b from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
 
       <div>
         {/* BRAND IDENTITY BANNER */}
-        <div className="p-8 relative z-10">
-          <h1 className="text-2xl font-black text-white tracking-tighter flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20">
-              <span className="text-white text-lg">M</span>
-            </div>
-            MentorSala
-          </h1>
-          <div className="inline-flex items-center mt-4 px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20">
-            <div className="w-1 h-1 rounded-full bg-rose-500 mr-2 animate-pulse" />
-            <span className="text-[10px] font-black tracking-[0.1em] text-rose-400 uppercase">
-              Admin Control
-            </span>
-          </div>
-        </div>
+        <div className="px-1 flex-shrink-0 ml-3 mt-2">
+        <h1 className="text-xl font-black tracking-tight text-white">
+          Mentor
+          <span className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent">
+            Sala
+          </span>
+        </h1>
+        <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-widest mt-0.5">
+          AI Powered Learning Platform
+        </p>
+      </div>
 
         {/* NAVIGATION TRACK RACK */}
         <nav className="px-4 mt-2 space-y-1.5 relative z-10">
@@ -181,57 +182,56 @@ const handleLogout = async () => {
         </nav>
       </div>
 
-      {/* FOOTER SYSTEM STATUS */}
-   {/* FOOTER */}
-<div className="p-6 space-y-4">
+      {/* FOOTER */}
+      <div className="p-6 space-y-4 relative z-10">
 
-  {/* Server Status */}
+        {/* Server Status */}
 
-  <div className="rounded-2xl bg-white/[0.02] border border-white/[0.05] p-4">
+        <div className="rounded-2xl bg-white/[0.02] border border-white/[0.05] p-4">
 
-    <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
 
-      <div className="space-y-1">
+            <div className="space-y-1">
 
-        <span className="text-[10px] font-bold text-slate-500 tracking-widest uppercase block">
-          Server Status
-        </span>
+              <span className="text-[10px] font-bold text-slate-500 tracking-widest uppercase block">
+                Server Status
+              </span>
 
-        <span className="text-[11px] font-black text-slate-200">
-          Operational
-        </span>
+              <span className="text-[11px] font-black text-slate-200">
+                Operational
+              </span>
+
+            </div>
+
+            <div className="relative flex items-center justify-center">
+
+              <div className="absolute w-3 h-3 bg-emerald-500/20 rounded-full animate-ping" />
+
+              <div className="relative w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Logout */}
+
+        <button
+
+          onClick={handleLogout}
+
+          className="w-full h-12 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 transition-all duration-300 flex items-center justify-center gap-2 text-red-400 font-bold"
+
+        >
+
+          <LogOut size={18} />
+
+          Logout
+
+        </button>
 
       </div>
-
-      <div className="relative flex items-center justify-center">
-
-        <div className="absolute w-3 h-3 bg-emerald-500/20 rounded-full animate-ping" />
-
-        <div className="relative w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
-
-      </div>
-
-    </div>
-
-  </div>
-
-  {/* Logout */}
-
-  <button
-
-    onClick={handleLogout}
-
-    className="w-full h-12 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 transition-all duration-300 flex items-center justify-center gap-2 text-red-400 font-bold"
-
-  >
-
-    <LogOut size={18} />
-
-    Logout
-
-  </button>
-
-</div>
     </aside>
   );
 };

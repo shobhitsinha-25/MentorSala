@@ -18,6 +18,7 @@ import type {
 } from "../../../services/admin/chapter.service";
 
 import { uploadImage } from "../../../services/upload.service";
+import SearchableSelect from "../../../components/ui/SearchableSelect";
 
 interface Props {
   initialValues?: any;
@@ -348,14 +349,15 @@ const QuestionForm = ({
   // UI
   // ======================================================
 
-  return (
+return (
     <div className="max-w-5xl mx-auto space-y-8 pb-16 antialiased">
 
       {/* ============================================= */}
       {/* BASIC INFORMATION */}
       {/* ============================================= */}
 
-      <div className="rounded-2xl bg-slate-900 border border-slate-800/80 p-6 shadow-xl backdrop-blur-sm">
+      {/* FIX: Set a high base stack index (z-30) for the card to flow cleanly over following sections */}
+      <div className="relative z-30 rounded-2xl bg-slate-900 border border-slate-800/80 p-6 shadow-xl backdrop-blur-sm">
         <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
           <div className="h-2 w-2 rounded-full bg-indigo-500" />
           <h2 className="text-xl font-bold tracking-tight text-slate-100">
@@ -363,123 +365,164 @@ const QuestionForm = ({
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Grid Container */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
 
-          {/* Exam Type */}
-          <div className="flex flex-col gap-2">
+          {/* Exam Type - Highest Row Stacking Context */}
+          <div className="flex flex-col gap-2 relative z-25">
+
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Exam Type
             </label>
-            <select
+
+            <SearchableSelect
               value={examType}
-              onChange={(e) => {
+              onChange={(value) => {
                 setExamType(
-                  e.target.value as
-                  "JEE" |
-                  "WBJEE" |
-                  "BOARDS"
+                  value as
+                    | "JEE"
+                    | "WBJEE"
+                    | "BOARDS"
                 );
                 setSubjectId("");
                 setChapterId("");
               }}
-              className="w-full rounded-xl bg-slate-800 border border-slate-700/60 px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all duration-200"
-            >
-              <option value="JEE">JEE</option>
-              <option value="WBJEE">WBJEE</option>
-              <option value="CBSE">BOARDS</option>
-            </select>
+              placeholder="Select Exam Type"
+              options={[
+                {
+                  label: "JEE",
+                  value: "JEE",
+                },
+                {
+                  label: "WBJEE",
+                  value: "WBJEE",
+                },
+                {
+                  label: "BOARDS",
+                  value: "BOARDS",
+                },
+              ]}
+            />
+
           </div>
 
-          {/* Subject */}
-          <div className="flex flex-col gap-2">
+          {/* Subject - Mid Row Stacking Context */}
+          <div className="flex flex-col gap-2 relative z-24">
+
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Subject
             </label>
-            <select
+
+            <SearchableSelect
               value={subjectId}
-              onChange={(e) => {
-                setSubjectId(
-                  e.target.value
-                );
+              onChange={(value) => {
+                setSubjectId(value);
                 setChapterId("");
               }}
-              className="w-full rounded-xl bg-slate-800 border border-slate-700/60 px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all duration-200"
-            >
-              <option value="">Select Subject</option>
-              {subjects.map(subject => (
-                <option key={subject.id} value={subject.id}>
-                  {subject.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Select Subject"
+              options={[
+                {
+                  label: "Select Subject",
+                  value: "",
+                },
+                ...subjects.map((subject) => ({
+                  label: subject.name,
+                  value: subject.id,
+                })),
+              ]}
+            />
+
           </div>
 
-          {/* Chapter */}
-          <div className="flex flex-col gap-2">
+          {/* Chapter - Mid Row Stacking Context */}
+          <div className="flex flex-col gap-2 relative z-23">
+
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Chapter
             </label>
-            <select
+
+            <SearchableSelect
               value={chapterId}
-              onChange={(e) =>
-                setChapterId(
-                  e.target.value
-                )
-              }
-              className="w-full rounded-xl bg-slate-800 border border-slate-700/60 px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all duration-200"
-            >
-              <option value="">Select Chapter</option>
-              {chapters.map(chapter => (
-                <option key={chapter.id} value={chapter.id}>
-                  {chapter.title}
-                </option>
-              ))}
-            </select>
+              onChange={setChapterId}
+              placeholder="Select Chapter"
+              options={[
+                {
+                  label: "Select Chapter",
+                  value: "",
+                },
+                ...chapters.map((chapter) => ({
+                  label: chapter.title,
+                  value: chapter.id,
+                })),
+              ]}
+            />
+
           </div>
 
-          {/* Question Type */}
-          <div className="flex flex-col gap-2">
+          {/* Question Type - Lower Row Stacking Context */}
+          <div className="flex flex-col gap-2 relative z-22">
+
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Question Type
             </label>
-            <select
+
+            <SearchableSelect
               value={questionType}
-              onChange={(e) =>
-                setQuestionType(
-                  e.target.value
-                )
-              }
-              className="w-full rounded-xl bg-slate-800 border border-slate-700/60 px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all duration-200"
-            >
-              <option value="SINGLE_CORRECT">Single Correct</option>
-              <option value="MULTIPLE_CORRECT">Multiple Correct</option>
-              <option value="INTEGER">Integer</option>
-              <option value="ASSERTION_REASON">Assertion & Reason</option>
-            </select>
+              onChange={setQuestionType}
+              placeholder="Select Question Type"
+              options={[
+                {
+                  label: "Single Correct",
+                  value: "SINGLE_CORRECT",
+                },
+                {
+                  label: "Multiple Correct",
+                  value: "MULTIPLE_CORRECT",
+                },
+                {
+                  label: "Integer",
+                  value: "INTEGER",
+                },
+                {
+                  label: "Assertion & Reason",
+                  value: "ASSERTION_REASON",
+                },
+              ]}
+            />
+
           </div>
 
-          {/* Difficulty */}
-          <div className="flex flex-col gap-2">
+          {/* Difficulty - Lower Row Stacking Context */}
+          <div className="flex flex-col gap-2 relative z-21">
+
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Difficulty
             </label>
-            <select
+
+            <SearchableSelect
               value={difficulty}
-              onChange={(e) =>
-                setDifficulty(
-                  e.target.value
-                )
-              }
-              className="w-full rounded-xl bg-slate-800 border border-slate-700/60 px-4 py-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all duration-200"
-            >
-              <option value="EASY">Easy</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HARD">Hard</option>
-            </select>
+              onChange={setDifficulty}
+              placeholder="Select Difficulty"
+              options={[
+                {
+                  label: "Easy",
+                  value: "EASY",
+                },
+                {
+                  label: "Medium",
+                  value: "MEDIUM",
+                },
+                {
+                  label: "Hard",
+                  value: "HARD",
+                },
+              ]}
+            />
+
           </div>
 
-          {/* Year */}
-          <div className="flex flex-col gap-2">
+          {/* Year - Ground Stacking Context */}
+          <div className="flex flex-col gap-2 relative z-10">
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Year
             </label>
@@ -504,7 +547,8 @@ const QuestionForm = ({
       {/* QUESTION */}
       {/* ============================================= */}
 
-      <div className="rounded-2xl bg-slate-900 border border-slate-800/80 p-6 shadow-xl backdrop-blur-sm">
+      {/* FIX: Layer dropped to z-20 so it falls cleanly beneath the Basic Info selections above */}
+      <div className="relative z-20 rounded-2xl bg-slate-900 border border-slate-800/80 p-6 shadow-xl backdrop-blur-sm">
         <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-5">
           <div className="h-2 w-2 rounded-full bg-violet-500" />
           <h2 className="text-xl font-bold tracking-tight text-slate-100">
@@ -564,7 +608,7 @@ const QuestionForm = ({
       {/* ============================================= */}
 
       {questionType !== "INTEGER" && (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
+        <div className="relative z-10 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
           <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
             <div className="h-2 w-2 rounded-full bg-emerald-500" />
             <h2 className="text-xl font-bold tracking-tight text-slate-100">
@@ -641,7 +685,7 @@ const QuestionForm = ({
       {/* ANSWER */}
       {/* ============================================= */}
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
+      <div className="relative z-10 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
         <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
           <div className="h-2 w-2 rounded-full bg-amber-500" />
           <h2 className="text-xl font-bold tracking-tight text-slate-100">
@@ -758,7 +802,7 @@ const QuestionForm = ({
       {/* SOLUTION */}
       {/* ============================================= */}
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
+      <div className="relative z-10 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
         <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-5">
           <div className="h-2 w-2 rounded-full bg-pink-500" />
           <h2 className="text-xl font-bold tracking-tight text-slate-100">
@@ -821,7 +865,7 @@ const QuestionForm = ({
       {/* SCORING */}
       {/* ============================================= */}
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
+      <div className="relative z-10 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
         <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
           <div className="h-2 w-2 rounded-full bg-cyan-500" />
           <h2 className="text-xl font-bold tracking-tight text-slate-100">
@@ -884,7 +928,7 @@ const QuestionForm = ({
       {/* SETTINGS */}
       {/* ============================================= */}
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
+      <div className="relative z-10 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
         <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
           <div className="h-2 w-2 rounded-full bg-teal-500" />
           <h2 className="text-xl font-bold tracking-tight text-slate-100">
@@ -949,7 +993,7 @@ const QuestionForm = ({
       {/* SAVE ACTION */}
       {/* ============================================= */}
 
-      <div className="flex justify-end pt-2">
+      <div className="relative z-10 flex justify-end pt-2">
         <button
           disabled={loading}
           onClick={handleSubmit}

@@ -1,4 +1,5 @@
 import prisma from "../../config/prisma";
+import { buildWordSearch } from "../../utils/buildSearchFilter";
 
 import {
   CreateChapterInput,GetChaptersInput,UpdateChapterInput
@@ -213,17 +214,44 @@ export const getChapters = async ({
 
   }
 
-  if (search) {
+ const searchFilter = buildWordSearch(search, [
 
-    where.title = {
-
-      contains: search,
-
+  (word) => ({
+    title: {
+      contains: word,
       mode: "insensitive",
+    },
+  }),
 
-    };
+  (word) => ({
+    slug: {
+      contains: word,
+      mode: "insensitive",
+    },
+  }),
 
-  }
+  (word) => ({
+    subject: {
+      name: {
+        contains: word,
+        mode: "insensitive",
+      },
+    },
+  }),
+
+]);
+
+if (searchFilter) {
+
+  where.AND = [
+
+    ...(where.AND || []),
+
+    ...searchFilter,
+
+  ];
+
+}
 
   const [chapters, total] =
     await prisma.$transaction([

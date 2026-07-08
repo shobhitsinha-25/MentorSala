@@ -1,4 +1,5 @@
 import prisma from "../../config/prisma";
+import { buildWordSearch } from "../../utils/buildSearchFilter";
 
 import { CreateSubjectInput,GetSubjectsInput,UpdateSubjectInput }
 from "./subject.types";
@@ -123,17 +124,35 @@ export const getSubjects = async ({
 
   }
 
-  if (search) {
+const searchFilter = buildWordSearch(search, [
 
-    where.name = {
-
-      contains: search,
-
+  (word) => ({
+    name: {
+      contains: word,
       mode: "insensitive",
+    },
+  }),
 
-    };
+  (word) => ({
+    slug: {
+      contains: word,
+      mode: "insensitive",
+    },
+  }),
 
-  }
+]);
+
+if (searchFilter) {
+
+  where.AND = [
+
+    ...(where.AND || []),
+
+    ...searchFilter,
+
+  ];
+
+}
 
   const [subjects, total] =
     await prisma.$transaction([

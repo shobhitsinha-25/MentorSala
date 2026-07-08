@@ -1,4 +1,5 @@
 import prisma from "../../../config/prisma";
+import { buildWordSearch } from "../../../utils/buildSearchFilter";
 
 import {
   CreateTestInput,GetTestsInput,UpdateTestInput
@@ -196,17 +197,53 @@ export const getTests = async ({
 
   };
 
-  if (search) {
+const searchFilter = buildWordSearch(search, [
 
-    where.title = {
-
-      contains: search,
-
+  (word) => ({
+    title: {
+      contains: word,
       mode: "insensitive",
+    },
+  }),
 
-    };
+  (word) => ({
+    description: {
+      contains: word,
+      mode: "insensitive",
+    },
+  }),
 
-  }
+  (word) => ({
+    subject: {
+      name: {
+        contains: word,
+        mode: "insensitive",
+      },
+    },
+  }),
+
+  (word) => ({
+    chapter: {
+      title: {
+        contains: word,
+        mode: "insensitive",
+      },
+    },
+  }),
+
+]);
+
+if (searchFilter) {
+
+  where.AND = [
+
+    ...(where.AND || []),
+
+    ...searchFilter,
+
+  ];
+
+}
 
   if (examType) {
 

@@ -9,7 +9,7 @@ const AdminLayout = () => {
 
   return (
 
-    <div className="flex min-h-screen bg-slate-950">
+    <div className="flex h-screen w-screen bg-slate-950 overflow-hidden">
 
       <AdminSidebar />
 
