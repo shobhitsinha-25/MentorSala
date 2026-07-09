@@ -6,7 +6,7 @@ import {
 } from "../../../services/admin/subject.service";
 
 import {
-  getChapters,
+  getChapters,getAllChapters
 } from "../../../services/admin/chapter.service";
 
 import type {
@@ -187,22 +187,33 @@ const QuestionForm = ({
   // LOAD CHAPTERS
   // ======================================================
 
-  const loadChapters = async () => {
-    if (!subjectId) {
-      setChapters([]);
-      return;
-    }
-    const res =
-      await getChapters(
-        1,
-        "",
-        subjectId
-      );
-    console.log(res);
-    setChapters(
-      res.chapters
-    );
-  };
+const loadChapters = async () => {
+
+  if (!subjectId) {
+
+    setChapters([]);
+
+    return;
+
+  }
+
+  try {
+
+    const res = await getAllChapters(subjectId);
+
+    setChapters(res.chapters);
+
+  }
+
+  catch {
+
+    setChapters([]);
+
+    toast.error("Failed to load chapters.");
+
+  }
+
+};
 
   useEffect(() => {
     loadSubjects();
