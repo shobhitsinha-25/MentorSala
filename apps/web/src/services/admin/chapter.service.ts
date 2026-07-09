@@ -54,8 +54,11 @@ export const getAllChapters = async (
   subjectId?: string
 ) => {
 
-  const { data } = await api.get(
-    "/chapters/all",
+  const { data } = await api.get<{
+    success: boolean;
+    chapters: Chapter[];
+  }>(
+    "/admin/chapters/all",
     {
       params: {
         subjectId,
