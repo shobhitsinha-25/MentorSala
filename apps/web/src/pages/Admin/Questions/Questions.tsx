@@ -33,8 +33,9 @@ import type {
 } from "../../../services/admin/chapter.service";
 
 import {
-  getChapters,
+  getChapters,getAllChapters
 } from "../../../services/admin/chapter.service";
+
 import SearchableSelect from "../../../components/ui/SearchableSelect";
 
 const Questions = () => {
@@ -124,40 +125,30 @@ const Questions = () => {
 
   const loadChapters = async () => {
 
-    if (!subjectId) {
+  if (!subjectId) {
 
-      setChapters([]);
+    setChapters([]);
 
-      return;
+    return;
 
-    }
+  }
 
-    try {
+  try {
 
-      const res =
-        await getChapters(
+    const res =
+      await getAllChapters(subjectId);
 
-          1,
+    setChapters(res.chapters);
 
-          "",
+  }
 
-          subjectId
+  catch (err) {
 
-        );
+    console.error(err);
 
-      setChapters(
-        res.chapters
-      );
+  }
 
-    }
-
-    catch (err) {
-
-      console.error(err);
-
-    }
-
-  };
+};
 
   // ======================================================
   // LOAD QUESTIONS
