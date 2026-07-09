@@ -8,7 +8,7 @@ import {
 
 import {
   createChapterController,getChaptersController,
-  updateChapterController,deleteChapterController
+  updateChapterController,deleteChapterController,getAllChaptersController
 } from "./chapter.controller";
 
 const router =
@@ -39,6 +39,20 @@ router.get(
   adminProtect,
 
   getChaptersController
+
+);
+
+// ======================================================
+// GET ALL CHAPTERS (NO PAGINATION)
+// ======================================================
+
+router.get(
+
+  "/all",
+
+  adminProtect,
+
+  getAllChaptersController
 
 );
 

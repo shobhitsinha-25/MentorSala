@@ -318,6 +318,92 @@ if (searchFilter) {
 
 };
 
+// ======================================================
+// GET ALL CHAPTERS (NO PAGINATION)
+// ======================================================
+
+export const getAllChapters = async (
+  subjectId?: string
+) => {
+
+  const where: any = {
+
+    isDeleted: false,
+
+  };
+
+  if (subjectId) {
+
+    const subject =
+      await prisma.subject.findFirst({
+
+        where: {
+
+          id: subjectId,
+
+          isDeleted: false,
+
+        },
+
+      });
+
+    if (!subject) {
+
+      throw new Error(
+        "Subject not found."
+      );
+
+    }
+
+    where.subjectId = subjectId;
+
+  }
+
+  const chapters =
+    await prisma.chapter.findMany({
+
+      where,
+
+      include: {
+
+        subject: {
+
+          select: {
+
+            id: true,
+
+            name: true,
+
+            examType: true,
+
+          },
+
+        },
+
+      },
+
+      orderBy: [
+
+        {
+
+          order: "asc",
+
+        },
+
+        {
+
+          title: "asc",
+
+        },
+
+      ],
+
+    });
+
+  return chapters;
+
+};
+
 
 // ======================================================
 // UPDATE CHAPTER

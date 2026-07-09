@@ -12,7 +12,7 @@ import {
 } from "./chapter.validation";
 
 import {
-  createChapter,getChapters,updateChapter,deleteChapter
+  createChapter,getChapters,updateChapter,deleteChapter,getAllChapters
 } from "./chapter.service";
 
 // ======================================================
@@ -111,6 +111,38 @@ export const getChaptersController =
 
   );
 
+// ======================================================
+// GET ALL CHAPTERS (NO PAGINATION)
+// ======================================================
+
+export const getAllChaptersController =
+  asyncHandler(
+
+    async (
+      req: Request,
+      res: Response
+    ) => {
+
+      const { subjectId } = req.query;
+
+      const chapters =
+        await getAllChapters(
+
+          subjectId as string | undefined
+
+        );
+
+      return res.status(200).json({
+
+        success: true,
+
+        chapters,
+
+      });
+
+    }
+
+  );
 
 // ======================================================
 // UPDATE CHAPTER

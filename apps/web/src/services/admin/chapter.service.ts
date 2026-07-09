@@ -12,7 +12,7 @@ export interface Chapter {
   subject: {
     id: string;
     name: string;
-    examType: "JEE" | "WBJEE" | "CBSE";
+    examType: "JEE" | "WBJEE" | "BOARDS";
   };
 }
 
@@ -41,6 +41,23 @@ export const getChapters = async (
       params: {
         page,
         search,
+        subjectId,
+      },
+    }
+  );
+
+  return data;
+
+};
+
+export const getAllChapters = async (
+  subjectId?: string
+) => {
+
+  const { data } = await api.get(
+    "/chapters/all",
+    {
+      params: {
         subjectId,
       },
     }
