@@ -6,127 +6,86 @@ import {
 
 
 import { asyncHandler } from "../../utils/asyncHandler";
+import { loginUser } from "../auth/auth.service";
+import { Role } from "@prisma/client";
+import prisma from "../../config/prisma";
 
-// ======================================================
-// ADMIN LOGIN
-// ======================================================
 
 
-import { loginAdmin } from "./adminAuth.service";
+
 
 // ======================================================
 // ADMIN LOGIN
 // ======================================================
 
 export const adminLogin = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email, password } = req.body;
 
-  async (
-    req: Request,
-    res: Response
-  ) => {
-
-    const {
-
-      email,
-
-      password,
-
-    } = req.body;
-
-    // ==============================================
-    // VALIDATION
-    // ==============================================
-
-    if (
-
-      !email ||
-
-      !password
-
-    ) {
-
+    if (!email || !password) {
       return res.status(400).json({
-
         success: false,
-
         message: "Email and password are required",
-
       });
-
     }
 
-    // ==============================================
-    // LOGIN
-    // ==============================================
+    // ==========================================
+    // USE COMMON LOGIN SERVICE
+    // ==========================================
 
-    const {
+    const data = await loginUser(email, password);
 
-      adminToken,
+    // ==========================================
+    // ROLE CHECK
+    // ==========================================
 
-      admin,
+    if (data.user.role !== Role.ADMIN) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized admin.",
+      });
+    }
 
-    } = await loginAdmin(
+    // ==========================================
+    // COOKIE OPTIONS
+    // ==========================================
 
-      email,
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite:
+        process.env.NODE_ENV === "production"
+          ? ("none" as const)
+          : ("lax" as const),
+      path: "/",
+    };
 
-      password
+    // ==========================================
+    // ACCESS TOKEN
+    // ==========================================
 
-    );
-
-    // ==============================================
-    // COOKIE
-    // ==============================================
-
-    res.cookie(
-
-      "adminToken",
-
-      adminToken,
-
-      {
-
-        httpOnly: true,
-
-        secure:
-          process.env.NODE_ENV ===
-          "production",
-
-        sameSite:
-          process.env.NODE_ENV ===
-          "production"
-
-            ? "none"
-
-            : "lax",
-
-        maxAge:
-          24 *
-          60 *
-          60 *
-          1000,
-
-        path: "/",
-
-      }
-
-    );
-
-    // ==============================================
-    // RESPONSE
-    // ==============================================
-
-    return res.status(200).json({
-
-      success: true,
-
-      message: "Admin login successful",
-
-      admin,
-
+    res.cookie("accessToken", data.accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000,
     });
 
-  }
+    // ==========================================
+    // REFRESH TOKEN
+    // ==========================================
 
+    res.cookie("refreshToken", data.refreshToken, {
+      ...cookieOptions,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin login successful",
+      user: data.user,
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+    });
+  }
 );
 
 // ======================================================
@@ -140,30 +99,25 @@ export const adminLogout = asyncHandler(
     res: Response
   ) => {
 
-    res.clearCookie(
+   res.clearCookie("accessToken", {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite:
+    process.env.NODE_ENV === "production"
+      ? "none"
+      : "lax",
+  path: "/",
+});
 
-      "adminToken",
-
-      {
-
-        httpOnly: true,
-
-        secure:
-          process.env.NODE_ENV ===
-          "production",
-
-        sameSite:
-          process.env.NODE_ENV ===
-          "production"
-            ? "none"
-            : "lax",
-
-        path: "/",
-
-      }
-
-    );
-
+res.clearCookie("refreshToken", {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite:
+    process.env.NODE_ENV === "production"
+      ? "none"
+      : "lax",
+  path: "/",
+});
     return res.status(200).json({
 
       success: true,
@@ -182,20 +136,26 @@ export const adminLogout = asyncHandler(
 // ======================================================
 
 export const getAdminProfile = asyncHandler(
+  async (req: Request, res: Response) => {
 
-  async (
-    req: Request,
-    res: Response
-  ) => {
-
-    return res.status(200).json({
-
-      success: true,
-
-      admin: req.admin,
-
+    const admin = await prisma.user.findUnique({
+      where: {
+        id: req.user!.userId,
+      },
     });
 
-  }
+    if (!admin || admin.role !== "ADMIN") {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found",
+      });
+    }
 
+    const { password, ...safeAdmin } = admin;
+
+    return res.status(200).json({
+      success: true,
+      admin: safeAdmin,
+    });
+  }
 );

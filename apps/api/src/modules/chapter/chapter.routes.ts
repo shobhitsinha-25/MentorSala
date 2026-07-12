@@ -2,10 +2,8 @@ import {
   Router,
 } from "express";
 
-import {
-  adminProtect,
-} from "../admin/admin.auth.middleware";
-
+import { protect, authorizeRoles } from "../auth/auth.middleware";
+import { Role } from "@prisma/client";
 import {
   createChapterController,getChaptersController,
   updateChapterController,deleteChapterController,getAllChaptersController
@@ -22,8 +20,8 @@ router.post(
 
   "/",
 
-  adminProtect,
-
+  protect,
+  authorizeRoles(Role.ADMIN),
   createChapterController
 
 );
@@ -36,7 +34,8 @@ router.get(
 
   "/",
 
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
 
   getChaptersController
 
@@ -50,7 +49,8 @@ router.get(
 
   "/all",
 
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
 
   getAllChaptersController
 
@@ -60,7 +60,8 @@ router.put(
 
   "/:chapterId",
 
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
 
   updateChapterController
 
@@ -70,7 +71,8 @@ router.delete(
 
   "/:chapterId",
 
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
 
   deleteChapterController
 

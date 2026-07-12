@@ -96,6 +96,36 @@ if (!student?.targetExam) {
 
 };
 
+
+// ======================================================
+// GET ALL MENTORS (ADMIN)
+// ======================================================
+
+export const getAllMentorsForAdmin = async () => {
+  const mentors = await prisma.mentor.findMany({
+    where: {
+      isDeleted: false,
+    },
+
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true,
+        },
+      },
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return mentors;
+};
+
 // ======================================================
 // GET SINGLE MENTOR
 // ======================================================

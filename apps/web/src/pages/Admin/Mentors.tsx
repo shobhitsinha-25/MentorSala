@@ -26,9 +26,8 @@ const AdminMentors = () => {
   useEffect(() => {
     const fetchMentors = async () => {
       try {
-        const res = await api.get("/mentors");
+        const res = await api.get("/admin-auth/mentors");
 
-        console.log("Mentors API Response:", res.data);
 
         const mentorData =
           res.data?.data ||

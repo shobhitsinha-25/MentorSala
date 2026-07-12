@@ -38,7 +38,6 @@ const AdminStudents = () => {
       try {
         const res = await api.get("/user/students");
 
-        console.log("Students:", res.data);
 
         setStudents(res.data?.data || []);
       } catch (error) {

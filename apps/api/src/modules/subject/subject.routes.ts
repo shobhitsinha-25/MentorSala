@@ -2,16 +2,8 @@ import {
   Router,
 } from "express";
 
-import { protect }
-from "../auth/auth.middleware";
-
-import {
-  authorizeRoles,
-}
-from "../../middleware/role.middleware";
-
-import { adminProtect }
-from "../admin/admin.auth.middleware";
+import { protect, authorizeRoles } from "../auth/auth.middleware";
+import { Role } from "@prisma/client";
 
 import {
 
@@ -31,7 +23,8 @@ Router();
 
 router.post(
   "/",
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
   createSubjectController
 );
 
@@ -43,7 +36,8 @@ router.get(
 
   "/",
 
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
 
   getSubjectsController
 
@@ -57,7 +51,8 @@ router.put(
 
   "/:subjectId",
 
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
 
   updateSubjectController
 
@@ -65,7 +60,8 @@ router.put(
 
 router.delete(
   "/:subjectId",
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
   deleteSubjectController
 );
 

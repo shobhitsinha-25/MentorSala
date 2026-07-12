@@ -90,24 +90,7 @@ export const signup =
 
       }
 
-      // ==================================================
-      // ADMIN (DEV ONLY)
-      // ==================================================
-
-      if (
-
-        role?.toUpperCase() ===
-          "ADMIN" &&
-
-        process.env.NODE_ENV ===
-          "development"
-
-      ) {
-
-        finalRole =
-          Role.ADMIN;
-
-      }
+     
 
       // ==================================================
       // CREATE USER

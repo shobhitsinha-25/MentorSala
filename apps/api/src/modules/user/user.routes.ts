@@ -114,6 +114,7 @@ router.post(
 
 router.get(
   "/students",
+  protect,
   getAllStudentsController
 );
 export default router;

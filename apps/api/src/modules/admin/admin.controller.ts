@@ -13,6 +13,7 @@ import{
 } from "./admin.service";*/
 
 import { asyncHandler } from "../../utils/asyncHandler";
+import { getAllMentorsForAdmin } from "../mentor/mentor.service";
 
 
 
@@ -125,3 +126,14 @@ export const assignMentor =
     }
 
   );
+
+  export const getAllMentors = asyncHandler(
+  async (req: Request, res: Response) => {
+    const mentors = await getAllMentorsForAdmin();
+
+    return res.status(200).json({
+      success: true,
+      mentors,
+    });
+  }
+);

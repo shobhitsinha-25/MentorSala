@@ -1,8 +1,7 @@
 import { Router } from "express";
 
-import {
-  adminProtect,
-} from "../../admin/admin.auth.middleware";
+import { protect, authorizeRoles } from "../../auth/auth.middleware";
+import { Role } from "@prisma/client";
 
 import {
   createQuestionController,
@@ -23,7 +22,8 @@ router.post(
 
   "/",
 
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
 
   createQuestionController
 
@@ -31,7 +31,8 @@ router.post(
 
 router.get(
   "/",
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
   getQuestionsController
 );
 
@@ -42,9 +43,8 @@ router.get(
 router.get(
 
   "/:questionId",
-
-  adminProtect,
-
+  protect,
+  authorizeRoles(Role.ADMIN),
   getQuestionByIdController
 
 );
@@ -53,7 +53,8 @@ router.put(
 
   "/:questionId",
 
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
 
   updateQuestionController
 
@@ -63,7 +64,8 @@ router.delete(
 
   "/:questionId",
 
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
 
   deleteQuestionController
 

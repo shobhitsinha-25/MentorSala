@@ -1,7 +1,5 @@
 import { Router } from "express";
-import {
-  adminProtect,
-} from "./admin.auth.middleware";
+import { Role } from "@prisma/client";
 
 import {
   adminLogin,
@@ -9,27 +7,51 @@ import {
   getAdminProfile,
 } from "./admin.auth.controller";
 
+import {
+  protect,
+  authorizeRoles,
+} from "../auth/auth.middleware"; // adjust path if needed
 
+import { getAllMentors } from "./admin.controller";
 
 const router = Router();
+
+// ==========================================
+// LOGIN
+// ==========================================
 
 router.post(
   "/login",
   adminLogin
 );
 
+// ==========================================
+// LOGOUT
+// ==========================================
+
 router.post(
   "/logout",
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
   adminLogout
 );
 
+// ==========================================
+// PROFILE
+// ==========================================
+
 router.get(
   "/profile",
-  adminProtect,
+  protect,
+  authorizeRoles(Role.ADMIN),
   getAdminProfile
 );
 
-
+router.get(
+  "/mentors",
+  protect,
+  authorizeRoles(Role.ADMIN),
+  getAllMentors
+);
 
 export default router;
