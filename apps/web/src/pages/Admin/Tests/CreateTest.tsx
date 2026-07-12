@@ -9,7 +9,7 @@ import {
 } from "../../../services/admin/subject.service";
 
 import {
-  getChapters,
+  getChapters,getAllChapters
 } from "../../../services/admin/chapter.service";
 
 import {
@@ -125,30 +125,21 @@ const CreateTest = () => {
 
     }
 
-    try {
+try {
 
-      const res =
-        await getChapters(
+    const res = await getAllChapters(subjectId);
 
-          1,
+    setChapters(res.chapters);
 
-          "",
+  }
 
-          subjectId
+  catch {
 
-        );
+    setChapters([]);
 
-      setChapters(
-        res.chapters
-      );
+    toast.error("Failed to load chapters.");
 
-    }
-
-    catch (err) {
-
-      console.log(err);
-
-    }
+  }
 
   };
 

@@ -60,7 +60,7 @@ async function createAdmin() {
 
     });
 
-    console.log("✅ Admin created successfully.");
+    console.log("Admin created successfully.");
 
   } catch (error) {
 
