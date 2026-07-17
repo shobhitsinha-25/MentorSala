@@ -60,6 +60,8 @@ import EditQuestion from "../pages/Admin/Questions/EditQuestion";
 import CreateTest from "../pages/Admin/Tests/CreateTest";
 import EditTest from "../pages/Admin/Tests/EditTest";
 import TestBuilder from "../pages/Admin/Tests/TestBuilder";
+import StudentTests from "../pages/student/tests/Tests";
+import TestDetail from "../pages/student/tests/TestDetails";
 
 
 
@@ -367,17 +369,16 @@ MENTOR ROUTES
           path="analytics"
           element={<Analytics />}
         />
-        <Route
-          path="problems"
-          element={<PracticeProblems />}
-        />
-
         
-
         <Route
           path="tests"
-          element={<Tests />}
+          element={<StudentTests />}
         />
+
+        <Route
+  path="/student/tests/:testId"
+  element={<TestDetail />}
+/>
 
         <Route
           path="leaderboard"

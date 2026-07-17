@@ -8,7 +8,8 @@ import { Role } from "@prisma/client";
 import {
 
   createSubjectController,getSubjectsController,
-  updateSubjectController,deleteSubjectController
+  updateSubjectController,deleteSubjectController,
+  
 
 
 }
@@ -64,5 +65,7 @@ router.delete(
   authorizeRoles(Role.ADMIN),
   deleteSubjectController
 );
+
+
 
 export default router;

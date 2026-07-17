@@ -37,9 +37,6 @@ export const createTestSchema = z.object({
   instructions:
     z.string().optional(),
 
-  maxAttempts:
-    z.number().optional(),
-
   startsAt:
     z.coerce.date().optional(),
 
@@ -47,10 +44,11 @@ export const createTestSchema = z.object({
     z.coerce.date().optional(),
 
   subscriptionPlanId: z
-  .string()
-  .trim()
-  .optional()
-  .transform(value => value || undefined),
+    .string()
+    .trim()
+    .optional()
+    .transform(value => value || undefined),
+
 });
 
 export type CreateTestDto =

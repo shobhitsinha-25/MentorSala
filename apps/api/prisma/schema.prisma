@@ -271,6 +271,65 @@ model Chapter {
   tests Test[]
 }
 
+model PracticeQuestion {
+
+  id String @id @default(cuid())
+
+  questionType QuestionType
+
+  question String
+
+  questionImageUrl String?
+
+  options Json
+
+  optionImages Json?
+
+  answer Json
+
+  solution String?
+
+  solutionImageUrl String?
+
+  difficulty DifficultyLevel
+
+  year Int?
+
+  examType ExamType
+
+  marks Int?
+
+  negativeMarks Float?
+
+  isPremium Boolean @default(false)
+
+  published Boolean @default(true)
+
+  subjectId String
+
+  chapterId String
+
+  createdBy String?
+
+  isDeleted Boolean @default(false)
+
+  deletedAt DateTime?
+
+  subject Subject @relation(fields: [subjectId], references: [id])
+
+  chapter Chapter @relation(fields: [chapterId], references: [id])
+
+  attempts QuestionAttempt[]
+
+  testQuestions TestQuestion[]
+
+  attemptAnswers AttemptAnswer[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
 // Test Series Model....
 
 model Test {
@@ -301,7 +360,7 @@ model Test {
 
   instructions String?
 
-  maxAttempts Int @default(1)
+  showAnswersAfterSubmit Boolean @default(true)
 
   status TestStatus @default(DRAFT)
 
@@ -363,9 +422,13 @@ model TestAttempt {
 
   testId String
 
+  attemptNumber Int
+
   startedAt DateTime
 
   submittedAt DateTime?
+
+  expiresAt DateTime
 
   status AttemptStatus
 
@@ -375,11 +438,21 @@ model TestAttempt {
 
   timeTaken Int?
 
+  correctAnswers Int @default(0)
+
+  wrongAnswers Int @default(0)
+
+  unanswered Int @default(0)
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   test Test @relation(fields: [testId], references: [id], onDelete: Cascade)
 
   answers AttemptAnswer[]
+
+  @@index([userId, testId, status])
+
+  @@unique([userId, testId, attemptNumber])
 }
 
 model AttemptAnswer {
@@ -389,7 +462,7 @@ model AttemptAnswer {
 
   questionId String
 
-  selectedAnswer String?
+  selectedAnswer Json?
 
   markedForReview Boolean
 
@@ -400,6 +473,8 @@ model AttemptAnswer {
   attempt TestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
 
   question PracticeQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
 }
 
 model ChapterProgress {
@@ -577,64 +652,7 @@ model MentorshipSession {
 // PRACTICE QUESTIONS
 // =====================================================
 
-model PracticeQuestion {
 
-  id String @id @default(cuid())
-
-  questionType QuestionType
-
-  question String
-
-  questionImageUrl String?
-
-  options Json
-
-  optionImages Json?
-
-  answer Json
-
-  solution String?
-
-  solutionImageUrl String?
-
-  difficulty DifficultyLevel
-
-  year Int?
-
-  examType ExamType
-
-  marks Int?
-
-  negativeMarks Float?
-
-  isPremium Boolean @default(false)
-
-  published Boolean @default(true)
-
-  subjectId String
-
-  chapterId String
-
-  createdBy String?
-
-  isDeleted Boolean @default(false)
-
-  deletedAt DateTime?
-
-  subject Subject @relation(fields: [subjectId], references: [id])
-
-  chapter Chapter @relation(fields: [chapterId], references: [id])
-
-  attempts QuestionAttempt[]
-
-  testQuestions TestQuestion[]
-
-  attemptAnswers AttemptAnswer[]
-
-  createdAt DateTime @default(now())
-
-  updatedAt DateTime @updatedAt
-}
 
 // =====================================================
 // QUESTION ATTEMPTS

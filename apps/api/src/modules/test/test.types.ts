@@ -24,8 +24,6 @@ export interface CreateTestInput {
 
   instructions?: string;
 
-  maxAttempts?: number;
-
   startsAt?: Date;
 
   endsAt?: Date;
@@ -77,8 +75,6 @@ export interface UpdateTestInput {
   negativeMarks?: number;
 
   instructions?: string;
-
-  maxAttempts?: number;
 
   startsAt?: Date;
 

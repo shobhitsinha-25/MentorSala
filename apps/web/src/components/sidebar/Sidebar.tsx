@@ -8,7 +8,8 @@ import {
   LogOut,
   Calendar,
   Brain,
-  CreditCard, 
+  CreditCard,
+  FileText, 
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom"; // ◄── NEW: Added useNavigate to route users away
 import { useAuthStore } from "../../store/auth.store";
@@ -32,7 +33,7 @@ export default function Sidebar() {
     { label: "Overview", icon: LayoutDashboard, path: "/student/dashboard" },
     { label: "Book Session",icon: Users,path: "/student/book-session",},
     { label: "My Sessions", icon: Calendar,path: "/student/my-sessions",},
-    {label: "Practice Problems",icon: Brain,path: "/student/problems",},
+    {label: "Tests",icon: FileText,path: "/student/tests",},
     {label: "Subscriptions",icon: CreditCard,path: "/student/subscriptions",},
     {label:"Profile",icon:UserRoundXIcon,path:"/student/profile"}
     

@@ -145,101 +145,127 @@ try {
 
   useEffect(() => {
 
-    loadSubjects();
+  loadSubjects();
+
+  setSubjectId("");
+
+  setChapterId("");
+
+  setChapters([]);
+
+}, [examType]);
+
+useEffect(() => {
+
+  if (testType === "CHAPTER") {
+
+    loadChapters();
+
+  } else {
+
+    setChapters([]);
+
+    setChapterId("");
+
+  }
+
+}, [subjectId, testType]);
+
+useEffect(() => {
+
+  if (testType === "MOCK") {
 
     setSubjectId("");
 
     setChapterId("");
 
-  }, [examType]);
+    setChapters([]);
 
-  useEffect(() => {
+  }
 
-    loadChapters();
+  if (testType === "SUBJECT") {
 
     setChapterId("");
 
-  }, [subjectId]);
+    setChapters([]);
 
+  }
+
+}, [testType]);
   // ======================================================
   // SAVE
   // ======================================================
 
-  const handleSubmit =
-    async () => {
+ const handleSubmit = async () => {
 
-      try {
+  try {
 
-        setLoading(true);
+    setLoading(true);
 
-        const res = await createTest({
+    const res = await createTest({
 
-  title,
+      title,
 
-  description,
+      description,
 
-  examType,
+      examType,
 
-  type: testType,
+      type: testType,
 
-  subjectId:
-    subjectId || undefined,
+      subjectId:
+        subjectId || undefined,
 
-  chapterId:
-    chapterId || undefined,
+      chapterId:
+        chapterId || undefined,
 
-  duration,
+      duration,
 
-  negativeMarks,
+      negativeMarks,
 
-  instructions,
+      instructions,
 
-  maxAttempts: 1,
+      subscriptionPlanId:
+        subscriptionPlanId || undefined,
 
-  subscriptionPlanId:
-    subscriptionPlanId || undefined,
+    });
 
-});
+    toast.success(
+      "Test created successfully."
+    );
 
-        toast.success(
-          "Test created successfully."
-        );
+    navigate(
+      `/admin/tests/${res.test.id}/edit`
+    );
 
-        navigate(
+  }
 
-          `/admin/tests/${res.test.id}/edit`
+  catch (err: any) {
 
-        );
+    console.log(err);
 
-      }
+    console.log(err.response);
 
-      catch (err: any) {
+    console.log(err.response?.data);
 
-  console.log(err);
+    toast.error(
 
-  console.log(err.response);
+      err.response?.data?.message ||
 
-  console.log(err.response?.data);
+      JSON.stringify(err.response?.data) ||
 
-  toast.error(
+      "Failed to create test."
 
-    err.response?.data?.message ||
+    );
 
-    JSON.stringify(err.response?.data) ||
+  }
 
-    "Failed to create test."
+  finally {
 
-  );
+    setLoading(false);
 
-}
+  }
 
-      finally {
-
-        setLoading(false);
-
-      }
-
-    };
+};
       // ======================================================
   // UI
   // ======================================================
@@ -420,119 +446,101 @@ try {
 
           {/* Subject */}
 
-          <div>
+          {(testType === "CHAPTER" || testType === "SUBJECT") && (
 
-            <label className="mb-2 block text-sm text-slate-400">
+  <div>
 
-              Subject
+    <label className="mb-2 block text-sm text-slate-400">
 
-            </label>
+      Subject
 
-            <select
+    </label>
 
-              value={subjectId}
+    <select
 
-              onChange={(e)=>
+      value={subjectId}
 
-                setSubjectId(
+      onChange={(e) =>
+        setSubjectId(e.target.value)
+      }
 
-                  e.target.value
+      className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white"
 
-                )
+    >
 
-              }
+      <option value="">
 
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white"
+        Select Subject
 
-            >
+      </option>
 
-              <option value="">
+      {subjects.map((subject) => (
 
-                Select Subject
+        <option
+          key={subject.id}
+          value={subject.id}
+        >
 
-              </option>
+          {subject.name}
 
-              {
+        </option>
 
-                subjects.map(subject=>(
+      ))}
 
-                  <option
+    </select>
 
-                    key={subject.id}
+  </div>
 
-                    value={subject.id}
-
-                  >
-
-                    {subject.name}
-
-                  </option>
-
-                ))
-
-              }
-
-            </select>
-
-          </div>
+)}
 
           {/* Chapter */}
 
-          <div>
+          {testType === "CHAPTER" && (
 
-            <label className="mb-2 block text-sm text-slate-400">
+  <div>
 
-              Chapter
+    <label className="mb-2 block text-sm text-slate-400">
 
-            </label>
+      Chapter
 
-            <select
+    </label>
 
-              value={chapterId}
+    <select
 
-              onChange={(e)=>
+      value={chapterId}
 
-                setChapterId(
+      onChange={(e) =>
+        setChapterId(e.target.value)
+      }
 
-                  e.target.value
+      className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white"
 
-                )
+    >
 
-              }
+      <option value="">
 
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white"
+        Select Chapter
 
-            >
+      </option>
 
-              <option value="">
+      {chapters.map((chapter) => (
 
-                Select Chapter
+        <option
+          key={chapter.id}
+          value={chapter.id}
+        >
 
-              </option>
+          {chapter.title}
 
-              {
+        </option>
 
-                chapters.map(chapter=>(
+      ))}
 
-                  <option
+    </select>
 
-                    key={chapter.id}
+  </div>
 
-                    value={chapter.id}
-
-                  >
-
-                    {chapter.title}
-
-                  </option>
-
-                ))
-
-              }
-
-            </select>
-
-          </div>
+)}
 
           {/* Duration */}
 

@@ -26,6 +26,7 @@ import chapterRoutes from "./modules/chapter/chapter.routes"
 import adminTestRoutes from "./modules/test/admin/admin.test.routes";
 import builderRoutes from "./modules/test/builder/builder.routes";
 import uploadRoutes from "./modules/upload/upload.routes";
+import studentTestRoutes from "./modules/test/student/student.test.routes";
 const app = express();
 
 
@@ -90,6 +91,11 @@ app.use(
 app.use(
   "/api/questions",
   studentQuestionRoutes
+);
+
+app.use(
+  "/api/student/tests",
+  studentTestRoutes
 );
 
 app.use(

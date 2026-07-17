@@ -55,8 +55,7 @@ export const createTest = async (
 
           id: data.chapterId,
 
-          subjectId:
-            data.subjectId,
+          subjectId: data.subjectId,
 
           isDeleted: false,
 
@@ -109,47 +108,32 @@ export const createTest = async (
 
     data: {
 
-      title:
-        data.title,
+      title: data.title,
 
-      description:
-        data.description,
+      description: data.description,
 
-      examType:
-        data.examType,
+      examType: data.examType,
 
-      type:
-        data.type,
+      type: data.type,
 
-      subjectId:
-        data.subjectId,
+      subjectId: data.subjectId,
 
-      chapterId:
-        data.chapterId,
+      chapterId: data.chapterId,
 
-      duration:
-        data.duration,
+      duration: data.duration,
 
-      negativeMarks:
-        data.negativeMarks ?? 0,
+      negativeMarks: data.negativeMarks ?? 0,
 
-      instructions:
-        data.instructions,
+      instructions: data.instructions,
 
-      maxAttempts:
-        data.maxAttempts ?? 1,
+      startsAt: data.startsAt,
 
-      startsAt:
-        data.startsAt,
-
-      endsAt:
-        data.endsAt,
+      endsAt: data.endsAt,
 
       subscriptionPlanId:
-  data.subscriptionPlanId || undefined,
+        data.subscriptionPlanId || undefined,
 
-      createdBy:
-        data.createdBy,
+      createdBy: data.createdBy,
 
       totalMarks: 0,
 
@@ -473,9 +457,9 @@ export const updateTest = async ({
 
   }
 
-  // ==========================
+  // ==========================================
   // SUBJECT VALIDATION
-  // ==========================
+  // ==========================================
 
   if (data.subjectId) {
 
@@ -502,9 +486,9 @@ export const updateTest = async ({
 
   }
 
-  // ==========================
+  // ==========================================
   // CHAPTER VALIDATION
-  // ==========================
+  // ==========================================
 
   if (data.chapterId) {
 
@@ -533,9 +517,9 @@ export const updateTest = async ({
 
   }
 
-  // ==========================
-  // SUBSCRIPTION PLAN
-  // ==========================
+  // ==========================================
+  // SUBSCRIPTION PLAN VALIDATION
+  // ==========================================
 
   if (data.subscriptionPlanId) {
 
@@ -559,6 +543,10 @@ export const updateTest = async ({
     }
 
   }
+
+  // ==========================================
+  // UPDATE TEST
+  // ==========================================
 
   return prisma.test.update({
 
@@ -584,26 +572,17 @@ export const updateTest = async ({
 
       duration: data.duration,
 
-      negativeMarks:
-        data.negativeMarks,
+      negativeMarks: data.negativeMarks,
 
-      instructions:
-        data.instructions,
+      instructions: data.instructions,
 
-      maxAttempts:
-        data.maxAttempts,
+      startsAt: data.startsAt,
 
-      startsAt:
-        data.startsAt,
+      endsAt: data.endsAt,
 
-      endsAt:
-        data.endsAt,
+      subscriptionPlanId: data.subscriptionPlanId,
 
-      subscriptionPlanId:
-        data.subscriptionPlanId,
-
-      status:
-        data.status,
+      status: data.status,
 
     },
 

@@ -12,7 +12,7 @@ import {
 from "./subject.validation";
 
 import {
-  createSubject,getSubjects,updateSubject
+  createSubject,getSubjects,updateSubject,
 }
 from "./subject.service";
 

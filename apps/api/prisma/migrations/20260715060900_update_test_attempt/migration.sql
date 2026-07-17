@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "TestAttempt" ADD COLUMN     "correctAnswers" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "unanswered" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "wrongAnswers" INTEGER NOT NULL DEFAULT 0;
