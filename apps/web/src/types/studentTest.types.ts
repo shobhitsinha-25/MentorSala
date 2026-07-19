@@ -22,6 +22,8 @@ export interface Test {
 
   negativeMarks: number;
 
+  instructions?: string;   // <-- Add this
+
   startsAt: string | null;
 
   endsAt: string | null;
