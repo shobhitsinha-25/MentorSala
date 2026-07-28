@@ -2,38 +2,38 @@ export default function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="relative py-20 px-6 overflow-hidden bg-[#F7F5FF]"
+      className="relative py-20 px-6 overflow-hidden bg-[#F8F9FE]"
     >
+      {/* Background Ambient Glows */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/3 left-1/4 h-[400px] w-[400px] rounded-full bg-purple-300/20 blur-[140px]" />
+        <div className="absolute bottom-10 right-1/4 h-[400px] w-[400px] rounded-full bg-indigo-300/20 blur-[140px]" />
+      </div>
 
-      <div className="max-w-6xl mx-auto">
+      <div className="relative max-w-6xl mx-auto z-10">
 
         {/* Heading */}
         <div className="text-center mb-14">
 
           <div className="relative inline-flex items-center justify-center rounded-full mb-5">
-  {/* The Ring Animation Layer (Stays behind, text won't fade) */}
-  <div className="absolute inset-0 rounded-full animate-pulse ring-3 ring-[#4d4dff] bg-[#ccccff]"></div>
+            {/* The Ring Animation Layer */}
+            <div className="absolute inset-0 rounded-full animate-pulse ring-2 ring-purple-400/50 bg-purple-200/40 blur-xs"></div>
 
-  {/* Your Original Div Layer (Text and background remain completely solid) */}
-  <div className="relative z-10 inline-flex items-center gap-2 rounded-full border border-[#D9D4FF] bg-white px-4 py-2 text-[11px] font-semibold tracking-[0.18em] text-[#7C3AED] shadow-sm">
-    HOW IT WORKS
-  </div>
-</div>
+            {/* Solid Glass Badge */}
+            <div className="relative z-10 inline-flex items-center gap-2 rounded-full border border-purple-200/80 bg-white/80 backdrop-blur-md px-4 py-2 text-[11px] font-bold tracking-[0.18em] text-purple-700 shadow-sm">
+              HOW IT WORKS
+            </div>
+          </div>
 
-          <h2 className="text-4xl md:text-5xl font-black text-[#0F172A] leading-tight">
-
+          <h2 className="text-4xl md:text-5xl font-black text-slate-900 leading-tight">
             Three Steps To Your
             <br />
-
             Dream Rank
-
           </h2>
 
-          <p className="mt-5 max-w-xl mx-auto text-base text-[#64748B] leading-relaxed">
-
+          <p className="mt-5 max-w-xl mx-auto text-base text-slate-600 leading-relaxed font-medium">
             A simple system designed to guide students
             from confusion to confidence.
-
           </p>
 
         </div>
@@ -42,7 +42,7 @@ export default function HowItWorksSection() {
         <div className="relative grid md:grid-cols-3 gap-6">
 
           {/* Connector */}
-          <div className="hidden md:block absolute top-[90px] left-[22%] w-[56%] h-[2px] bg-gradient-to-r from-[#7C3AED] via-[#2563EB] to-[#06B6D4] opacity-20" />
+          <div className="hidden md:block absolute top-[90px] left-[22%] w-[56%] h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 opacity-30" />
 
           {[
             {
@@ -53,7 +53,7 @@ export default function HowItWorksSection() {
                 "Select your target exam and preparation path.",
 
               visual: (
-                <div className="mt-6 rounded-2xl border border-[#EEF0F7] bg-[#FAFBFF] p-4">
+                <div className="mt-6 rounded-2xl border border-purple-100/80 bg-purple-50/40 p-4 backdrop-blur-xs">
 
                   <div className="flex flex-wrap justify-center gap-2">
 
@@ -69,8 +69,8 @@ export default function HowItWorksSection() {
                           
                           ${
                             exam === "JEE"
-                              ? "bg-gradient-to-r from-[#7C3AED] to-[#2563EB] text-white"
-                              : "bg-white border border-[#E8E5F5] text-[#64748B]"
+                              ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm"
+                              : "bg-white border border-purple-100 text-slate-600"
                           }
                         `}
                       >
@@ -95,7 +95,7 @@ export default function HowItWorksSection() {
                 "Daily schedule personalised for your weak areas.",
 
               visual: (
-                <div className="mt-6 rounded-2xl border border-[#EEF0F7] bg-[#FAFBFF] p-4">
+                <div className="mt-6 rounded-2xl border border-purple-100/80 bg-purple-50/40 p-4 backdrop-blur-xs">
 
                   <div className="space-y-3">
 
@@ -107,12 +107,12 @@ export default function HowItWorksSection() {
 
                       <div
                         key={task}
-                        className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-sm"
+                        className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-xs border border-purple-100/50"
                       >
 
-                        <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#2563EB]" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600" />
 
-                        <span className="text-[#0F172A] font-medium text-xs">
+                        <span className="text-slate-800 font-semibold text-xs">
 
                           {task}
 
@@ -136,7 +136,7 @@ export default function HowItWorksSection() {
                 "Attend classes, solve tests, and earn XP rewards.",
 
               visual: (
-                <div className="mt-6 rounded-2xl border border-[#EEF0F7] bg-[#FAFBFF] p-4">
+                <div className="mt-6 rounded-2xl border border-purple-100/80 bg-purple-50/40 p-4 backdrop-blur-xs">
 
                   <div className="space-y-3">
 
@@ -165,8 +165,8 @@ export default function HowItWorksSection() {
                           
                           ${
                             user.name === "You"
-                              ? "bg-gradient-to-r from-[#7C3AED] to-[#2563EB] text-white"
-                              : "bg-white shadow-sm"
+                              ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm"
+                              : "bg-white shadow-xs border border-purple-100/50"
                           }
                         `}
                       >
@@ -179,7 +179,7 @@ export default function HowItWorksSection() {
                               ${
                                 user.name === "You"
                                   ? "bg-white/20 text-white"
-                                  : "bg-[#EEF2FF] text-[#2563EB]"
+                                  : "bg-indigo-50 text-indigo-600"
                               }
                             `}
                           >
@@ -189,30 +189,30 @@ export default function HowItWorksSection() {
                           </div>
 
                           <span
-                              className={`font-medium text-xs ${
-                                user.name === "You"
-                                  ? "text-white"
-                                  : "text-[#0F172A]"
-                              }`}
-                            >
+                            className={`font-semibold text-xs ${
+                              user.name === "You"
+                                ? "text-white"
+                                : "text-slate-800"
+                            }`}
+                          >
 
-                              {user.name}
+                            {user.name}
 
-                            </span>
+                          </span>
 
                         </div>
 
-                                                      <span
-                                className={`font-bold text-xs ${
-                                  user.name === "You"
-                                    ? "text-white"
-                                    : "text-[#0F172A]"
-                                }`}
-                              >
+                        <span
+                          className={`font-bold text-xs ${
+                            user.name === "You"
+                              ? "text-white"
+                              : "text-slate-800"
+                          }`}
+                        >
 
-                                {user.xp} XP
+                          {user.xp} XP
 
-                              </span>
+                        </span>
 
                       </div>
 
@@ -227,32 +227,32 @@ export default function HowItWorksSection() {
 
             <div
               key={item.step}
-              className="group relative rounded-[28px] border border-[#E8E5F5] bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_16px_40px_rgba(124,58,237,0.08)]"
+              className="group relative rounded-[28px] border border-purple-200/60 bg-white/70 backdrop-blur-xl p-6 shadow-lg shadow-purple-500/5 transition-all duration-300 hover:-translate-y-2 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-500/10"
             >
 
               {/* Step */}
-              <div className="mb-5 inline-flex rounded-full bg-[#F3F0FF] px-3 py-1.5 text-[10px] font-bold tracking-[0.16em] text-[#7C3AED]">
+              <div className="mb-5 inline-flex rounded-full bg-purple-100/80 border border-purple-200/50 px-3 py-1.5 text-[10px] font-bold tracking-[0.16em] text-purple-700">
 
                 {item.step}
 
               </div>
 
               {/* Icon */}
-              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#2563EB] text-3xl shadow-lg shadow-blue-500/10">
+              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-3xl shadow-md shadow-indigo-500/20">
 
                 {item.icon}
 
               </div>
 
               {/* Title */}
-              <h3 className="text-2xl font-black text-[#0F172A] leading-snug">
+              <h3 className="text-2xl font-black text-slate-900 leading-snug group-hover:text-purple-900 transition-colors">
 
                 {item.title}
 
               </h3>
 
               {/* Description */}
-              <p className="mt-4 text-[#64748B] text-sm leading-relaxed">
+              <p className="mt-4 text-slate-600 text-sm leading-relaxed font-medium">
 
                 {item.desc}
 

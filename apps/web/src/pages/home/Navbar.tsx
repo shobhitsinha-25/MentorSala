@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import mentorsalalogo from "../../assets/logo1.png";
 
 export default function Navbar() {
   return (
@@ -7,7 +8,12 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between rounded-full border border-[#E8E5F5] bg-white/80 backdrop-blur-xl shadow-md shadow-[#99ccff]">
         
         {/* Logo */}
-        <Link to="/" className="flex items-center">
+        <Link to="/" className="flex items-center gap-2">
+          <img 
+            src={mentorsalalogo} 
+            alt="Mentor Sala Logo" 
+            className="h-8 w-auto object-contain" 
+          />
           <h1 className="text-2xl md:text-3xl font-black tracking-tight text-black">
             Mentor
             <span className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent">
