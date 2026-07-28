@@ -1,4 +1,5 @@
 import React from "react";
+import mentorsalalogo from "../../assets/logo1.png"
 import { Link } from "react-router-dom";
 import { 
   Play, 
@@ -135,9 +136,14 @@ export default function HeroSection() {
                     
                     {/* Logo */}
                     <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-indigo-500/20">
-                        M
-                      </div>
+                      <div className="flex items-center gap-2">
+  <img 
+    src={mentorsalalogo} 
+    alt="Mentor Sala Logo" 
+    className="h-7 w-auto object-contain" 
+  />
+  
+</div>
                       <span className="text-base font-black tracking-tight text-slate-900">
                         Mentor<span className="text-indigo-600">Sala</span>
                       </span>
