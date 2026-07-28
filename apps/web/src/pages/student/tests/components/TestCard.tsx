@@ -1,139 +1,221 @@
-import { Clock, BookOpen, Award, ArrowRight } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Clock3,
+  BookOpen,
+  FileQuestion,
+  Trophy,
+  Play,
+  CalendarDays,
+} from "lucide-react";
 
+import { startTest } from "../../../../api/studentTestApi";
 import type { Test } from "../../../../types/studentTest.types";
 
 interface TestCardProps {
   test: Test;
 }
 
+const getTypeColor = (type: string) => {
+  switch (type) {
+    case "CHAPTER":
+      return "bg-blue-100/80 text-blue-700 border-blue-200/80";
+
+    case "SUBJECT":
+      return "bg-emerald-100/80 text-emerald-700 border-emerald-200/80";
+
+    case "MOCK":
+      return "bg-purple-100/80 text-purple-700 border-purple-200/80";
+
+    case "PYQ":
+      return "bg-amber-100/80 text-amber-700 border-amber-200/80";
+
+    case "PRACTICE":
+      return "bg-cyan-100/80 text-cyan-700 border-cyan-200/80";
+
+    default:
+      return "bg-slate-100 text-slate-700 border-slate-200";
+  }
+};
+
 const TestCard = ({ test }: TestCardProps) => {
   const navigate = useNavigate();
 
+  const [starting, setStarting] = useState(false);
+
+  const handleViewDetails = () => {
+    navigate(`/student/tests/${test.id}`);
+  };
+
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 p-6 flex flex-col justify-between">
+    <div className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white  to-[#b3b3ff] transition-all duration-300 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/10">
 
       {/* Header */}
-      <div>
 
-        <div className="flex items-center justify-between">
+      <div className="border-b border-slate-100 p-6">
+
+        <div className="mb-4 flex items-start justify-between gap-3">
 
           <div>
 
-            <h2 className="text-xl font-bold text-gray-900">
-
+            <h2 className="text-xl font-bold text-slate-900">
               {test.title}
-
             </h2>
 
-            {test.description && (
-
-              <p className="text-sm text-gray-500 mt-1">
-
-                {test.description}
-
-              </p>
-
-            )}
+            <p className="mt-2 line-clamp-2 text-sm text-slate-500">
+              {test.description || "No description available."}
+            </p>
 
           </div>
 
-          <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
-
-            {test.examType}
-
-          </span>
-
-        </div>
-
-        {/* Type */}
-
-        <div className="mt-4">
-
-          <span className="inline-block rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
-
+          <span
+            className={`rounded-full border px-3 py-1 text-xs font-semibold ${getTypeColor(
+              test.type
+            )}`}
+          >
             {test.type}
           </span>
 
         </div>
 
-        {/* Stats */}
+      </div>
 
-        <div className="grid grid-cols-3 gap-4 mt-6">
+      {/* Body */}
 
-          <div className="flex flex-col items-center">
+      <div className="space-y-4 p-6">
 
-            <Clock className="w-5 h-5 text-indigo-600" />
+        <div className="grid grid-cols-2 gap-4">
 
-            <span className="text-sm text-gray-600 mt-1">
+          <div className="flex items-center gap-3">
 
-              {test.duration} min
+            <Clock3
+              size={18}
+              className="text-indigo-600"
+            />
 
-            </span>
+            <div>
+
+              <p className="text-xs text-slate-500">
+                Duration
+              </p>
+
+              <p className="text-sm font-semibold text-slate-900">
+                {test.duration} min
+              </p>
+
+            </div>
 
           </div>
 
-          <div className="flex flex-col items-center">
+          <div className="flex items-center gap-3">
 
-            <BookOpen className="w-5 h-5 text-green-600" />
+            <FileQuestion
+              size={18}
+              className="text-emerald-600"
+            />
 
-            <span className="text-sm text-gray-600 mt-1">
+            <div>
 
-              {test.totalQuestions} Qs
+              <p className="text-xs text-slate-500">
+                Questions
+              </p>
 
-            </span>
+              <p className="text-sm font-semibold text-slate-900">
+                {test.totalQuestions}
+              </p>
+
+            </div>
 
           </div>
 
-          <div className="flex flex-col items-center">
+          <div className="flex items-center gap-3">
 
-            <Award className="w-5 h-5 text-orange-500" />
+            <Trophy
+              size={18}
+              className="text-amber-500"
+            />
 
-            <span className="text-sm text-gray-600 mt-1">
+            <div>
 
-              {test.totalMarks} Marks
+              <p className="text-xs text-slate-500">
+                Marks
+              </p>
 
-            </span>
+              <p className="text-sm font-semibold text-slate-900">
+                {test.totalMarks}
+              </p>
+
+            </div>
+
+          </div>
+
+          <div className="flex items-center gap-3">
+
+            <BookOpen
+              size={18}
+              className="text-pink-600"
+            />
+
+            <div>
+
+              <p className="text-xs text-slate-500">
+                Subject
+              </p>
+
+              <p className="text-sm font-semibold text-slate-900">
+                {test.subject?.name ?? "General"}
+              </p>
+
+            </div>
 
           </div>
 
         </div>
 
-        {/* Subject */}
+        {test.startsAt && (
+          <div className="flex items-center gap-3 rounded-xl border border-indigo-100/80 bg-indigo-50/40 px-4 py-3">
 
-        {test.subject && (
+            <CalendarDays
+              size={18}
+              className="text-indigo-600"
+            />
 
-          <div className="mt-6">
+            <div>
 
-            <span className="text-sm text-gray-500">
+              <p className="text-xs text-slate-500">
+                Available From
+              </p>
 
-              Subject
+              <p className="text-sm font-medium text-slate-800">
+                {new Date(
+                  test.startsAt
+                ).toLocaleString()}
+              </p>
 
-            </span>
-
-            <p className="font-medium text-gray-800">
-
-              {test.subject.name}
-
-            </p>
+            </div>
 
           </div>
-
         )}
 
       </div>
 
-      {/* Button */}
+      {/* Footer */}
 
-      <button
-        onClick={() => navigate(`/student/tests/${test.id}`)}
-        className="mt-8 w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-3 flex items-center justify-center gap-2 transition"
-      >
-        View Details
+      <div className="border-t border-slate-100 p-6">
 
-        <ArrowRight size={18} />
+        <button
+          onClick={handleViewDetails}
+          disabled={starting}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Play size={18} />
 
-      </button>
+          {starting
+            ? "Starting..."
+            : "Start Test"}
+        </button>
+
+      </div>
 
     </div>
   );

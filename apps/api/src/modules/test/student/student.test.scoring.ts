@@ -60,10 +60,16 @@ export const evaluateAnswer = ({
     // SINGLE CORRECT
     // ======================================
 
-    case "SINGLE_CORRECT":
+    case "SINGLE_CORRECT": {
+  const correct = Array.isArray(correctAnswer)
+    ? correctAnswer[0]
+    : correctAnswer;
 
-      return studentAnswer === correctAnswer;
-
+  return (
+    String(studentAnswer).trim().toUpperCase() ===
+    String(correct).trim().toUpperCase()
+  );
+}
     // ======================================
     // MULTIPLE CORRECT
     // ======================================
@@ -176,6 +182,8 @@ export const calculateScore = (
       continue;
 
     }
+
+    
 
     const isCorrect =
       evaluateAnswer({

@@ -7,14 +7,12 @@ import {
   BookOpen,
   Trophy,
   MinusCircle,
-  CheckCircle2,
   Play,
   Loader2,
 } from "lucide-react";
 
 import {
   getTestDetails,
-  startTest,
 } from "../../../api/studentTestApi";
 
 import type {
@@ -73,29 +71,11 @@ const TestDetail = () => {
   // START TEST
   // ==========================================
 
-  const handleStartTest = async () => {
+  const handleStartTest = () => {
 
     if (!testId) return;
 
-    try {
-
-      setStarting(true);
-
-      const res = await startTest(testId);
-
-      navigate(
-        `/student/tests/attempts/${res.attempt.id}/instructions`
-      );
-
-    } catch (err) {
-
-      console.error(err);
-
-    } finally {
-
-      setStarting(false);
-
-    }
+    navigate(`/student/tests/${testId}/instructions`);
 
   };
 
@@ -107,7 +87,7 @@ const TestDetail = () => {
 
     return (
 
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50/50">
 
         <Loader2
           className="animate-spin text-indigo-600"
@@ -128,9 +108,9 @@ const TestDetail = () => {
 
     return (
 
-      <div className="min-h-screen flex flex-col items-center justify-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50/50">
 
-        <h2 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold text-slate-800">
 
           Test Not Found
 
@@ -140,7 +120,7 @@ const TestDetail = () => {
 
           onClick={() => navigate(-1)}
 
-          className="mt-6 rounded-xl bg-indigo-600 text-white px-6 py-3"
+          className="mt-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 font-semibold shadow-md shadow-indigo-600/20 transition"
 
         >
 
@@ -156,7 +136,7 @@ const TestDetail = () => {
 
   return (
 
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
 
       {/* ============================= */}
 
@@ -168,7 +148,7 @@ const TestDetail = () => {
 
         onClick={() => navigate(-1)}
 
-        className="flex items-center gap-2 text-gray-600 hover:text-indigo-600 mb-6"
+        className="flex items-center gap-2 text-white hover:text-slate-100/50 font-medium transition mb-2"
 
       >
 
@@ -178,33 +158,29 @@ const TestDetail = () => {
 
       </button>
 
-      <div className="bg-white rounded-2xl shadow border p-8">
+      <div className="bg-gradient-to-br bg-white rounded-3xl border border-slate-200/80 p-8 shadow-sm">
 
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
           <div>
 
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-slate-900">
 
               {test.title}
 
             </h1>
 
-            <div className="flex gap-3 mt-4 flex-wrap">
+            <div className="flex gap-2.5 mt-4 flex-wrap">
 
-              <span className="rounded-full bg-green-100 text-green-700 px-4 py-1 text-sm font-medium">
+              
 
-                {test.status}
-
-              </span>
-
-              <span className="rounded-full bg-indigo-100 text-indigo-700 px-4 py-1 text-sm font-medium">
+              <span className="rounded-full bg-indigo-100/80 border border-indigo-200/80 text-indigo-700 px-4 py-1 text-sm font-semibold">
 
                 {test.type}
 
               </span>
 
-              <span className="rounded-full bg-orange-100 text-orange-700 px-4 py-1 text-sm font-medium">
+              <span className="rounded-full bg-amber-100/80 border border-amber-200/80 text-amber-700 px-4 py-1 text-sm font-semibold">
 
                 {test.examType}
 
@@ -220,7 +196,7 @@ const TestDetail = () => {
 
             disabled={starting}
 
-            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-8 py-4 font-semibold disabled:opacity-60"
+            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white rounded-xl px-8 py-4 font-semibold shadow-lg shadow-indigo-600/20 transition disabled:opacity-60"
 
           >
 
@@ -266,19 +242,19 @@ const TestDetail = () => {
 
       {/* ============================= */}
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 mt-8">
+      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5">
 
-        <div className="bg-white rounded-2xl shadow border p-6">
+        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
 
-          <Clock3 className="text-indigo-600 mb-3" />
+          <Clock3 className="text-indigo-600 mb-3" size={24} />
 
-          <p className="text-3xl font-bold">
+          <p className="text-3xl font-bold text-slate-900">
 
             {test.duration}
 
           </p>
 
-          <p className="text-gray-500">
+          <p className="text-slate-500 font-medium text-sm mt-1">
 
             Minutes
 
@@ -286,17 +262,17 @@ const TestDetail = () => {
 
         </div>
 
-        <div className="bg-white rounded-2xl shadow border p-6">
+        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
 
-          <BookOpen className="text-blue-600 mb-3" />
+          <BookOpen className="text-emerald-600 mb-3" size={24} />
 
-          <p className="text-3xl font-bold">
+          <p className="text-3xl font-bold text-slate-900">
 
             {test.totalQuestions}
 
           </p>
 
-          <p className="text-gray-500">
+          <p className="text-slate-500 font-medium text-sm mt-1">
 
             Questions
 
@@ -304,17 +280,17 @@ const TestDetail = () => {
 
         </div>
 
-        <div className="bg-white rounded-2xl shadow border p-6">
+        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
 
-          <Trophy className="text-yellow-500 mb-3" />
+          <Trophy className="text-amber-500 mb-3" size={24} />
 
-          <p className="text-3xl font-bold">
+          <p className="text-3xl font-bold text-slate-900">
 
             {test.totalMarks}
 
           </p>
 
-          <p className="text-gray-500">
+          <p className="text-slate-500 font-medium text-sm mt-1">
 
             Total Marks
 
@@ -322,17 +298,17 @@ const TestDetail = () => {
 
         </div>
 
-        <div className="bg-white rounded-2xl shadow border p-6">
+        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
 
-          <MinusCircle className="text-red-500 mb-3" />
+          <MinusCircle className="text-rose-500 mb-3" size={24} />
 
-          <p className="text-3xl font-bold">
+          <p className="text-3xl font-bold text-slate-900">
 
             -{test.negativeMarks}
 
           </p>
 
-          <p className="text-gray-500">
+          <p className="text-slate-500 font-medium text-sm mt-1">
 
             Negative Marking
 
@@ -341,15 +317,16 @@ const TestDetail = () => {
         </div>
 
       </div>
-            {/* ============================= */}
+
+      {/* ============================= */}
       {/* Information */}
       {/* ============================= */}
 
-      <div className="grid lg:grid-cols-2 gap-6 mt-8">
+      <div className="grid lg:grid-cols-2 gap-6">
 
-        <div className="bg-white rounded-2xl shadow border p-6">
+        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
 
-          <h2 className="text-xl font-semibold mb-6">
+          <h2 className="text-xl font-bold text-slate-900 mb-6">
 
             Test Information
 
@@ -357,15 +334,15 @@ const TestDetail = () => {
 
           <div className="space-y-5">
 
-            <div>
+            <div className="border-b border-slate-100 pb-3">
 
-              <p className="text-sm text-gray-500">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
 
                 Exam
 
               </p>
 
-              <p className="font-semibold text-lg">
+              <p className="font-semibold text-lg text-slate-800 mt-1">
 
                 {test.examType}
 
@@ -373,15 +350,15 @@ const TestDetail = () => {
 
             </div>
 
-            <div>
+            <div className="border-b border-slate-100 pb-3">
 
-              <p className="text-sm text-gray-500">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
 
                 Subject
 
               </p>
 
-              <p className="font-semibold text-lg">
+              <p className="font-semibold text-lg text-slate-800 mt-1">
 
                 {test.subject?.name ?? "-"}
 
@@ -391,13 +368,13 @@ const TestDetail = () => {
 
             <div>
 
-              <p className="text-sm text-gray-500">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
 
                 Chapter
 
               </p>
 
-              <p className="font-semibold text-lg">
+              <p className="font-semibold text-lg text-slate-800 mt-1">
 
                 {test.chapter?.title ?? "Full Syllabus"}
 
@@ -409,15 +386,15 @@ const TestDetail = () => {
 
         </div>
 
-        <div className="bg-white rounded-2xl shadow border p-6">
+        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
 
-          <h2 className="text-xl font-semibold mb-6">
+          <h2 className="text-xl font-bold text-slate-900 mb-6">
 
             Description
 
           </h2>
 
-          <p className="text-gray-600 leading-7 whitespace-pre-wrap">
+          <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">
 
             {test.description ||
 
@@ -429,151 +406,6 @@ const TestDetail = () => {
 
       </div>
 
-      {/* ============================= */}
-      {/* Instructions */}
-      {/* ============================= */}
-
-      <div className="bg-white rounded-2xl shadow border p-8 mt-8">
-
-        <h2 className="text-2xl font-semibold mb-6">
-
-          Instructions
-
-        </h2>
-
-        {
-
-          test.instructions ? (
-
-            <div className="text-gray-700 leading-8 whitespace-pre-wrap">
-
-              {test.instructions}
-
-            </div>
-
-          ) : (
-
-            <div className="space-y-4">
-
-              {
-
-                [
-
-                  "Read every question carefully before answering.",
-
-                  "All questions are compulsory.",
-
-                  "Negative marking is applicable wherever mentioned.",
-
-                  "The timer starts immediately after beginning the test.",
-
-                  "Your answers are saved automatically.",
-
-                  "You may change answers before submitting.",
-
-                  "Do not refresh or close the browser during the test.",
-
-                  "The test will be automatically submitted when time expires.",
-
-                ].map((instruction) => (
-
-                  <div
-
-                    key={instruction}
-
-                    className="flex items-start gap-3"
-
-                  >
-
-                    <CheckCircle2
-
-                      size={20}
-
-                      className="text-green-600 mt-1 flex-shrink-0"
-
-                    />
-
-                    <span className="text-gray-700">
-
-                      {instruction}
-
-                    </span>
-
-                  </div>
-
-                ))
-
-              }
-
-            </div>
-
-          )
-
-        }
-
-      </div>
-
-      {/* ============================= */}
-      {/* Footer */}
-      {/* ============================= */}
-
-      <div className="flex justify-between items-center mt-10">
-
-        <button
-
-          onClick={() => navigate(-1)}
-
-          className="border border-gray-300 rounded-xl px-6 py-3 font-medium hover:bg-gray-100"
-
-        >
-
-          Back
-
-        </button>
-
-        <button
-
-          onClick={handleStartTest}
-
-          disabled={starting}
-
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 font-semibold disabled:opacity-60"
-
-        >
-
-          {
-
-            starting
-
-            ?
-
-            <Loader2
-
-              className="animate-spin"
-
-              size={18}
-
-            />
-
-            :
-
-            <Play size={18} />
-
-          }
-
-          {
-
-            starting
-
-              ? "Starting..."
-
-              : "Start Test"
-
-          }
-
-        </button>
-
-      </div>
 
     </div>
 

@@ -18,6 +18,8 @@ import {
 import { Toaster }
 from "react-hot-toast";
 
+import "katex/dist/katex.min.css";
+
 ReactDOM.createRoot(
   document.getElementById("root")!
 ).render(

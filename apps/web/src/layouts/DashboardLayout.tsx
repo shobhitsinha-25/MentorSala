@@ -1,24 +1,34 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/sidebar/Sidebar";
+import { useLayoutStore } from "../store/layout.store";
 
 export default function DashboardLayout() {
+  const { collapsed } = useLayoutStore();
+
   return (
-    // ✅ FIXED: Using h-screen and overflow-hidden locks the app viewport to the exact screen boundary dimensions
     <div className="w-screen h-screen bg-[#020617] flex overflow-hidden relative">
-      
-      {/* Sidebar - Remains locked firmly on the left without vertical clipping */}
+      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content Workspace Wrapper */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        
-        {/* Page Viewport Area - This handles vertical scrolling for the page dashboard grid separate from the sidebar */}
-        <main className="flex-1 overflow-y-auto px-6 py-6 custom-page-scroll">
+      {/* Main Content */}
+      <div
+        className={`
+          flex-1
+          flex
+          flex-col
+          min-w-0
+          h-full
+          overflow-hidden
+          transition-all
+          duration-300
+          ease-in-out
+          ${collapsed ? "ml-0" : "ml-0"}
+        `}
+      >
+        <main className="flex-1 overflow-y-auto custom-page-scroll px-6 py-6">
           <Outlet />
         </main>
-
       </div>
-
     </div>
   );
 }

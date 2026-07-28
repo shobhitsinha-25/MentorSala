@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import igLogo from "../../assets/iglogo.jpg"
-import inlogo from "../../assets/inlogo.jpg"
-import youtube from "../../assets/utube.png"
+import igLogo from "../../assets/iglogo.jpg";
+import inlogo from "../../assets/inlogo.jpg";
+import youtube from "../../assets/utube.png";
 
 export default function Footer() {
   return (
@@ -92,25 +92,35 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Support Static Links */}
+          {/* Support Links */}
           <div>
             <h3 className="text-sm font-bold text-white mb-4">
               Support
             </h3>
             <div className="space-y-2">
               {[
-                "Help Center",
-                "Contact (+91-6203075758)",
-                "Privacy",
-                "Terms",
-              ].map((item) => (
-                <span
-                  key={item}
-                  className="block text-xs text-[#94A3B8] cursor-default"
-                >
-                  {item}
-                </span>
-              ))}
+                { label: "Help Center", to: "/help", isLink: true },
+                
+                { label: "Privacy", to: "/privacy", isLink: true },
+                { label: "Terms and Condition", to: "/terms", isLink: true },
+              ].map((item) => 
+                item.isLink ? (
+                  <Link
+                    key={item.label}
+                    to={item.to!}
+                    className="block text-xs !text-[#94A3B8] hover:!text-white transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <span
+                    key={item.label}
+                    className="block text-xs text-[#94A3B8] cursor-default"
+                  >
+                    {item.label}
+                  </span>
+                )
+              )}
             </div>
           </div>
 

@@ -108,21 +108,12 @@ export const startTest = async (
 // LOAD ATTEMPT
 // ======================================================
 
-export const getAttempt = async (
-
-  attemptId: string
-
-) => {
-
-  const { data } =
-    await api.get(
-
-      `/student/tests/attempt/${attemptId}`
-
-    );
+export const getAttempt = async (attemptId: string) => {
+  const { data } = await api.get(
+    `/student/tests/attempts/${attemptId}`
+  );
 
   return data;
-
 };
 
 export interface StudentSubject {
@@ -145,5 +136,83 @@ export const getStudentChapters = async (subjectId: string) => {
   const { data } = await api.get(
     `/student/tests/subjects/${subjectId}/chapters`
   );
+  return data;
+};
+
+// ======================================================
+// SAVE ANSWER
+// ======================================================
+
+export const saveAnswer = async (
+  attemptId: string,
+  questionId: string,
+  selectedAnswer: string | string[] | number | null,
+  timeSpent: number
+) => {
+  const { data } = await api.patch(
+    `/student/tests/attempts/${attemptId}/answer`,
+    {
+      questionId,
+      selectedAnswer,
+      timeSpent,
+    }
+  );
+
+  return data;
+};
+
+// ======================================================
+// MARK FOR REVIEW
+// ======================================================
+
+export const markForReview = async (
+  attemptId: string,
+  questionId: string,
+  markedForReview: boolean
+) => {
+  const { data } = await api.patch(
+    `/student/tests/attempts/${attemptId}/review`,
+    {
+      questionId,
+      markedForReview,
+    }
+  );
+
+  return data;
+};
+
+// ======================================================
+// SUBMIT TEST
+// ======================================================
+
+export const submitTest = async (attemptId: string) => {
+  const { data } = await api.post(
+    `/student/tests/attempts/${attemptId}/submit`
+  );
+
+  return data;
+};
+
+// ======================================================
+// GET RESULT
+// ======================================================
+
+export const getResult = async (attemptId: string) => {
+  const { data } = await api.get(
+    `/student/tests/attempts/${attemptId}/result`
+  );
+
+  return data;
+};
+
+// ======================================================
+// GET REVIEW
+// ======================================================
+
+export const getReview = async (attemptId: string) => {
+  const { data } = await api.get(
+    `/student/tests/attempts/${attemptId}/review`
+  );
+
   return data;
 };

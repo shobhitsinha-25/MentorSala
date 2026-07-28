@@ -512,12 +512,30 @@ try {
           },
 
         });
+if (activeAttempt) {
 
-      if (activeAttempt) {
+    if (
+        activeAttempt.expiresAt > new Date()
+    ) {
 
         return activeAttempt;
 
-      }
+    }
+
+    await tx.testAttempt.update({
+
+        where:{
+            id:activeAttempt.id
+        },
+
+        data:{
+            status:"SUBMITTED",
+            submittedAt:new Date()
+        }
+
+    });
+
+}
 
       // ======================================
       // FIND LAST ATTEMPT
@@ -713,6 +731,8 @@ export const getAttempt = async (
 
             title: true,
 
+            type: true,
+
             duration: true,
 
             totalMarks: true,
@@ -738,6 +758,8 @@ export const getAttempt = async (
     );
 
   }
+
+  // ==========================================
 
   // ==========================================
   // AUTO SUBMIT IF TIME EXPIRED
@@ -842,30 +864,27 @@ export const getAttempt = async (
         negativeMarks: true,
 
         question: {
+  select: {
+    id: true,
+    questionType: true,
+    question: true,
+    questionImageUrl: true,
+    options: true,
+    optionImages: true,
+    difficulty: true,
 
-          select: {
+    subjectId: true,
 
-            id: true,
+    subject: {
+      select: {
+        id: true,
+        name: true,
+      },
+    },
 
-            questionType: true,
-
-            question: true,
-
-            questionImageUrl: true,
-
-            options: true,
-
-            optionImages: true,
-
-            difficulty: true,
-
-            subjectId: true,
-
-            chapterId: true,
-
-          },
-
-        },
+    chapterId: true,
+  },
+},
 
       },
 
@@ -980,12 +999,13 @@ export const getAttempt = async (
             item.question.difficulty,
 
           subjectId:
+  item.question.subjectId,
 
-            item.question.subjectId,
+subject:
+  item.question.subject.name,
 
-          chapterId:
-
-            item.question.chapterId,
+chapterId:
+  item.question.chapterId,
 
           answerState: {
 

@@ -117,11 +117,11 @@ const QuestionForm = ({
     ]
   );
 
-  const [answer, setAnswer] =
-    useState<string[]>(
-      initialValues?.answer ??
-      []
-    );
+  const [answer, setAnswer] = useState<
+  string | string[] | number
+>(
+  initialValues?.answer ?? ""
+);
 
   const [solution, setSolution] =
     useState(
@@ -708,15 +708,16 @@ return (
         {questionType === "SINGLE_CORRECT" && (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {options.map((option) => {
-              const isActive = answer.includes(option.key);
+              const isActive =
+  typeof answer === "string" && answer === option.key;
               return (
                 <button
                   key={option.key}
                   type="button"
                   onClick={() =>
-                    setAnswer([
+                    setAnswer(
                       option.key,
-                    ])
+                    )
                   }
                   className={`rounded-xl border p-4 font-bold text-sm tracking-wide transition-all duration-200 transform active:scale-95 shadow-md ${
                     isActive
@@ -735,15 +736,18 @@ return (
         {questionType === "MULTIPLE_CORRECT" && (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {options.map((option) => {
-              const isActive = answer.includes(option.key);
+              const isActive =
+  Array.isArray(answer) &&
+  answer.includes(option.key);
               return (
                 <button
                   key={option.key}
                   type="button"
                   onClick={() => {
                     if (
-                      answer.includes(option.key)
-                    ) {
+  Array.isArray(answer) &&
+  answer.includes(option.key)
+) {
                       setAnswer(
                         answer.filter(
                           (item) =>
@@ -752,10 +756,11 @@ return (
                       );
                     }
                     else {
-                      setAnswer([
-                        ...answer,
-                        option.key,
-                      ]);
+                      setAnswer(
+  Array.isArray(answer)
+    ? answer.filter(item => item !== option.key)
+    : []
+);
                     }
                   }}
                   className={`rounded-xl border p-4 font-bold text-sm tracking-wide transition-all duration-200 transform active:scale-95 shadow-md ${
@@ -770,28 +775,30 @@ return (
             })}
           </div>
         )}
-
-        {/* INTEGER */}
-        {questionType === "INTEGER" && (
-          <div className="max-w-md">
-            <input
-              value={answer[0] ?? ""}
-              onChange={(e) =>
-                setAnswer([
-                  e.target.value,
-                ])
-              }
-              placeholder="Provide exact matching target numeric calculation payload..."
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3.5 text-sm text-slate-200 placeholder-slate-500 outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all duration-200"
-            />
-          </div>
-        )}
+{/* INTEGER */}
+{questionType === "INTEGER" && (
+  <div className="max-w-md">
+    <input
+      type="number"
+      value={typeof answer === "number" ? answer : ""}
+      onChange={(e) =>
+        setAnswer(
+          e.target.value === ""
+            ? ""
+            : Number(e.target.value)
+        )
+      }
+      placeholder="Enter the correct integer answer"
+      className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3.5 text-sm text-slate-200 placeholder-slate-500 outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all duration-200"
+    />
+  </div>
+)}
 
         {/* ASSERTION & REASON */}
         {questionType === "ASSERTION_REASON" && (
           <div className="max-w-md">
             <select
-              value={answer[0] ?? ""}
+              value={typeof answer === "string" ? answer : ""}
               onChange={(e) =>
                 setAnswer([
                   e.target.value,

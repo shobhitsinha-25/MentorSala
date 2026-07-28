@@ -20,6 +20,9 @@ import Achievements from "../pages/student/Achievements";
 import Community from "../pages/student/Community";
 import Sessions from "../pages/mentor/Sessions";
 import About from "../pages/About/About";
+import TermsConditions from "../pages/TermsAndConditon/TermsAndCondition"
+import PrivacyPolicy from "../pages/PrivacyPolicy/PrivacyPolicy";
+import HelpCenter from "../pages/HelpCentre/HelpCenter";
 
 import MentorOnboarding
 from "../pages/mentor/MentorOnboarding";
@@ -62,6 +65,11 @@ import EditTest from "../pages/Admin/Tests/EditTest";
 import TestBuilder from "../pages/Admin/Tests/TestBuilder";
 import StudentTests from "../pages/student/tests/Tests";
 import TestDetail from "../pages/student/tests/TestDetails";
+import Instructions from "../pages/student/tests/Instructions";
+import ReadyScreen from "../pages/student/tests/WaitingScreen";
+import TestEngine from "../pages/student/tests/pages/TestEngine";
+import Result from "../pages/student/tests/pages/Result";
+import Review from "../pages/student/tests/pages/Review";
 
 
 
@@ -87,6 +95,23 @@ function AppRoutes() {
   path="/about"
   element={<About />}
 />
+
+<Route
+  path="/privacy"
+  element={<PrivacyPolicy />}
+/>
+
+
+<Route
+  path="/terms"
+  element={<TermsConditions />}
+/>
+
+<Route
+  path="/help"
+  element={<HelpCenter />}
+/>
+
 
       <Route
   path="/signup"
@@ -376,9 +401,22 @@ MENTOR ROUTES
         />
 
         <Route
-  path="/student/tests/:testId"
+  path="tests/:testId"
   element={<TestDetail />}
 />
+
+<Route
+  path="tests/:testId/instructions"
+  element={<Instructions />}
+/>
+
+<Route
+  path="tests/:testId/ready"
+  element={<ReadyScreen />}
+/>
+
+
+
 
         <Route
           path="leaderboard"
@@ -411,6 +449,37 @@ MENTOR ROUTES
 />
 
       </Route>
+
+      {/* ==========================================
+   EXAM ROUTES (No Dashboard Layout)
+========================================== */}
+
+<Route
+  path="/student/tests/attempts/:attemptId"
+  element={
+    <RoleProtectedRoute allowedRole="STUDENT">
+      <TestEngine />
+    </RoleProtectedRoute>
+  }
+/>
+
+<Route
+  path="/student/tests/attempts/:attemptId/result"
+  element={
+    <RoleProtectedRoute allowedRole="STUDENT">
+      <Result />
+    </RoleProtectedRoute>
+  }
+/>
+
+<Route
+  path="/student/tests/attempts/:attemptId/review"
+  element={
+    <RoleProtectedRoute allowedRole="STUDENT">
+      <Review />
+    </RoleProtectedRoute>
+  }
+/>
 
       {/* 🛑 Catch All */}
       <Route
