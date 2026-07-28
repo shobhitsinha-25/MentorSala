@@ -106,7 +106,7 @@ export default function HeroSection() {
                 <p className="mt-0.5 text-[11px] font-medium text-slate-500 leading-tight">Active Students and growing every day</p>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-3.5 shadow-sm">
-                <p className="text-xl font-extrabold text-slate-900">200+</p>
+                <p className="text-xl font-extrabold text-slate-900">10+</p>
                 <p className="mt-0.5 text-[11px] font-medium text-slate-500 leading-tight">IIT/NIT Selections from our mentorship</p>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-3.5 shadow-sm">
@@ -377,18 +377,38 @@ export default function HeroSection() {
   </p>
   <div className="mt-6 flex flex-wrap items-center justify-center gap-8 md:gap-12 text-center">
     {[
-      { name: "IIT KHARAGPUR", logo: "https://upload.wikimedia.org/wikipedia/en/1/1c/IIT_Kharagpur_Logo.svg" },
-      { name: "IIT BOMBAY", logo: "https://upload.wikimedia.org/wikipedia/en/1/1d/Indian_Institute_of_Technology_Bombay_Logo.svg" },
-      { name: "IIT DELHI", logo: "https://upload.wikimedia.org/wikipedia/en/e/e1/IIT_Delhi_logo.svg" },
-      { name: "IIT (ISM) DHANBAD", logo: "https://upload.wikimedia.org/wikipedia/en/b/b0/IIT_ISM_Dhanbad_logo.svg" },
-      { name: "NIT DURGAPUR", logo: "https://upload.wikimedia.org/wikipedia/en/e/e5/National_Institute_of_Technology%2C_Durgapur_Logo.svg" },
-      { name: "JADAVPUR UNIVERSITY", logo: "https://upload.wikimedia.org/wikipedia/en/e/e0/Jadavpur_University_Logo.svg" },
+      { 
+        name: "IIT KHARAGPUR", 
+        logo: "https://upload.wikimedia.org/wikipedia/en/1/1c/IIT_Kharagpur_Logo.svg" 
+      },
+      { 
+        name: "IIT BOMBAY", 
+        logo: "https://upload.wikimedia.org/wikipedia/en/1/1d/Indian_Institute_of_Technology_Bombay_Logo.svg" 
+      },
+      { 
+        name: "IIT DELHI", 
+        // Fixed: Replaced Wikipedia page link with direct SVG URL
+        logo: "https://upload.wikimedia.org/wikipedia/en/e/e1/IIT_Delhi_logo.svg" 
+      },
+      { 
+        name: "IIT (ISM) DHANBAD", 
+        logo: "https://upload.wikimedia.org/wikipedia/en/b/b0/IIT_ISM_Dhanbad_logo.svg" 
+      },
+      { 
+        name: "NIT DURGAPUR", 
+        logo: "https://upload.wikimedia.org/wikipedia/en/e/e5/National_Institute_of_Technology%2C_Durgapur_Logo.svg" 
+      },
+      { 
+        name: "JADAVPUR UNIVERSITY", 
+        logo: "https://upload.wikimedia.org/wikipedia/en/e/e0/Jadavpur_University_Logo.svg" 
+      },
     ].map((inst) => (
       <div key={inst.name} className="flex flex-col items-center group cursor-pointer transition-transform hover:scale-105">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 border border-slate-100 p-2 shadow-2xl transition-all group-hover:border-indigo-200 group-hover:bg-indigo-50/50">
           <img 
             src={inst.logo} 
             alt={inst.name} 
+            crossOrigin="anonymous"
             className="h-full w-full object-contain filter grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300" 
             onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
               const img = e.currentTarget;
@@ -520,7 +540,7 @@ export default function HeroSection() {
 
   <div className="relative z-10 grid grid-cols-2 gap-6 text-center md:grid-cols-4">
     <div className="flex flex-col items-center">
-      <p className="text-3xl font-black text-purple-950 sm:text-4xl">1M+</p>
+      <p className="text-3xl font-black text-purple-950 sm:text-4xl">100k+</p>
       <p className="mt-1 text-xs font-semibold text-purple-700/80">AI Doubts Solved</p>
     </div>
 
@@ -530,7 +550,7 @@ export default function HeroSection() {
     </div>
 
     <div className="flex flex-col items-center md:border-l md:border-purple-200/50">
-      <p className="text-3xl font-black text-purple-950 sm:text-4xl">50K+</p>
+      <p className="text-3xl font-black text-purple-950 sm:text-4xl">10K+</p>
       <p className="mt-1 text-xs font-semibold text-purple-700/80">Tests Attempted Daily</p>
     </div>
 
