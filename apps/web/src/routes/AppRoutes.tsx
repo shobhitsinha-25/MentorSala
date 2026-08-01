@@ -23,6 +23,7 @@ import About from "../pages/About/About";
 import TermsConditions from "../pages/TermsAndConditon/TermsAndCondition"
 import PrivacyPolicy from "../pages/PrivacyPolicy/PrivacyPolicy";
 import HelpCenter from "../pages/HelpCentre/HelpCenter";
+import Careers from "../pages/careers/careers"
 
 import MentorOnboarding
 from "../pages/mentor/MentorOnboarding";
@@ -110,6 +111,10 @@ function AppRoutes() {
 <Route
   path="/help"
   element={<HelpCenter />}
+/>
+<Route 
+path="/careers"
+element={<Careers />}
 />
 
 

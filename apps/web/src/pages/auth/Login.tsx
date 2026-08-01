@@ -4,6 +4,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import api from "../../lib/axios";
 import { useAuthStore } from "../../store/auth.store";
 import { AlertCircle, GraduationCap, TrendingUp, Trophy } from "lucide-react";
+import axios from "axios";
 
 export default function Login() {
   const setUser = useAuthStore((state) => state.setUser);
@@ -95,40 +96,26 @@ export default function Login() {
         // =========================================
         handleRoleRouting(res.data.user);
       }
-    } catch (error: any) {
-      console.error("Login Exception Handle Context:", error);
-      
-      const rawData = error?.response?.data?.message || error?.response?.data;
-      
-      // =========================================
-      // CLEAN RAW SCHEMA STRINGS & ARRAYS
-      // =========================================
-      if (rawData) {
-        try {
-          // If the error message is a stringified JSON array or object
-          const parsed = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
-          
-          if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].message) {
-            setErrorMessage(parsed[0].message);
-            return;
-          } else if (parsed.message) {
-            setErrorMessage(parsed.message);
-            return;
-          }
-        } catch (e) {
-          // If parsing fails, fall back check if it's already an array type
-          if (Array.isArray(rawData) && rawData.length > 0 && rawData[0].message) {
-            setErrorMessage(rawData[0].message);
-            return;
-          }
-        }
-      }
+    } catch (error: unknown) {
 
-      // Fallback clean message string if formatting doesn't contain a schema structure
-      setErrorMessage(
-        typeof rawData === "string" ? rawData : "Invalid account credentials entered"
-      );
-    }
+  // Log only in development
+  if (import.meta.env.DEV) {
+    console.error("Login error:", error);
+  }
+
+  // Network/server unavailable
+  if (axios.isAxiosError(error) && !error.response) {
+    setErrorMessage(
+      "Unable to connect to the server. Please check your internet connection and try again."
+    );
+    return;
+  }
+
+  // Generic message for production
+  setErrorMessage(
+    "Login failed. Please check your email and password, then try again."
+  );
+}
   };
 
   return (

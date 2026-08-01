@@ -68,7 +68,7 @@ export default function Footer() {
             <div className="space-y-2">
               {[
                 { label: "About Us", to: "/about", isLink: true },
-                { label: "Careers", isLink: false },
+                { label: "Careers",to: "/careers", isLink: true },
                 { label: "Blog", isLink: false },
                 { label: "Press", isLink: false },
               ].map((item) => 

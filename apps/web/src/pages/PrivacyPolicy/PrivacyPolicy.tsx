@@ -199,8 +199,8 @@ export default function PrivacyPolicy() {
 
             <div className="flex items-center gap-2 rounded-xl bg-white border border-slate-200/80 px-4 py-2.5 shadow-xs">
               <span className="text-slate-400">Email:</span>
-              <a href="mailto:privacy@mentorsala.com" className="text-indigo-600 hover:underline">
-                privacy@mentorsala.com
+              <a href="mailto:support@mentorsala.com" className="text-indigo-600 hover:underline">
+                support@mentorsala.com
               </a>
             </div>
 
