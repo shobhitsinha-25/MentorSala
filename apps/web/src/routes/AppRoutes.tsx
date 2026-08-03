@@ -71,7 +71,7 @@ import ReadyScreen from "../pages/student/tests/WaitingScreen";
 import TestEngine from "../pages/student/tests/pages/TestEngine";
 import Result from "../pages/student/tests/pages/Result";
 import Review from "../pages/student/tests/pages/Review";
-
+import SuccessStories from"../pages/Feedback/SuccessStories";
 
 
 
@@ -117,6 +117,10 @@ path="/careers"
 element={<Careers />}
 />
 
+<Route
+  path="/success-stories"
+  element={<SuccessStories />}
+/>
 
       <Route
   path="/signup"

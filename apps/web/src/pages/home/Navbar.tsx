@@ -6,13 +6,13 @@ export default function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50 p-3 bg-transparent select-none">
       {/* Floating Floating Curved Wrapper */}
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between rounded-full border border-[#E8E5F5] bg-white/80 backdrop-blur-xl shadow-md shadow-[#99ccff]">
-        
+
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <img 
-            src={mentorsalalogo} 
-            alt="Mentor Sala Logo" 
-            className="h-8 w-auto object-contain" 
+          <img
+            src={mentorsalalogo}
+            alt="Mentor Sala Logo"
+            className="h-8 w-auto object-contain"
           />
           <h1 className="text-2xl md:text-3xl font-black tracking-tight text-black">
             Mentor
@@ -24,31 +24,31 @@ export default function Navbar() {
 
         {/* Right-aligned Navigation Links and Buttons */}
         <div className="flex items-center gap-4 lg:gap-10">
-          
-          {/* Nav Links (Shifted right next to login) */}
+
+          {/* Nav Links */}
           <div className="hidden lg:flex items-center gap-10 text-black">
-            {[
-              {
-                label: "Courses",
-                href: "#courses",
-              },
-              {
-                label: "Mentors",
-                href: "#mentors",
-              },
-              {
-                label: "Success Stories",
-                href: "#hero",
-              },
-            ].map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="text-[15px] font-medium text-[#64748B] transition hover:text-[#2563EB]"
-              >
-                {item.label}
-              </a>
-            ))}
+
+            <a
+              href="#courses"
+              className="text-[15px] font-medium text-[#64748B] transition hover:text-[#2563EB]"
+            >
+              Courses
+            </a>
+
+            <a
+              href="#mentors"
+              className="text-[15px] font-medium text-[#64748B] transition hover:text-[#2563EB]"
+            >
+              Mentors
+            </a>
+
+            <Link
+              to="/success-stories"
+              className="text-[15px] font-medium text-[#64748B] transition hover:text-[#2563EB]"
+            >
+              Success Stories
+            </Link>
+
           </div>
 
           <Link
@@ -64,6 +64,7 @@ export default function Navbar() {
           >
             Start Free
           </Link>
+
         </div>
 
       </div>
