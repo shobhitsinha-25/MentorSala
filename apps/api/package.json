@@ -9,7 +9,7 @@
 
     "build": "tsc",
 
-    "start": "dotenv -e .env.production -- node dist/server.js",
+    "start": "node dist/server.js",
 
     "prisma:generate": "dotenv -e .env.development -- prisma generate",
 
