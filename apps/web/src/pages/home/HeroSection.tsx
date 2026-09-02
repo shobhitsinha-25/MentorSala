@@ -7,6 +7,7 @@ import jadhavpurlogo from "../../assets/jadhavpur university.png";
 import botlogo from "../../assets/botlogo.png";
 import mentorlogo from "../../assets/m1.jpeg";
 import { Link } from "react-router-dom";
+import { ShinyText } from "@/components/lightswind/shiny-text";
 import { 
   Play, 
   Check, 
@@ -25,6 +26,8 @@ import {
   LayoutDashboard,
   ExternalLink,
   MessageSquare,
+  ChevronLeft, 
+  ChevronRight, 
   Send
 } from "lucide-react";
 
@@ -61,6 +64,61 @@ export default function HeroSection() {
 
     return () => clearTimeout(timer);
   }, [displayText, isDeleting, currentWordIndex]);
+
+  const fullPhrase = "Everything You Need to Rank Higher";
+const highlightStart = fullPhrase.indexOf("Rank Higher"); // index where purple/indigo starts
+const [displayedLength, setDisplayedLength] = useState(0);
+const [isSentenceDeleting, setIsSentenceDeleting] = useState(false);
+
+useEffect(() => {
+  let timer: ReturnType<typeof setTimeout>;
+
+  if (!isSentenceDeleting) {
+    if (displayedLength < fullPhrase.length) {
+      timer = setTimeout(() => {
+        setDisplayedLength((prev) => prev + 1);
+      }, 70);
+    } else {
+      timer = setTimeout(() => {
+        setIsSentenceDeleting(true);
+      }, 2500);
+    }
+  } else {
+    if (displayedLength > 0) {
+      timer = setTimeout(() => {
+        setDisplayedLength((prev) => prev - 1);
+      }, 35);
+    } else {
+      setIsSentenceDeleting(false);
+    }
+  }
+
+  return () => clearTimeout(timer);
+}, [displayedLength, isSentenceDeleting]);
+
+// Carousel state: 5 cards total - 3 visible at once = max index of 2
+const [currentSlide, setCurrentSlide] = useState(0);
+const totalCards = 5;
+const visibleCards = 3;
+const maxSlideIndex = totalCards - visibleCards; // 2
+
+const handlePrev = () => {
+  setCurrentSlide((prev) => (prev <= 0 ? maxSlideIndex : prev - 1));
+};
+
+const handleNext = () => {
+  setCurrentSlide((prev) => (prev >= maxSlideIndex ? 0 : prev + 1));
+};
+
+// Automatic left-right sliding every 4 seconds
+useEffect(() => {
+  const interval = setInterval(() => {
+    handleNext();
+  }, 2000);
+  return () => clearInterval(interval);
+}, [currentSlide]);
+
+
 
   return (
     <section id="hero" className="relative min-h-screen overflow-hidden bg-[#F8F9FE] px-4 pt-24 sm:pt-28 pb-12 sm:pb-16 lg:px-8">
@@ -113,12 +171,24 @@ export default function HeroSection() {
               </span>
 
               <Link
-                to="/signup"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-[#5B46F6] px-6 sm:px-7 py-3 sm:py-3.5 text-sm sm:text-base font-semibold text-white shadow-md shadow-indigo-500/25 transition-all duration-300 hover:bg-[#4C36E4] hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto"
-              >
-                Start Free
-                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1 sm:w-[18px] sm:h-[18px]" />
-              </Link>
+  to="/signup"
+  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-[#5B46F6] px-6 sm:px-7 py-3 sm:py-3.5 text-sm sm:text-base font-semibold text-white shadow-md shadow-indigo-500/25 transition-all duration-300 hover:bg-[#4C36E4] hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto"
+>
+  <ShinyText
+    baseColor="#000000"
+    shineColor="#f9f9f9"
+    speed={2.5}
+    intensity={0.9}
+    className="inline-block"
+  >
+    Start Free
+  </ShinyText>
+
+  <ArrowRight
+    size={16}
+    className="transition-transform group-hover:translate-x-1 sm:w-[18px] sm:h-[18px]"
+  />
+</Link>
             </div>
 
             {/* Feature Checklist */}
@@ -417,104 +487,173 @@ export default function HeroSection() {
 
         {/* FEATURES GRID SECTION */}
         <div className="mt-16 sm:mt-20 lg:mt-24 text-center">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 px-2">
-            Everything You Need to <span className="text-indigo-600">Rank Higher</span>
-          </h2>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 px-2 min-h-[1.3em]">
+  {displayedLength <= highlightStart ? (
+    fullPhrase.slice(0, displayedLength)
+  ) : (
+    <>
+      {fullPhrase.slice(0, highlightStart)}
+      <span className="text-indigo-600">
+        {fullPhrase.slice(highlightStart, displayedLength)}
+      </span>
+    </>
+  )}
+</h2>
 
-          <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
-            {/* Feature 1 */}
-            <div className="rounded-2xl bg-white p-5 text-left border border-slate-100 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                  <Calendar size={18} />
-                </div>
-                <h3 className="mt-4 text-base font-bold text-slate-900">AI-Powered Study Plan</h3>
-                <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-                  Personalized daily plans that adapt to your performance and learning pace.
-                </p>
-              </div>
-              <div className="mt-6 rounded-xl bg-slate-50 p-2.5 text-[10px]">
-                <p className="font-bold text-slate-700">Today's Plan</p>
-                <div className="mt-1 flex justify-between text-slate-500">
-                  <span>Physics</span>
-                  <span className="font-bold text-indigo-600">75%</span>
-                </div>
-              </div>
+       <div className="relative mt-8 sm:mt-12 mx-auto w-full max-w-6xl">
+  
+ 
+
+  {/* Centered 3-Card Viewport Window */}
+  <div className="overflow-hidden py-3">
+    {/* Sliding Track */}
+    <div
+      className="flex transition-transform duration-500 ease-out"
+      style={{
+        transform: `translateX(-${currentSlide * (100 / visibleCards)}%)`
+      }}
+    >
+      {/* Feature 1 */}
+      <div className="w-full shrink-0 px-2 sm:px-3 sm:w-1/2 lg:w-1/3">
+        <div className="group relative rounded-2xl bg-white p-5 text-left border border-slate-200/80 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-300 flex flex-col justify-between overflow-hidden h-full">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-indigo-500/5 blur-2xl transition-all duration-500 group-hover:bg-indigo-500/15 group-hover:scale-150" />
+          <div className="relative z-10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-all duration-300 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-md group-hover:shadow-indigo-500/30">
+              <Calendar size={18} />
             </div>
-
-            {/* Feature 2 */}
-            <div className="rounded-2xl bg-white p-5 text-left border border-slate-100 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                  <FileText size={18} />
-                </div>
-                <h3 className="mt-4 text-base font-bold text-slate-900">Unlimited Mock Tests</h3>
-                <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-                  Chapter-wise, full syllabus & previous year tests with real exam experience.
-                </p>
-              </div>
-              <div className="mt-6 rounded-xl bg-slate-50 p-2.5 text-[10px]">
-                <p className="text-slate-400">Mock Test Score</p>
-                <p className="text-sm font-extrabold text-slate-800">240 / 300 <span className="text-emerald-500 text-[10px] font-bold">↑ 24</span></p>
-              </div>
+            <h3 className="mt-4 text-base font-bold text-slate-900 transition-colors duration-200 group-hover:text-indigo-600">
+              AI-Powered Study Plan
+            </h3>
+            <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+              Personalized daily plans that adapt to your performance and learning pace.
+            </p>
+          </div>
+          <div className="relative z-10 mt-6 rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 text-[10px] transition-colors duration-200 group-hover:border-indigo-100 group-hover:bg-indigo-50/40">
+            <p className="font-bold text-slate-700">Today's Plan</p>
+            <div className="mt-1 flex justify-between text-slate-500">
+              <span>Physics</span>
+              <span className="font-bold text-indigo-600">75%</span>
             </div>
-
-            {/* Feature 3 */}
-            <div className="rounded-2xl bg-white p-5 text-left border border-slate-100 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                  <LineChart size={18} />
-                </div>
-                <h3 className="mt-4 text-base font-bold text-slate-900">AI Performance Analysis</h3>
-                <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-                  Detailed analysis of strengths, weaknesses and improvement areas.
-                </p>
-              </div>
-              <div className="mt-6 flex justify-center">
-                <img 
-                  src={botlogo} 
-                  alt="AI Bot Logo" 
-                  className="h-12 w-12 object-contain rounded-full shadow-sm" 
-                />
-              </div>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="rounded-2xl bg-white p-5 text-left border border-slate-100 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                  <Video size={18} />
-                </div>
-                <h3 className="mt-4 text-base font-bold text-slate-900">IIT Mentor Guidance</h3>
-                <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-                  Learn from IITians who guide you, motivate you and keep you accountable.
-                </p>
-              </div>
-              <div className="mt-6 flex items-center gap-2 rounded-xl bg-slate-50 p-2">
-                <img className="h-7 w-7 rounded-full object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" alt="Mentor" />
-                <div className="text-[9px]">
-                  <p className="font-bold text-slate-800">Aditya Pratap Singh</p>
-                  <p className="text-slate-400">IIT Jammu</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="rounded-2xl bg-white p-5 text-left border border-slate-100 shadow-sm flex flex-col justify-between sm:col-span-2 md:col-span-1">
-              <div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                  <MessageSquare size={18} />
-                </div>
-                <h3 className="mt-4 text-base font-bold text-slate-900">Doubt Solving 24x7</h3>
-                <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-                  Get instant solutions from AI or connect with mentors whenever you need.
-                </p>
-              </div>
-              <div className="mt-6 rounded-xl bg-indigo-50/70 p-2 text-[9px] text-indigo-900">
-                <p className="font-semibold">What is the formula for differential equations?</p>
-              </div>
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200/80">
+              <div className="h-full w-[75%] rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-all duration-500 group-hover:w-[85%]" />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Feature 2 */}
+      <div className="w-full shrink-0 px-2 sm:px-3 sm:w-1/2 lg:w-1/3">
+        <div className="group relative rounded-2xl bg-white p-5 text-left border border-slate-200/80 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-300 flex flex-col justify-between overflow-hidden h-full">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-indigo-500/5 blur-2xl transition-all duration-500 group-hover:bg-indigo-500/15 group-hover:scale-150" />
+          <div className="relative z-10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-all duration-300 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-md group-hover:shadow-indigo-500/30">
+              <FileText size={18} />
+            </div>
+            <h3 className="mt-4 text-base font-bold text-slate-900 transition-colors duration-200 group-hover:text-indigo-600">
+              Unlimited Mock Tests
+            </h3>
+            <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+              Chapter-wise, full syllabus & previous year tests with real exam experience.
+            </p>
+          </div>
+          <div className="relative z-10 mt-6 rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 text-[10px] transition-colors duration-200 group-hover:border-indigo-100 group-hover:bg-indigo-50/40">
+            <p className="text-slate-400">Mock Test Score</p>
+            <div className="mt-0.5 flex items-baseline justify-between">
+              <p className="text-sm font-extrabold text-slate-800">240 / 300</p>
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-600 border border-emerald-200/60 transition-transform group-hover:scale-105">
+                ↑ 24 pts
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Feature 3 */}
+      <div className="w-full shrink-0 px-2 sm:px-3 sm:w-1/2 lg:w-1/3">
+        <div className="group relative rounded-2xl bg-white p-5 text-left border border-slate-200/80 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-300 flex flex-col justify-between overflow-hidden h-full">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-indigo-500/5 blur-2xl transition-all duration-500 group-hover:bg-indigo-500/15 group-hover:scale-150" />
+          <div className="relative z-10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-all duration-300 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-md group-hover:shadow-indigo-500/30">
+              <LineChart size={18} />
+            </div>
+            <h3 className="mt-4 text-base font-bold text-slate-900 transition-colors duration-200 group-hover:text-indigo-600">
+              AI Performance Analysis
+            </h3>
+            <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+              Detailed analysis of strengths, weaknesses and improvement areas.
+            </p>
+          </div>
+          <div className="relative z-10 mt-6 flex items-center justify-center rounded-xl border border-slate-100 bg-slate-50/80 p-2 transition-colors duration-200 group-hover:border-indigo-100 group-hover:bg-indigo-50/40">
+            <div className="relative flex items-center justify-center">
+              <div className="absolute -inset-1.5 rounded-full bg-indigo-400/20 blur-sm animate-pulse opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <img 
+                src={botlogo} 
+                alt="AI Bot Logo" 
+                className="relative h-11 w-11 object-contain rounded-full drop-shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" 
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Feature 4 */}
+      <div className="w-full shrink-0 px-2 sm:px-3 sm:w-1/2 lg:w-1/3">
+        <div className="group relative rounded-2xl bg-white p-5 text-left border border-slate-200/80 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-300 flex flex-col justify-between overflow-hidden h-full">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-indigo-500/5 blur-2xl transition-all duration-500 group-hover:bg-indigo-500/15 group-hover:scale-150" />
+          <div className="relative z-10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-all duration-300 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-md group-hover:shadow-indigo-500/30">
+              <Video size={18} />
+            </div>
+            <h3 className="mt-4 text-base font-bold text-slate-900 transition-colors duration-200 group-hover:text-indigo-600">
+              IIT Mentor Guidance
+            </h3>
+            <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+              Learn from IITians who guide you, motivate you and keep you accountable.
+            </p>
+          </div>
+          <div className="relative z-10 mt-6 flex items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50/80 p-2 transition-colors duration-200 group-hover:border-indigo-100 group-hover:bg-indigo-50/40">
+            <img 
+              className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-200/60 transition-transform duration-300 group-hover:scale-105" 
+              src={mentorlogo} 
+              alt="Mentor" 
+            />
+            <div className="text-[9px] overflow-hidden">
+              <p className="font-bold text-slate-800 truncate">Aditya Pratap Singh</p>
+              <p className="font-medium text-indigo-600 truncate">IIT Jammu</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Feature 5 */}
+      <div className="w-full shrink-0 px-2 sm:px-3 sm:w-1/2 lg:w-1/3">
+        <div className="group relative rounded-2xl bg-white p-5 text-left border border-slate-200/80 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-300 flex flex-col justify-between overflow-hidden h-full">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-indigo-500/5 blur-2xl transition-all duration-500 group-hover:bg-indigo-500/15 group-hover:scale-150" />
+          <div className="relative z-10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-all duration-300 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white group-hover:shadow-md group-hover:shadow-indigo-500/30">
+              <MessageSquare size={18} />
+            </div>
+            <h3 className="mt-4 text-base font-bold text-slate-900 transition-colors duration-200 group-hover:text-indigo-600">
+              Doubt Solving 24x7
+            </h3>
+            <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+              Get instant solutions from AI or connect with mentors whenever you need.
+            </p>
+          </div>
+          <div className="relative z-10 mt-6 rounded-xl border border-indigo-100/80 bg-indigo-50/60 p-2.5 text-[9px] text-indigo-950 transition-all duration-200 group-hover:bg-indigo-100/70 group-hover:shadow-sm">
+            <div className="flex items-center gap-1.5">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <p className="font-medium line-clamp-1">What is the formula for differential equations?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Pagination Dots Indicator */}
+  
+</div>
         </div>
 
         {/* STATS BAR (Light Purple Glassmorphism Theme) */}

@@ -1,4 +1,4 @@
-// src/components/common/PageLoader.tsx
+import mentorsalalog from "../../assets/logo1.png";
 
 export default function PageLoader() {
   return (
@@ -30,13 +30,15 @@ export default function PageLoader() {
         />
 
         {/* Circular Glassmorphic Core */}
-        <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-slate-900/90 shadow-2xl backdrop-blur-md shadow-purple-950/60">
+        <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-slate-900/90 shadow-2xl backdrop-blur-md shadow-purple-950/60 p-3">
           <div className="absolute inset-0 rounded-full bg-purple-500/10" />
 
-          {/* Glowing 'M' Letter */}
-          <span className="relative text-3xl font-black italic tracking-tighter bg-gradient-to-tr from-purple-400 via-purple-200 to-white bg-clip-text text-transparent drop-shadow-[0_0_14px_rgba(168,85,247,0.7)] animate-pulse">
-            M
-          </span>
+          {/* Mentorsala Logo */}
+          <img 
+            src={mentorsalalog} 
+            alt="MentorSala Loading" 
+            className="relative h-full w-full object-contain drop-shadow-[0_0_12px_rgba(168,85,247,0.7)] animate-pulse"
+          />
         </div>
       </div>
     </div>
