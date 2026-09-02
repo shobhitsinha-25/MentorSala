@@ -1,35 +1,27 @@
 {
   "compilerOptions": {
-    "typeRoots": ["./node_modules/@types", "./src/types"],
-    "target": "ES2020",
-
-    "module": "CommonJS",
-    "moduleResolution": "node",
-
-    "rootDir": "./src",
-    "outDir": "./dist",
-
-    "strict": true,
-
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
     "skipLibCheck": true,
 
-    "resolveJsonModule": true,
+    "moduleResolution": "bundler",
 
-    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
 
-    "isolatedModules": false,
+    "ignoreDeprecations": "6.0",
 
-    "verbatimModuleSyntax": false,
-
-    "sourceMap": true,
-
-    "types": ["node","express", "multer"]
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true
   },
-
-  "include": ["src"],
-
-  "exclude": ["node_modules", "dist"]
+  "include": ["src"]
 }
