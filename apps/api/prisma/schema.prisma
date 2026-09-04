@@ -25,7 +25,7 @@ enum ExamType {
 
 enum TestType {
   CHAPTER
-  SUBJECT 
+  SUBJECT
   MOCK
   PYQ
   PRACTICE
@@ -77,6 +77,42 @@ enum QuestionType {
   ASSERTION_REASON
 }
 
+enum PaymentStatus {
+  CREATED
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  UPI
+  NETBANKING
+  WALLET
+  EMI
+  OTHER
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+enum PlanLimitType {
+  LIMITED
+  UNLIMITED
+  NOT_ALLOWED
+}
+
+enum PlanLimitPeriod {
+  DAILY
+  MONTHLY
+  LIFETIME
+}
+
 // =====================================================
 // USER MODEL
 // =====================================================
@@ -113,6 +149,7 @@ model User {
   // Relations
   mentorProfile     Mentor?
   subscriptions     UserSubscription[]
+  payments          Payment[]
   bookedSessions    MentorshipSession[]       @relation("StudentSessions")
   questionAttempts  QuestionAttempt[]
   mentorPreferences StudentMentorPreference[]
@@ -194,7 +231,6 @@ model Mentor {
 // =====================================================
 
 model Subject {
-
   id String @id @default(cuid())
 
   name String
@@ -240,7 +276,6 @@ model Subject {
   // ==========================================
 
   @@unique([examType, slug])
-
 }
 
 // =====================================================
@@ -260,19 +295,18 @@ model Chapter {
 
   subjectId String
 
-  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subject           Subject            @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   practiceQuestions PracticeQuestion[]
 
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
-  isDeleted Boolean @default(false)
+  isDeleted Boolean  @default(false)
 
   tests Test[]
 }
 
 model PracticeQuestion {
-
   id String @id @default(cuid())
 
   questionType QuestionType
@@ -333,7 +367,6 @@ model PracticeQuestion {
 // Test Series Model....
 
 model Test {
-
   id String @id @default(cuid())
 
   title String
@@ -450,9 +483,8 @@ model TestAttempt {
 
   answers AttemptAnswer[]
 
-  @@index([userId, testId, status])
-
   @@unique([userId, testId, attemptNumber])
+  @@index([userId, testId, status])
 }
 
 model AttemptAnswer {
@@ -552,6 +584,8 @@ model SubscriptionPlan {
   isPopular              Boolean            @default(false)
   isActive               Boolean            @default(true)
   subscriptions          UserSubscription[]
+  payments               Payment[]
+  testLimits             PlanTestLimit[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -580,6 +614,127 @@ model UserSubscription {
   @@index([userId])
   @@index([planId])
   @@index([status])
+}
+
+model PlanTestLimit {
+  id String @id @default(cuid())
+
+  planId   String
+  testType TestType
+
+  limitType PlanLimitType @default(LIMITED)
+  limit     Int?
+
+  period PlanLimitPeriod @default(MONTHLY)
+
+  plan SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([planId, testType])
+  @@index([planId])
+}
+
+// =====================================================
+// PAYMENT
+// =====================================================
+
+model Payment {
+  id String @id @default(cuid())
+
+  userId String
+  planId String
+
+  // Razorpay identifiers
+  razorpayOrderId   String  @unique
+  razorpayPaymentId String? @unique
+
+  // Amount is stored in INR paise
+  amount   Int
+  currency String @default("INR")
+
+  status PaymentStatus @default(CREATED)
+
+  method PaymentMethod?
+
+  // Razorpay payment metadata
+  email       String?
+  contact     String?
+  description String?
+
+  errorCode        String?
+  errorDescription String?
+
+  capturedAt DateTime?
+  failedAt   DateTime?
+
+  // Relation
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  refunds Refund[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// =====================================================
+// REFUND
+// =====================================================
+
+model Refund {
+  id String @id @default(cuid())
+
+  paymentId String
+
+  razorpayRefundId String @unique
+
+  amount Int
+
+  currency String @default("INR")
+
+  status RefundStatus @default(PENDING)
+
+  reason String?
+
+  processedAt DateTime?
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([status])
+}
+
+// =====================================================
+// RAZORPAY WEBHOOK EVENT
+// =====================================================
+
+model RazorpayWebhookEvent {
+  id String @id @default(cuid())
+
+  eventId String @unique
+
+  event String
+
+  processed Boolean @default(false)
+
+  processedAt DateTime?
+
+  payload Json
+
+  createdAt DateTime @default(now())
+
+  @@index([event])
+  @@index([processed])
 }
 
 // =====================================================
@@ -651,8 +806,6 @@ model MentorshipSession {
 // =====================================================
 // PRACTICE QUESTIONS
 // =====================================================
-
-
 
 // =====================================================
 // QUESTION ATTEMPTS

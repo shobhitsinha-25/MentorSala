@@ -732,49 +732,58 @@ return (
           </div>
         )}
 
-        {/* MULTIPLE CORRECT */}
         {questionType === "MULTIPLE_CORRECT" && (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {options.map((option) => {
-              const isActive =
-  Array.isArray(answer) &&
-  answer.includes(option.key);
-              return (
-                <button
-                  key={option.key}
-                  type="button"
-                  onClick={() => {
-                    if (
-  Array.isArray(answer) &&
-  answer.includes(option.key)
-) {
-                      setAnswer(
-                        answer.filter(
-                          (item) =>
-                            item !== option.key
-                        )
-                      );
-                    }
-                    else {
-                      setAnswer(
-  Array.isArray(answer)
-    ? answer.filter(item => item !== option.key)
-    : []
-);
-                    }
-                  }}
-                  className={`rounded-xl border p-4 font-bold text-sm tracking-wide transition-all duration-200 transform active:scale-95 shadow-md ${
-                    isActive
-                      ? "border-indigo-500 bg-indigo-600 text-white ring-2 ring-indigo-500/20"
-                      : "border-slate-700/80 bg-slate-800 hover:bg-slate-700 text-slate-300"
-                  }`}
-                >
-                  Option {option.key}
-                </button>
-              );
-            })}
-          </div>
-        )}
+  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+    {options.map((option) => {
+
+      const isActive =
+        Array.isArray(answer) &&
+        answer.includes(option.key);
+
+      return (
+        <button
+          key={option.key}
+          type="button"
+          onClick={() => {
+
+            setAnswer((prev) => {
+
+              const current =
+                Array.isArray(prev)
+                  ? prev
+                  : [];
+
+              if (current.includes(option.key)) {
+
+                // Remove selected option
+                return current.filter(
+                  (item) =>
+                    item !== option.key
+                );
+
+              }
+
+              // Add newly selected option
+              return [
+                ...current,
+                option.key,
+              ];
+
+            });
+
+          }}
+          className={`rounded-xl border p-4 font-bold text-sm tracking-wide transition-all duration-200 transform active:scale-95 shadow-md ${
+            isActive
+              ? "border-indigo-500 bg-indigo-600 text-white ring-2 ring-indigo-500/20"
+              : "border-slate-700/80 bg-slate-800 hover:bg-slate-700 text-slate-300"
+          }`}
+        >
+          Option {option.key}
+        </button>
+      );
+    })}
+  </div>
+)}
 {/* INTEGER */}
 {questionType === "INTEGER" && (
   <div className="max-w-md">

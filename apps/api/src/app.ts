@@ -19,7 +19,6 @@ import sessionRoutes from "./modules/mentorship/session/session.routes";
 import adminQuestionRoutes from "./modules/question/admin/admin.question.routes"
 
 import studentQuestionRoutes from "./modules/question/student/student.question.routes";
-import subscriptionRoutes from "./modules/subscription/subscription.routes";
 
 import subjectRoutes from "./modules/subject/subject.routes";
 import chapterRoutes from "./modules/chapter/chapter.routes"
@@ -27,6 +26,8 @@ import adminTestRoutes from "./modules/test/admin/admin.test.routes";
 import builderRoutes from "./modules/test/builder/builder.routes";
 import uploadRoutes from "./modules/upload/upload.routes";
 import studentTestRoutes from "./modules/test/student/student.test.routes";
+
+import adminPlanRoutes from "./modules/admin/plan/admin.plan.routes";
 const app = express();
 
 
@@ -98,10 +99,7 @@ app.use(
   studentTestRoutes
 );
 
-app.use(
-  "/api/plans",
-  subscriptionRoutes
-);
+
 
 app.use(
   "/api/admin/subjects",
@@ -129,6 +127,11 @@ app.use(
 
 uploadRoutes
 
+);
+
+app.use(
+  "/admin/plans",
+  adminPlanRoutes
 );
 
 app.use(errorHandler);
