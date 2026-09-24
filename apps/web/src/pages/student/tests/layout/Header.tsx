@@ -91,11 +91,11 @@ const Header = ({
 
           {/* Candidate Profile */}
           <div className="border-l border-white/10 pl-4 text-white">
-            <CandidateInfo
-              name={user?.name ?? "Student"}
-              avatar={user?.avatar}
-            />
-          </div>
+  <CandidateInfo
+    name={user?.name ?? "Student"}
+    avatar={user?.avatar ?? undefined}
+  />
+</div>
         </div>
       </div>
 
