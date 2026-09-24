@@ -1,6 +1,8 @@
 import prisma from "../../config/prisma";
 
-
+import {
+  ExamType,
+} from "@prisma/client";
 
 interface CreateChapterInput {
 
@@ -124,6 +126,63 @@ export const getAllMentorsForAdmin = async () => {
   });
 
   return mentors;
+};
+
+export const getPublicMentors = async (
+  examType?: ExamType
+) => {
+  return prisma.mentor.findMany({
+    where: {
+      isDeleted: false,
+      isVerified: true,
+      availableForMentorship: true,
+
+      ...(examType
+        ? {
+            examType,
+          }
+        : {}),
+    },
+
+    select: {
+      id: true,
+      bio: true,
+      profileHeadline: true,
+      profileImage: true,
+      qualification: true,
+      experienceYears: true,
+      expertise: true,
+      skills: true,
+      languages: true,
+      examType: true,
+      rating: true,
+      totalStudents: true,
+      totalSessions: true,
+      totalReviews: true,
+      availableForMentorship: true,
+      isVerified: true,
+
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
+    },
+
+    orderBy: [
+      {
+        rating: "desc",
+      },
+      {
+        totalSessions: "desc",
+      },
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
 };
 
 // ======================================================

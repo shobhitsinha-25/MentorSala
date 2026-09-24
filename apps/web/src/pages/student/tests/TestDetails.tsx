@@ -87,10 +87,10 @@ const TestDetail = () => {
 
     return (
 
-      <div className="min-h-screen flex items-center justify-center bg-slate-50/50">
+      <div className="min-h-screen flex items-center justify-center bg-white">
 
         <Loader2
-          className="animate-spin text-indigo-600"
+          className="animate-spin text-purple-600"
           size={42}
         />
 
@@ -108,7 +108,7 @@ const TestDetail = () => {
 
     return (
 
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50/50">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
 
         <h2 className="text-3xl font-bold text-slate-800">
 
@@ -120,7 +120,7 @@ const TestDetail = () => {
 
           onClick={() => navigate(-1)}
 
-          className="mt-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 font-semibold shadow-md shadow-indigo-600/20 transition"
+          className="mt-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 font-semibold shadow-md shadow-purple-600/20 transition"
 
         >
 
@@ -148,7 +148,7 @@ const TestDetail = () => {
 
         onClick={() => navigate(-1)}
 
-        className="flex items-center gap-2 text-white hover:text-slate-100/50 font-medium transition mb-2"
+        className="flex items-center gap-2 text-slate-600 hover:text-purple-600 font-medium transition mb-2"
 
       >
 
@@ -158,7 +158,7 @@ const TestDetail = () => {
 
       </button>
 
-      <div className="bg-gradient-to-br bg-white rounded-3xl border border-slate-200/80 p-8 shadow-sm">
+      <div className="bg-gradient-to-br from-purple-50/60 to-white rounded-3xl border border-purple-100 p-8 shadow-sm">
 
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
@@ -174,13 +174,13 @@ const TestDetail = () => {
 
               
 
-              <span className="rounded-full bg-indigo-100/80 border border-indigo-200/80 text-indigo-700 px-4 py-1 text-sm font-semibold">
+              <span className="rounded-full bg-purple-100 border border-purple-200 text-purple-700 px-4 py-1 text-sm font-semibold">
 
                 {test.type}
 
               </span>
 
-              <span className="rounded-full bg-amber-100/80 border border-amber-200/80 text-amber-700 px-4 py-1 text-sm font-semibold">
+              <span className="rounded-full bg-fuchsia-100 border border-fuchsia-200 text-fuchsia-700 px-4 py-1 text-sm font-semibold">
 
                 {test.examType}
 
@@ -196,7 +196,7 @@ const TestDetail = () => {
 
             disabled={starting}
 
-            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white rounded-xl px-8 py-4 font-semibold shadow-lg shadow-indigo-600/20 transition disabled:opacity-60"
+            className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 active:scale-[0.99] text-white rounded-xl px-8 py-4 font-semibold shadow-lg shadow-purple-600/20 transition disabled:opacity-60"
 
           >
 
@@ -244,9 +244,9 @@ const TestDetail = () => {
 
       <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5">
 
-        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-purple-100 p-6 shadow-sm hover:border-purple-200 transition">
 
-          <Clock3 className="text-indigo-600 mb-3" size={24} />
+          <Clock3 className="text-purple-600 mb-3" size={24} />
 
           <p className="text-3xl font-bold text-slate-900">
 
@@ -262,9 +262,9 @@ const TestDetail = () => {
 
         </div>
 
-        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-purple-100 p-6 shadow-sm hover:border-purple-200 transition">
 
-          <BookOpen className="text-emerald-600 mb-3" size={24} />
+          <BookOpen className="text-violet-600 mb-3" size={24} />
 
           <p className="text-3xl font-bold text-slate-900">
 
@@ -280,7 +280,7 @@ const TestDetail = () => {
 
         </div>
 
-        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-purple-100 p-6 shadow-sm hover:border-purple-200 transition">
 
           <Trophy className="text-amber-500 mb-3" size={24} />
 
@@ -298,7 +298,7 @@ const TestDetail = () => {
 
         </div>
 
-        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-purple-100 p-6 shadow-sm hover:border-purple-200 transition">
 
           <MinusCircle className="text-rose-500 mb-3" size={24} />
 
@@ -324,7 +324,7 @@ const TestDetail = () => {
 
       <div className="grid lg:grid-cols-2 gap-6">
 
-        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-purple-100 p-6 shadow-sm">
 
           <h2 className="text-xl font-bold text-slate-900 mb-6">
 
@@ -334,9 +334,9 @@ const TestDetail = () => {
 
           <div className="space-y-5">
 
-            <div className="border-b border-slate-100 pb-3">
+            <div className="border-b border-purple-50 pb-3">
 
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <p className="text-xs font-semibold text-purple-400 uppercase tracking-wider">
 
                 Exam
 
@@ -350,9 +350,9 @@ const TestDetail = () => {
 
             </div>
 
-            <div className="border-b border-slate-100 pb-3">
+            <div className="border-b border-purple-50 pb-3">
 
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <p className="text-xs font-semibold text-purple-400 uppercase tracking-wider">
 
                 Subject
 
@@ -368,7 +368,7 @@ const TestDetail = () => {
 
             <div>
 
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <p className="text-xs font-semibold text-purple-400 uppercase tracking-wider">
 
                 Chapter
 
@@ -386,7 +386,7 @@ const TestDetail = () => {
 
         </div>
 
-        <div className="bg-gradient-to-br from-white to-[#ccccff] rounded-2xl border border-slate-200/80 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-purple-100 p-6 shadow-sm">
 
           <h2 className="text-xl font-bold text-slate-900 mb-6">
 

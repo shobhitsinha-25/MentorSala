@@ -2,191 +2,173 @@ import prisma from "../../../config/prisma";
 
 import dayjs from "../../../lib/dayjs";
 
+import {
+  consumeMentorshipSession,
+} from "../../user/subscription/entitlement/entitlement.service";
+
 // ======================================================
 // BOOK SESSION
 // ======================================================
 
-export const bookMentorshipSession =
-  async (
+export const bookMentorshipSession = async (
+  studentId: string,
+  mentorId: string,
+  scheduledAt: string
+) => {
+  // ==================================================
+  // CONVERT TO DATE
+  // ==================================================
 
-    studentId: string,
+  const parsedDate = dayjs(scheduledAt);
 
-    mentorId: string,
+  if (!parsedDate.isValid()) {
+    throw new Error("Invalid scheduled time.");
+  }
 
-    scheduledAt: string
+  const sessionDate = parsedDate.toDate();
 
-  ) => {
+  // ==================================================
+  // CHECK MENTOR EXISTS
+  // ==================================================
 
-    // ==================================================
-    // CONVERT TO DATE
-    // ==================================================
+  const mentor = await prisma.mentor.findUnique({
+    where: {
+      id: mentorId,
+    },
+  });
 
-    const sessionDate =
-      dayjs(scheduledAt).toDate();
+  if (!mentor) {
+    throw new Error("Mentor not found");
+  }
 
-    // ==================================================
-    // CHECK MENTOR EXISTS
-    // ==================================================
+  // ==================================================
+  // TRANSACTION
+  // ==================================================
 
-    const mentor =
-      await prisma.mentor.findUnique({
+  const session = await prisma.$transaction(
+    async (tx) => {
+      // ==================================================
+      // CHECK EXISTING SESSION
+      // ==================================================
 
-        where: {
-          id: mentorId,
-        },
-
-      });
-
-    if (!mentor) {
-
-      throw new Error(
-        "Mentor not found"
-      );
-
-    }
-
-    // ==================================================
-    // CHECK EXISTING SESSION
-    // ==================================================
-
-    const existingSession =
-      await prisma.mentorshipSession.findUnique({
-
-        where: {
-
-          mentorId_scheduledAt: {
-
-            mentorId,
-
-            scheduledAt:
-              sessionDate,
-
-          },
-
-        },
-
-      });
-
-    // ==================================================
-    // IF SESSION EXISTS AND IS CANCELLED
-    // REUSE THE SLOT
-    // ==================================================
-
-    if (
-      existingSession &&
-      existingSession.status ===
-        "CANCELLED"
-    ) {
-
-      const reopenedSession =
-        await prisma.mentorshipSession.update({
-
+      const existingSession =
+        await tx.mentorshipSession.findUnique({
           where: {
+            mentorId_scheduledAt: {
+              mentorId,
+              scheduledAt: sessionDate,
+            },
+          },
+        });
 
-            id:
-              existingSession.id,
+      // ==================================================
+      // SLOT ALREADY TAKEN
+      // ==================================================
 
+      if (
+        existingSession &&
+        existingSession.status !== "CANCELLED"
+      ) {
+        throw new Error("Slot already booked");
+      }
+
+      // ==================================================
+      // CONSUME MENTORSHIP ENTITLEMENT
+      // ==================================================
+      //
+      // IMPORTANT:
+      // Quota is consumed during booking.
+      // This prevents a student with 0 remaining
+      // sessions from booking a slot.
+      //
+
+      const entitlement =
+        await consumeMentorshipSession(
+          tx,
+          studentId
+        );
+
+      // ==================================================
+      // ENTITLEMENT DENIED
+      // ==================================================
+
+      if (!entitlement.allowed) {
+        throw new Error(
+          entitlement.reason ??
+            "You are not eligible to book a mentorship session."
+        );
+      }
+
+      // ==================================================
+      // IF SESSION EXISTS AND IS CANCELLED
+      // REUSE THE SLOT
+      // ==================================================
+
+      if (
+        existingSession &&
+        existingSession.status === "CANCELLED"
+      ) {
+        return tx.mentorshipSession.update({
+          where: {
+            id: existingSession.id,
           },
 
           data: {
-
             studentId,
 
-            status:
-              "SCHEDULED",
+            status: "SCHEDULED",
 
-            cancellationReason:
-              null,
+            cancellationReason: null,
 
-            studentFeedback:
-              null,
-
+            studentFeedback: null,
           },
-
         });
+      }
 
-      return reopenedSession;
+      // ==================================================
+      // CREATE NEW SESSION
+      // ==================================================
 
-    }
-
-    // ==================================================
-    // SLOT ALREADY TAKEN
-    // ==================================================
-
-    if (
-      existingSession
-    ) {
-
-      throw new Error(
-        "Slot already booked"
-      );
-
-    }
-
-    // ==================================================
-    // CREATE NEW SESSION
-    // ==================================================
-
-    const session =
-      await prisma.mentorshipSession.create({
-
+      return tx.mentorshipSession.create({
         data: {
-
           mentorId,
 
           studentId,
 
-          scheduledAt:
-            sessionDate,
+          scheduledAt: sessionDate,
 
           duration: 30,
 
-          status:
-            "SCHEDULED",
-
+          status: "SCHEDULED",
         },
-
       });
+    },
 
     // ==================================================
-    // RETURN
+    // INTERACTIVE TRANSACTION OPTIONS
     // ==================================================
 
-    return session;
+    {
+      maxWait: 10000,
+      timeout: 15000,
+    }
+  );
 
-  };
+  // ==================================================
+  // RETURN
+  // ==================================================
+
+  return session;
+};
 // ======================================================
 // GET STUDENT SESSIONS
 // ======================================================
+
 
 export const getStudentSessions =
   async (
     studentId: string
   ) => {
-
-    await prisma.mentorshipSession.updateMany({
-
-      where: {
-
-        studentId,
-
-        status: "SCHEDULED",
-
-        scheduledAt: {
-
-          lt: new Date(),
-
-        },
-
-      },
-
-      data: {
-
-        status: "CANCELLED",
-
-      },
-
-    });
 
     const sessions =
       await prisma.mentorshipSession.findMany({
@@ -326,131 +308,230 @@ export const getMentorSessions =
 // CANCEL SESSION
 // ======================================================
 
-export const cancelSession =
-  async (
+export const cancelSession = async (
+  sessionId: string,
+  userId: string
+) => {
+  // ==================================================
+  // FIND SESSION
+  // ==================================================
 
-    sessionId: string,
+  const session =
+    await prisma.mentorshipSession.findUnique({
+      where: {
+        id: sessionId,
+      },
+    });
 
-    userId: string
+  // ==================================================
+  // SESSION NOT FOUND
+  // ==================================================
 
-  ) => {
+  if (!session) {
+    throw new Error("Session not found");
+  }
 
-    // ==================================================
-    // FIND SESSION
-    // ==================================================
+  // ==================================================
+  // ONLY STUDENT CAN CANCEL OWN SESSION
+  // ==================================================
 
-    const session =
-      await prisma.mentorshipSession.findUnique({
+  if (session.studentId !== userId) {
+    throw new Error("Unauthorized");
+  }
 
-        where: {
+  // ==================================================
+  // CHECK SESSION STATUS
+  // ==================================================
 
-          id: sessionId,
+  if (session.status === "CANCELLED") {
+    throw new Error("Session already cancelled");
+  }
 
-        },
+  // ==================================================
+  // CHECK 8 HOUR RULE
+  // ==================================================
 
-      });
+  const now = dayjs();
 
-    // ==================================================
-    // SESSION NOT FOUND
-    // ==================================================
+  const sessionTime = dayjs(
+    session.scheduledAt
+  );
 
-    if (!session) {
+  const hoursDifference =
+    sessionTime.diff(
+      now,
+      "hour"
+    );
 
-      throw new Error(
-        "Session not found"
-      );
+  // ==================================================
+  // CANNOT CANCEL WITHIN 8 HOURS
+  // ==================================================
 
-    }
+  if (hoursDifference < 8) {
+    throw new Error(
+      "Session can only be cancelled at least 8 hours before scheduled time"
+    );
+  }
 
-    // ==================================================
-    // ONLY STUDENT CAN CANCEL OWN SESSION
-    // ==================================================
+  // ==================================================
+  // CANCEL SESSION + RELEASE QUOTA
+  // ==================================================
 
-    if (
-      session.studentId !==
-      userId
-    ) {
+  const cancelledSession =
+    await prisma.$transaction(
+      async (tx) => {
 
-      throw new Error(
-        "Unauthorized"
-      );
+        // ==================================================
+        // FIND ACTIVE SUBSCRIPTION
+        // ==================================================
 
-    }
+        const activeSubscription =
+          await tx.userSubscription.findFirst({
+            where: {
+              userId,
 
-    // ==================================================
-    // CHECK SESSION STATUS
-    // ==================================================
+              status: "ACTIVE",
 
-    if (
-      session.status ===
-      "CANCELLED"
-    ) {
+              startsAt: {
+                lte: now.toDate(),
+              },
 
-      throw new Error(
-        "Session already cancelled"
-      );
+              expiresAt: {
+                gt: now.toDate(),
+              },
+            },
 
-    }
+            orderBy: [
+              {
+                isTrial: "asc",
+              },
+              {
+                expiresAt: "desc",
+              },
+            ],
+          });
 
-    // ==================================================
-    // CHECK 8 HOUR RULE
-    // ==================================================
+        // ==================================================
+        // RELEASE MENTORSHIP USAGE
+        // ==================================================
 
-    const now =
-      dayjs();
+        if (activeSubscription) {
 
-    const sessionTime =
-      dayjs(
-        session.scheduledAt
-      );
+          // ==================================================
+          // DETERMINE USAGE PERIOD
+          // ==================================================
 
-    const hoursDifference =
-      sessionTime.diff(
-        now,
-        "hour"
-      );
+          let periodStart: Date;
+          let periodEnd: Date;
 
-    // ==================================================
-    // CANNOT CANCEL
-    // ==================================================
+          // ==================================================
+          // TRIAL PERIOD
+          // ==================================================
 
-    if (
-      hoursDifference < 8
-    ) {
+          if (activeSubscription.isTrial) {
 
-      throw new Error(
+            periodStart =
+              activeSubscription.startsAt;
 
-        "Session can only be cancelled at least 8 hours before scheduled time"
+            periodEnd =
+              activeSubscription.expiresAt;
 
-      );
+          }
 
-    }
+          // ==================================================
+          // PAID SUBSCRIPTION
+          // ==================================================
 
-    // ==================================================
-    // CANCEL SESSION
-    // ==================================================
+          else {
 
-    const cancelledSession =
-      await prisma.mentorshipSession.update({
+            periodStart =
+              dayjs(now.toDate())
+                .startOf("month")
+                .toDate();
 
-        where: {
+            periodEnd =
+              dayjs(now.toDate())
+                .endOf("month")
+                .toDate();
 
-          id: sessionId,
+          }
 
-        },
+          // ==================================================
+          // FIND EXISTING USAGE
+          // ==================================================
 
-        data: {
+          const usage =
+            await tx.subscriptionUsage.findUnique({
+              where: {
+                subscriptionId_resource_variant_periodStart:
+                  {
+                    subscriptionId:
+                      activeSubscription.id,
 
-          status:
-            "CANCELLED",
+                    resource:
+                      "MENTORSHIP_SESSION",
 
-        },
+                    variant:
+                      "DEFAULT",
 
-      });
+                    periodStart,
+                  },
+              },
+            });
 
-    return cancelledSession;
+          // ==================================================
+          // RELEASE 1 RESERVED SESSION
+          // ==================================================
 
-  };
+          if (
+            usage &&
+            usage.used > 0
+          ) {
+
+            await tx.subscriptionUsage.update({
+              where: {
+                id: usage.id,
+              },
+
+              data: {
+                used: {
+                  decrement: 1,
+                },
+              },
+            });
+
+          }
+        }
+
+        // ==================================================
+        // CANCEL SESSION
+        // ==================================================
+
+        const updatedSession =
+          await tx.mentorshipSession.update({
+            where: {
+              id: sessionId,
+            },
+
+            data: {
+              status: "CANCELLED",
+            },
+          });
+
+        // ==================================================
+        // RETURN
+        // ==================================================
+
+        return updatedSession;
+      }
+    );
+
+  // ==================================================
+  // RETURN CANCELLED SESSION
+  // ==================================================
+
+  return cancelledSession;
+};
 
   export const getNextSession =
   async (
@@ -513,6 +594,10 @@ export const completeSession =
     mentorUserId: string
   ) => {
 
+    // ============================================================
+    // FIND MENTOR
+    // ============================================================
+
     const mentor =
       await prisma.mentor.findUnique({
 
@@ -533,6 +618,10 @@ export const completeSession =
 
     }
 
+    // ============================================================
+    // FIND SESSION
+    // ============================================================
+
     const session =
       await prisma.mentorshipSession.findUnique({
 
@@ -552,6 +641,10 @@ export const completeSession =
 
     }
 
+    // ============================================================
+    // VERIFY MENTOR OWNERSHIP
+    // ============================================================
+
     if (
       session.mentorId !==
       mentor.id
@@ -562,6 +655,10 @@ export const completeSession =
       );
 
     }
+
+    // ============================================================
+    // CHECK CANCELLED
+    // ============================================================
 
     if (
       session.status ===
@@ -574,6 +671,10 @@ export const completeSession =
 
     }
 
+    // ============================================================
+    // CHECK ALREADY COMPLETED
+    // ============================================================
+
     if (
       session.status ===
       "COMPLETED"
@@ -584,16 +685,54 @@ export const completeSession =
       );
 
     }
+
+    // ============================================================
+    // CALCULATE SESSION END TIME
+    // ============================================================
+    //
+    // Example:
+    //
+    // scheduledAt = 5:00 PM
+    // duration    = 30 minutes
+    //
+    // sessionEndTime = 5:30 PM
+    //
+    // The mentor cannot mark the session completed
+    // before 5:30 PM.
+    //
+
+    const sessionStartTime =
+      new Date(
+        session.scheduledAt
+      ).getTime();
+
+    const sessionDuration =
+      session.duration *
+      60 *
+      1000;
+
+    const sessionEndTime =
+      sessionStartTime +
+      sessionDuration;
+
+    // ============================================================
+    // CHECK WHETHER SESSION HAS ENDED
+    // ============================================================
+
     if (
-  new Date() <
-  session.scheduledAt
-) {
+      Date.now() <
+      sessionEndTime
+    ) {
 
-  throw new Error(
-    "Session has not started yet"
-  );
+      throw new Error(
+        "Session has not ended yet"
+      );
 
-}
+    }
+
+    // ============================================================
+    // MARK SESSION AS COMPLETED
+    // ============================================================
 
     return prisma.mentorshipSession.update({
 
@@ -692,3 +831,178 @@ export const updateMeetingLink =
     });
 
   };
+
+
+const JOIN_EARLY_MINUTES = 5;
+
+export const getStudentSessionJoinInfo = async (
+  sessionId: string,
+  studentId: string
+) => {
+  const now = new Date();
+
+  const session =
+    await prisma.mentorshipSession.findUnique({
+      where: {
+        id: sessionId,
+      },
+      include: {
+        mentor: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+  if (!session) {
+    throw new Error(
+      "Mentorship session not found."
+    );
+  }
+
+  // ==========================================
+  // STUDENT OWNERSHIP
+  // ==========================================
+
+  if (session.studentId !== studentId) {
+    throw new Error(
+      "You are not authorized to join this session."
+    );
+  }
+
+  // ==========================================
+  // SESSION STATUS
+  // ==========================================
+
+  if (session.status === "CANCELLED") {
+    throw new Error(
+      "This mentorship session has been cancelled."
+    );
+  }
+
+  if (session.status === "COMPLETED") {
+    throw new Error(
+      "This mentorship session has already been completed."
+    );
+  }
+
+  // ==========================================
+  // ACTIVE SUBSCRIPTION / TRIAL
+  // ==========================================
+
+  const activeSubscription =
+    await prisma.userSubscription.findFirst({
+      where: {
+        userId: studentId,
+        status: "ACTIVE",
+        startsAt: {
+          lte: now,
+        },
+        expiresAt: {
+          gt: now,
+        },
+      },
+      orderBy: [
+        {
+          isTrial: "asc",
+        },
+        {
+          expiresAt: "desc",
+        },
+      ],
+    });
+
+  if (!activeSubscription) {
+    throw new Error(
+      "Your subscription or trial has expired."
+    );
+  }
+
+  // ==========================================
+  // JOIN WINDOW
+  // ==========================================
+
+  const joinStart = new Date(
+    session.scheduledAt.getTime() -
+      JOIN_EARLY_MINUTES * 60 * 1000
+  );
+
+  const sessionEnd = new Date(
+    session.scheduledAt.getTime() +
+      session.duration * 60 * 1000
+  );
+
+  // ==========================================
+  // TOO EARLY
+  // ==========================================
+
+  if (now < joinStart) {
+    return {
+      sessionId: session.id,
+      scheduledAt: session.scheduledAt,
+      duration: session.duration,
+      status: session.status,
+      canJoin: false,
+      joinStart,
+      sessionEnd,
+      mentor: {
+        id: session.mentor.user.id,
+        name: session.mentor.user.name,
+        avatar: session.mentor.user.avatar,
+      },
+      message:
+        "The mentorship session has not started yet.",
+    };
+  }
+
+  // ==========================================
+  // SESSION ENDED
+  // ==========================================
+
+  if (now >= sessionEnd) {
+    return {
+      sessionId: session.id,
+      scheduledAt: session.scheduledAt,
+      duration: session.duration,
+      status: session.status,
+      canJoin: false,
+      joinStart,
+      sessionEnd,
+      mentor: {
+        id: session.mentor.user.id,
+        name: session.mentor.user.name,
+        avatar: session.mentor.user.avatar,
+      },
+      message:
+        "The mentorship session has ended.",
+    };
+  }
+
+  // ==========================================
+  // CAN JOIN
+  // ==========================================
+
+  return {
+    sessionId: session.id,
+    scheduledAt: session.scheduledAt,
+    duration: session.duration,
+    status: session.status,
+    canJoin: true,
+    joinStart,
+    sessionEnd,
+    mentor: {
+      id: session.mentor.user.id,
+      name: session.mentor.user.name,
+      avatar: session.mentor.user.avatar,
+    },
+    message:
+      "You can join the mentorship session.",
+  };
+};

@@ -15,6 +15,10 @@ from "../../config/prisma";
 import { asyncHandler }
 from "../../utils/asyncHandler";
 
+import {
+  ExamType,
+} from "@prisma/client";  
+
 import nodemailer
 from "nodemailer";
 
@@ -22,6 +26,7 @@ import { Resend } from "resend";
 
 import {
   getMentors,
+  getPublicMentors,
 } from "./mentor.service";
 
 
@@ -56,6 +61,25 @@ export const getMentorsController =
 
   );
 
+
+export const getPublicMentorsController =
+  asyncHandler(
+    async (
+      req: Request,
+      res: Response
+    ) => {
+      const examType =
+        req.query.examType as ExamType | undefined;
+
+      const mentors =
+        await getPublicMentors(examType);
+
+      return res.status(200).json({
+        success: true,
+        mentors,
+      });
+    }
+  );
 
 
 // ======================================================

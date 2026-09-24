@@ -8,6 +8,7 @@ import {
   Star,
   Users,
   GraduationCap,
+  X,
 } from "lucide-react";
 
 import {
@@ -49,8 +50,8 @@ const BookSession = () => {
   const fetchMentors = async () => {
     try {
       const res = await api.get("/mentors");
-      setMentors(res.data.mentors);
-      setFilteredMentors(res.data.mentors);
+      setMentors(res.data.mentors || []);
+      setFilteredMentors(res.data.mentors || []);
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || "Failed to fetch mentors"
@@ -69,16 +70,18 @@ const BookSession = () => {
   // ==========================================
 
   useEffect(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) {
+      setFilteredMentors(mentors);
+      return;
+    }
+
     const filtered = mentors.filter(
       (mentor) =>
-        mentor.user.name
-          .toLowerCase()
-          .includes(search.toLowerCase()) ||
-        mentor.expertise.some(
-          (skill) =>
-            skill
-              .toLowerCase()
-              .includes(search.toLowerCase())
+        mentor.user.name.toLowerCase().includes(query) ||
+        mentor.qualification?.toLowerCase().includes(query) ||
+        mentor.expertise?.some((skill) =>
+          skill.toLowerCase().includes(query)
         )
     );
     setFilteredMentors(filtered);
@@ -86,134 +89,188 @@ const BookSession = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[70vh] bg-[#020617]">
-        <div className="h-8 w-8 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+      <div className="flex items-center justify-center min-h-[70vh] bg-white">
+        <div className="h-9 w-9 rounded-full border-3 border-purple-600 border-t-transparent animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="p-6 bg-[#020617] text-slate-200 min-h-screen select-none">
-      
-      {/* HEADER SECTION */}
-      <div className="mb-8 text-center sm:text-left">
-        <h1 className="text-3xl font-black text-white tracking-tight leading-none">
-          Book a Session
-        </h1>
-        <p className="text-xs font-medium text-slate-400 mt-2.5">
-          Connect with expert mentors matching your target curriculum tracks
-        </p>
-      </div>
+    <div className="p-4 sm:p-6 lg:p-8 bg-white text-slate-800 min-h-screen select-none w-full mt-4">
+      {/* Keyframe animation for the rotating conic border beam */}
+      <style>{`
+        @keyframes rotateBorderGlow {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+        .animate-border-beam {
+          animation: rotateBorderGlow 4s linear infinite;
+        }
+      `}</style>
 
-      {/* ✅ HIGHLY REFINED LUXURY SEARCH INTERFACE */}
-      <div className="relative mb-10 max-w-xl mx-auto sm:mx-0 group">
-        <Search
-          size={20}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors duration-200"
-        />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search mentor by name or expertise..."
-          className="w-full h-12 bg-[#0B0F19] border border-white/[0.06] rounded-xl pl-12 pr-16 text-sm font-semibold text-white placeholder-slate-500 outline-none focus:border-indigo-500/50 focus:bg-[#0D1321] focus:shadow-[0_0_20px_rgba(79,70,229,0.15)] transition-all duration-200 shadow-inner"
-        />
-        
+      {/* REFINED PROFESSIONAL SEARCH INTERFACE */}
+      <div className="relative mb-6 sm:mb-8 lg:mb-10 w-full max-w-xl">
+        <div className="relative rounded-2xl sm:rounded-3xl p-[2px] overflow-hidden shadow-xl shadow-cyan-500/10">
+          {/* Rotating Light-Blue / Cyan Conic Beam Border Animation */}
+          <div
+            className="absolute -inset-[150%] animate-border-beam"
+            style={{
+              background:
+                "conic-gradient(from 0deg, transparent 0deg, transparent 180deg, #38bdf8 260deg, #06b6d4 310deg, #60a5fa 340deg, transparent 360deg)",
+            }}
+          />
+
+          {/* Ambient Glow layer matching the border */}
+          <div className="absolute inset-0 rounded-2xl sm:rounded-3xl bg-cyan-400/10 blur-sm pointer-events-none" />
+
+          {/* Inner Input Card */}
+          <div className="relative flex items-center rounded-[14px] sm:rounded-[22px] bg-white border border-slate-200/80 transition-all duration-200 focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-400/10">
+            {/* Search Icon */}
+            <div className="pointer-events-none pl-3.5 sm:pl-5 pr-2 sm:pr-3 text-sky-500 transition-colors">
+              <Search size={18} className="stroke-[2.2] sm:w-5 sm:h-5" />
+            </div>
+
+            {/* Input Field */}
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search mentor by name or expertise..."
+              className="h-11 sm:h-12 w-full bg-transparent pr-16 sm:pr-20 text-xs sm:text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none"
+            />
+
+            {/* Right Actions: Clear Button / Keyboard Shortcut */}
+            <div className="absolute right-2.5 sm:right-3.5 flex items-center gap-1.5 sm:gap-2">
+              {search ? (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  aria-label="Clear search"
+                  className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
+              ) : (
+                <span className="hidden sm:inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-400 tracking-wider">
+                  ⌘
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* =====================================================
-          ✅ RECTANGULAR DISPLAY GRID WITH BALANCED DARK CONTRAST
+          RESPONSIVE GRID FOR MOBILE, TABS & LAPTOP
           ===================================================== */}
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto sm:mx-0">
-        {filteredMentors.map((mentor) => (
-          <div
-            key={mentor.id}
-            className="bg-[#0F172A]/70 border border-white/[0.05] hover:border-indigo-500/40 rounded-[24px] p-6 shadow-xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] transition-all duration-300 relative group flex flex-col justify-between overflow-hidden backdrop-blur-md"
+      {filteredMentors.length === 0 ? (
+        <div className="text-center py-16 rounded-2xl border border-dashed border-slate-300 max-w-xl">
+          <p className="text-sm font-semibold text-slate-600">No mentors found matching "{search}"</p>
+          <button
+            type="button"
+            onClick={() => setSearch("")}
+            className="mt-3 text-xs font-bold text-purple-600 hover:underline cursor-pointer"
           >
-            {/* Background Light Mesh Inlays */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] via-transparent to-transparent pointer-events-none" />
-            
-            <div>
-              {/* TOP STRIP: AVATAR & QUICK STATS */}
-              <div className="flex items-start justify-between gap-4">
-                <div className="relative shrink-0">
-                  <img
-                    src={
-                      mentor.user.avatar ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.user.name)}&background=4f46e5&color=fff`
-                    }
-                    alt={mentor.user.name}
-                    className="w-16 h-16 rounded-2xl object-cover border border-white/[0.08] shadow-md shadow-black/30 group-hover:scale-[1.02] transition-transform duration-200"
-                  />
-                  <span className={`absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-[#0B0F19] ${
-                    mentor.availableForMentorship ? "bg-emerald-500" : "bg-slate-500"
-                  }`} />
+            Clear Search
+          </button>
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 max-w-7xl">
+          {filteredMentors.map((mentor) => (
+            <div
+              key={mentor.id}
+              className="bg-white border border-purple-100 hover:border-purple-300 rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 shadow-sm hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 transition-all duration-300 relative group flex flex-col justify-between overflow-hidden"
+            >
+              {/* Ambient Background Accent */}
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-purple-100/40 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-200/40 transition-colors" />
+
+              <div>
+                {/* TOP STRIP: AVATAR & QUICK STATS */}
+                <div className="flex items-start justify-between gap-3 sm:gap-4">
+                  <div className="relative shrink-0">
+                    <img
+                      src={
+                        mentor.user.avatar ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.user.name)}&background=9333ea&color=fff`
+                      }
+                      alt={mentor.user.name}
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl object-cover border-2 border-purple-100 shadow-sm group-hover:scale-105 transition-transform duration-200"
+                    />
+                    <span
+                      className={`absolute -bottom-1 -right-1 h-3 sm:h-3.5 w-3 sm:w-3.5 rounded-full border-2 border-white ${
+                        mentor.availableForMentorship ? "bg-emerald-500" : "bg-slate-400"
+                      }`}
+                    />
+                  </div>
+
+                  {/* MINI HUD METRICS CONTAINER */}
+                  <div className="flex gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-bold">
+                    <div className="bg-amber-50 rounded-lg sm:rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5 flex items-center gap-1 border border-amber-200/70 shadow-2xs">
+                      <Star size={12} className="text-amber-500" fill="currentColor" />
+                      <span className="text-amber-800 font-extrabold">{mentor.rating}</span>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg sm:rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5 flex items-center gap-1 border border-purple-100 shadow-2xs">
+                      <Users size={12} className="text-purple-600" />
+                      <span className="text-purple-900 font-extrabold">{mentor.totalStudents}</span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* MINI HUD METRICS CONTAINER */}
-                <div className="flex gap-2 text-[11px] font-bold text-slate-400">
-                  <div className="bg-[#1E293B]/60 rounded-xl px-2.5 py-1.5 flex items-center gap-1 border border-white/[0.02] shadow-sm">
-                    <Star size={12} className="text-amber-400" fill="currentColor" />
-                    <span className="text-slate-100 font-extrabold">{mentor.rating}</span>
-                  </div>
-                  <div className="bg-[#1E293B]/60 rounded-xl px-2.5 py-1.5 flex items-center gap-1 border border-white/[0.02] shadow-sm">
-                    <Users size={12} className="text-cyan-400" />
-                    <span className="text-slate-100 font-extrabold">{mentor.totalStudents}</span>
-                  </div>
+                {/* IDENTITY HEADLINE BLOCK */}
+                <div className="mt-3 sm:mt-4 space-y-0.5">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate group-hover:text-purple-900 transition-colors">
+                    {mentor.user.name}
+                  </h2>
+                  <p className="text-[11px] sm:text-xs font-semibold text-purple-600/90 tracking-wide truncate">
+                    {mentor.qualification}
+                  </p>
                 </div>
-              </div>
 
-              {/* IDENTITY HEADLINE BLOCK */}
-              <div className="mt-4 space-y-1">
-                <h2 className="text-lg font-bold text-white tracking-tight truncate group-hover:text-indigo-300 transition-colors">
-                  {mentor.user.name}
-                </h2>
-                <p className="text-xs font-semibold text-indigo-400/90 tracking-wide truncate">
-                  {mentor.qualification}
+                {/* BIO DESCRIPTION PARAGRAPH */}
+                <p className="text-xs font-normal text-slate-500 line-clamp-3 mt-2 sm:mt-3 leading-relaxed">
+                  {mentor.bio || "No summary profile details provided."}
                 </p>
+
+                {/* EXPERTISE BADGES STRIP */}
+                <div className="flex flex-wrap gap-1.5 mt-3 sm:mt-4">
+                  {mentor.expertise.slice(0, 3).map((skill) => (
+                    <span
+                      key={skill}
+                      className="px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] font-semibold rounded-md sm:rounded-lg bg-purple-50/70 border border-purple-100 text-purple-700 tracking-wide"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                  {mentor.expertise.length > 3 && (
+                    <span className="px-2 py-0.5 sm:py-1 text-[10px] font-bold rounded-md sm:rounded-lg bg-purple-100 text-purple-700 border border-purple-200">
+                      +{mentor.expertise.length - 3}
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* BIO DESCRIPTION PARAGRAPH */}
-              <p className="text-xs font-medium text-slate-400/90 line-clamp-3 mt-3 leading-relaxed">
-                {mentor.bio || "No summary profile details provided."}
-              </p>
+              {/* BOTTOM CARD ACTION BLOCK */}
+              <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-purple-50 flex items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-semibold text-slate-500">
+                  <GraduationCap size={15} className="text-purple-600 shrink-0" />
+                  <span className="font-bold text-slate-700 truncate">{mentor.experienceYears} Yrs Exp</span>
+                </div>
 
-              {/* EXPERTISE BADGES STRIP */}
-              <div className="flex flex-wrap gap-1.5 mt-4">
-                {mentor.expertise.slice(0, 3).map((skill) => (
-                  <span
-                    key={skill}
-                    className="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-[#1E293B]/40 border border-white/[0.04] text-slate-300 tracking-wide"
-                  >
-                    {skill}
-                  </span>
-                ))}
-                {mentor.expertise.length > 3 && (
-                  <span className="px-2 py-1 text-[10px] font-bold rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 shadow-sm">
-                    +{mentor.expertise.length - 3}
-                  </span>
-                )}
+                <button
+                  onClick={() => navigate(`/student/book-session/${mentor.id}`)}
+                  className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-lg sm:rounded-xl bg-purple-600 text-white text-xs font-bold shadow-md shadow-purple-600/25 hover:bg-purple-700 active:scale-[0.98] transition-all shrink-0 cursor-pointer"
+                >
+                  View Profile
+                </button>
               </div>
             </div>
-
-            {/* BOTTOM CARD ACTION BLOCK */}
-            <div className="mt-6 pt-4 border-t border-white/[0.04] flex items-center justify-between gap-4">
-              <div className="flex items-center gap-1 text-xs font-semibold text-slate-500">
-                <GraduationCap size={14} className="text-slate-600" />
-                <span className="font-bold text-slate-400">{mentor.experienceYears} Years Exp</span>
-              </div>
-
-              <button
-                onClick={() => navigate(`/student/book-session/${mentor.id}`)}
-                className="h-10 px-4 rounded-xl bg-gradient-to-r from-[#7C3AED] to-[#2563EB] text-white text-xs font-bold shadow-md shadow-indigo-500/5 hover:opacity-95 hover:shadow-[0_0_15px_rgba(99,102,241,0.2)] active:scale-[0.98] transition-all"
-              >
-                View Profile
-              </button>
-            </div>
-
-          </div>
-        ))}
-      </div>
-
+          ))}
+        </div>
+      )}
     </div>
   );
 };

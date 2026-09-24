@@ -3,25 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-   "scripts": {
+  "scripts": {
     "dev": "dotenv -e .env.development -- tsx watch src/server.ts",
-
     "build": "tsc",
-
     "start": "node dist/server.js",
-
     "prisma:generate": "dotenv -e .env.development -- prisma generate",
-
     "prisma:migrate": "dotenv -e .env.development -- prisma migrate dev",
-
     "prisma:validate": "dotenv -e .env.development -- prisma validate",
-
     "prisma:studio": "dotenv -e .env.development -- prisma studio",
-
     "test": "echo \"Error: no test specified\" && exit 1",
-
     "create-admin": "tsx scripts/createAdmin.ts"
-
   },
   "keywords": [],
   "author": "",
@@ -41,8 +32,11 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.7",
+    "razorpay": "^2.9.8",
     "resend": "^6.12.4",
+    "socket.io": "^4.8.3",
     "streamifier": "^0.1.1",
+    "twilio": "^6.1.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {

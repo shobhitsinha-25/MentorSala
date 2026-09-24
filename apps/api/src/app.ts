@@ -28,6 +28,21 @@ import uploadRoutes from "./modules/upload/upload.routes";
 import studentTestRoutes from "./modules/test/student/student.test.routes";
 
 import adminPlanRoutes from "./modules/admin/plan/admin.plan.routes";
+import studentPlanRoutes from "./modules/user/Plans/student.plan.routes";
+import paymentRoutes from "./modules/user/Payments/payment.routes";
+
+import razorpayWebhookRoutes from "./modules/razorpay/payment/webhook/razorpay.webhook.routes";
+
+import studentSubscriptionRoutes from "../../api/src/modules/user/subscription/student.subscription.routes"
+import videoCallRoutes from "./modules/mentorship/video-call/videoCall.routes";
+import adminDailyProblemRoutes from "./modules/question/admin/daily-problem/admin.dailyProblem.routes";
+import studentDailyProblemRoutes from "./modules/question/student/daily-problem/student.dailyProblem.routes";
+import adminBlogRoutes from "./modules/admin/blog.routes";
+
+import publicBlogRoutes from "./modules/blog/blog.routes";
+import leaderboardRoutes from "./modules/leaderboard/leaderboard.routes";
+import testProgressRoutes from "./modules/test-progress/test-progress.routes";
+
 const app = express();
 
 
@@ -37,6 +52,16 @@ app.use(
     credentials: true,               
   })
 );
+
+app.use(
+  "/api/webhooks/razorpay",
+  express.raw({
+    type: "application/json",
+  }),
+  razorpayWebhookRoutes
+);
+
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -76,6 +101,16 @@ app.use(
   sessionRoutes
 );
 
+app.use(
+  "/api/leaderboard",
+  leaderboardRoutes
+);
+
+app.use(
+  "/api/student/test-progress",
+  testProgressRoutes
+);
+
 // ==========================================
 // ADMIN QUESTION BANK
 // ==========================================
@@ -99,7 +134,10 @@ app.use(
   studentTestRoutes
 );
 
-
+app.use(
+  "/api/student/subscription",
+  studentSubscriptionRoutes
+);
 
 app.use(
   "/api/admin/subjects",
@@ -109,6 +147,16 @@ app.use(
 app.use(
   "/api/admin/chapters",
   chapterRoutes
+);
+
+app.use(
+  "/api/admin/blogs",
+  adminBlogRoutes
+);
+
+app.use(
+  "/api/blogs",
+  publicBlogRoutes
 );
 
 app.use(
@@ -129,11 +177,39 @@ uploadRoutes
 
 );
 
+// Plans...
+
 app.use(
-  "/admin/plans",
+  "/api/admin/plans",
   adminPlanRoutes
 );
 
+
+app.use(
+  "/api/admin/daily-problems",
+  adminDailyProblemRoutes
+);
+
+app.use(
+  "/api/student/plans",
+  studentPlanRoutes
+);
+
+app.use(
+  "/api/student/daily-problem",
+  studentDailyProblemRoutes
+);
+
+// Payments...
+app.use(
+  "/api/student/payments",
+  paymentRoutes
+);
+
+app.use(
+  "/api/video-call",
+  videoCallRoutes
+);
 app.use(errorHandler);
 
 export default app;

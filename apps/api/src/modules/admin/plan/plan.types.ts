@@ -28,25 +28,17 @@ export interface PlanTestLimitInput {
 // ======================================================
 
 export interface CreatePlanInput {
-
   title: string;
-
   description?: string;
-
   examType: ExamType;
-
+  level: number;
   price: number;
-
   durationInDays: number;
-
   sessionsPerMonth: number;
-
+  isTrial?: boolean;
   isPopular?: boolean;
-
   isActive?: boolean;
-
   testLimits: PlanTestLimitInput[];
-
 }
 
 export interface GetPlansInput {
@@ -55,20 +47,21 @@ export interface GetPlansInput {
   search?: string;
   examType?: ExamType;
   isActive?: boolean;
+  isTrial?: boolean;
 }
 
 export interface UpdatePlanInput {
   planId: string;
-
   title?: string;
   description?: string;
   examType?: ExamType;
+  level?: number;
   price?: number;
   durationInDays?: number;
   sessionsPerMonth?: number;
+  isTrial?: boolean;
   isPopular?: boolean;
   isActive?: boolean;
-
   testLimits?: {
     testType: TestType;
     limitType: PlanLimitType;

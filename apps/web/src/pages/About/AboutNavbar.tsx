@@ -3,18 +3,22 @@ import mentorsalalogo from "../../assets/logo1.png";
 
 export default function AboutNavbar() {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 p-3 bg-transparent select-none">
-      {/* Floating Floating Curved Wrapper */}
-      <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between rounded-full border border-[#E8E5F5] bg-white/80 backdrop-blur-xl shadow-md shadow-[#99ccff]">
+    <header className="fixed top-0 left-0 right-0 z-50 p-2 sm:p-3 bg-transparent select-none">
+      {/* Floating Curved Wrapper */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between rounded-full border border-[#E8E5F5] bg-white/80 backdrop-blur-xl shadow-md shadow-[#99ccff]">
         
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <img 
-            src={mentorsalalogo} 
-            alt="Mentor Sala Logo" 
-            className="h-8 w-auto object-contain" 
+        <Link
+          to="/"
+          className="flex items-center gap-1.5 sm:gap-2 shrink-0"
+        >
+          <img
+            src={mentorsalalogo}
+            alt="Mentor Sala Logo"
+            className="h-6 sm:h-7 md:h-8 w-auto object-contain"
           />
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-black">
+
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-black tracking-tight !text-slate-900">
             Mentor
             <span className="bg-gradient-to-r from-[#7C3AED] to-[#2563EB] bg-clip-text text-transparent">
               Sala
@@ -23,18 +27,18 @@ export default function AboutNavbar() {
         </Link>
 
         {/* Right-aligned Navigation Links and Buttons */}
-        <div className="flex items-center gap-4 lg:gap-10">
+        <div className="flex items-center gap-2.5 sm:gap-4 lg:gap-10">
           
           <Link
             to="/login"
-            className="text-[15px] font-medium text-[#64748B] hover:text-[#2563EB] transition"
+            className="text-xs sm:text-[15px] font-medium text-[#64748B] hover:text-[#2563EB] transition px-1"
           >
             Login
           </Link>
 
           <Link
             to="/signup"
-            className="rounded-full bg-gradient-to-r from-[#85a6ff] to-[#6600ff] px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:scale-105 active:scale-[0.98]"
+            className="rounded-full bg-gradient-to-r from-[#85a6ff] to-[#6600ff] px-3.5 sm:px-6 py-1.5 sm:py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md transition-all duration-300 hover:scale-105 active:scale-[0.98] whitespace-nowrap"
           >
             Start Free
           </Link>

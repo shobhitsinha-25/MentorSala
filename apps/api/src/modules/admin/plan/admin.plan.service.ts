@@ -6,7 +6,8 @@ import {
 
 import type {
   CreatePlanInput,
-  GetPlansInput,UpdatePlanInput,
+  GetPlansInput,
+  UpdatePlanInput,
 } from "../plan/plan.types";
 
 
@@ -21,6 +22,48 @@ export const createPlan = async (
   return prisma.$transaction(
 
     async (tx) => {
+
+      // ================================================
+      // CHECK ACTIVE TRIAL PLAN
+      // ================================================
+
+      if (data.isTrial) {
+
+        const existingTrialPlan =
+          await tx.subscriptionPlan.findFirst({
+
+            where: {
+
+              examType:
+                data.examType,
+
+              isTrial:
+                true,
+
+              isActive:
+                true,
+
+            },
+
+            select: {
+
+              id: true,
+
+            },
+
+          });
+
+
+        if (existingTrialPlan) {
+
+          throw new Error(
+            `An active trial plan already exists for ${data.examType}.`
+          );
+
+        }
+
+      }
+
 
       // ================================================
       // CREATE PLAN
@@ -40,6 +83,9 @@ export const createPlan = async (
             examType:
               data.examType,
 
+            level:
+              data.level,
+
             price:
               data.price,
 
@@ -48,6 +94,9 @@ export const createPlan = async (
 
             sessionsPerMonth:
               data.sessionsPerMonth,
+
+            isTrial:
+              data.isTrial ?? false,
 
             isPopular:
               data.isPopular ?? false,
@@ -139,6 +188,7 @@ export const getPlans = async ({
   search,
   examType,
   isActive,
+  isTrial,
 }: GetPlansInput) => {
 
   // ====================================================
@@ -241,6 +291,20 @@ export const getPlans = async ({
 
 
   // ====================================================
+  // TRIAL FILTER
+  // ====================================================
+
+  if (
+    isTrial !== undefined
+  ) {
+
+    where.isTrial =
+      isTrial;
+
+  }
+
+
+  // ====================================================
   // FETCH PLANS + TOTAL
   // ====================================================
 
@@ -269,12 +333,30 @@ export const getPlans = async ({
 
         },
 
-        orderBy: {
+        orderBy: [
 
-          createdAt:
-            "desc",
+          {
 
-        },
+            examType:
+              "asc",
+
+          },
+
+          {
+
+            level:
+              "asc",
+
+          },
+
+          {
+
+            createdAt:
+              "desc",
+
+          },
+
+        ],
 
         skip,
 
@@ -320,6 +402,7 @@ export const getPlans = async ({
 
 };
 
+
 // ======================================================
 // GET PLAN BY ID
 // ======================================================
@@ -332,7 +415,10 @@ export const getPlanById = async (
     await prisma.subscriptionPlan.findUnique({
 
       where: {
-        id: planId,
+
+        id:
+          planId,
+
       },
 
       include: {
@@ -340,7 +426,10 @@ export const getPlanById = async (
         testLimits: {
 
           orderBy: {
-            testType: "asc",
+
+            testType:
+              "asc",
+
           },
 
         },
@@ -363,6 +452,7 @@ export const getPlanById = async (
 
 };
 
+
 // ======================================================
 // UPDATE PLAN
 // ======================================================
@@ -377,11 +467,18 @@ export const updatePlan = async ({
 
     async (tx) => {
 
+      // ================================================
+      // GET EXISTING PLAN
+      // ================================================
+
       const existingPlan =
         await tx.subscriptionPlan.findUnique({
 
           where: {
-            id: planId,
+
+            id:
+              planId,
+
           },
 
         });
@@ -396,10 +493,86 @@ export const updatePlan = async ({
       }
 
 
+      // ================================================
+      // RESOLVE FINAL VALUES
+      // ================================================
+
+      const finalExamType =
+        data.examType ??
+        existingPlan.examType;
+
+      const finalIsTrial =
+        data.isTrial ??
+        existingPlan.isTrial;
+
+      const finalIsActive =
+        data.isActive ??
+        existingPlan.isActive;
+
+
+      // ================================================
+      // CHECK ACTIVE TRIAL PLAN
+      // ================================================
+
+      if (
+        finalIsTrial &&
+        finalIsActive
+      ) {
+
+        const existingTrialPlan =
+          await tx.subscriptionPlan.findFirst({
+
+            where: {
+
+              examType:
+                finalExamType,
+
+              isTrial:
+                true,
+
+              isActive:
+                true,
+
+              id: {
+
+                not:
+                  planId,
+
+              },
+
+            },
+
+            select: {
+
+              id: true,
+
+            },
+
+          });
+
+
+        if (existingTrialPlan) {
+
+          throw new Error(
+            `An active trial plan already exists for ${finalExamType}.`
+          );
+
+        }
+
+      }
+
+
+      // ================================================
+      // UPDATE PLAN
+      // ================================================
+
       await tx.subscriptionPlan.update({
 
         where: {
-          id: planId,
+
+          id:
+            planId,
+
         },
 
         data,
@@ -416,35 +589,42 @@ export const updatePlan = async ({
         await tx.planTestLimit.deleteMany({
 
           where: {
+
             planId,
+
           },
 
         });
 
 
-        if (testLimits.length > 0) {
+        if (
+          testLimits.length > 0
+        ) {
 
           await tx.planTestLimit.createMany({
 
-            data: testLimits.map(
-              (limit) => ({
+            data:
+              testLimits.map(
+                (limit) => ({
 
-                planId,
+                  planId,
 
-                testType:
-                  limit.testType,
+                  testType:
+                    limit.testType,
 
-                limitType:
-                  limit.limitType,
+                  limitType:
+                    limit.limitType,
 
-                limit:
-                  limit.limit ?? null,
+                  limit:
+                    limit.limit ??
+                    null,
 
-                period:
-                  limit.period ?? "MONTHLY",
+                  period:
+                    limit.period ??
+                    "MONTHLY",
 
-              })
-            ),
+                })
+              ),
 
           });
 
@@ -460,7 +640,10 @@ export const updatePlan = async ({
       return tx.subscriptionPlan.findUnique({
 
         where: {
-          id: planId,
+
+          id:
+            planId,
+
         },
 
         include: {
@@ -468,7 +651,10 @@ export const updatePlan = async ({
           testLimits: {
 
             orderBy: {
-              testType: "asc",
+
+              testType:
+                "asc",
+
             },
 
           },
@@ -483,6 +669,7 @@ export const updatePlan = async ({
 
 };
 
+
 // ======================================================
 // DEACTIVATE PLAN
 // ======================================================
@@ -495,10 +682,14 @@ export const deactivatePlan = async (
     await prisma.subscriptionPlan.findUnique({
 
       where: {
-        id: planId,
+
+        id:
+          planId,
+
       },
 
     });
+
 
   if (!plan) {
 
@@ -508,6 +699,7 @@ export const deactivatePlan = async (
 
   }
 
+
   if (!plan.isActive) {
 
     throw new Error(
@@ -516,14 +708,21 @@ export const deactivatePlan = async (
 
   }
 
+
   return prisma.subscriptionPlan.update({
 
     where: {
-      id: planId,
+
+      id:
+        planId,
+
     },
 
     data: {
-      isActive: false,
+
+      isActive:
+        false,
+
     },
 
   });

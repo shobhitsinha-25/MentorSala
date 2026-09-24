@@ -7,7 +7,6 @@ import api from "../lib/axios";
 // ======================================================
 
 export interface MentorProfile {
-
   id: string;
 
   userId: string;
@@ -35,7 +34,6 @@ export interface MentorProfile {
   totalCourses: number;
 
   earnings: number;
-
 }
 
 // ======================================================
@@ -43,7 +41,6 @@ export interface MentorProfile {
 // ======================================================
 
 export interface User {
-
   id: string;
 
   name: string;
@@ -55,7 +52,7 @@ export interface User {
     | "MENTOR"
     | "ADMIN";
 
-  avatar?: string;
+  avatar?: string | null;
 
   onboardingCompleted?: boolean;
 
@@ -72,7 +69,16 @@ export interface User {
   createdAt?: string;
 
   updatedAt?: string;
+}
 
+// ======================================================
+// XP REWARD
+// ======================================================
+
+interface XPReward {
+  amount: number;
+
+  id: number;
 }
 
 // ======================================================
@@ -80,10 +86,11 @@ export interface User {
 // ======================================================
 
 interface AuthState {
-
   user: User | null;
 
   loading: boolean;
+
+  xpReward: XPReward | null;
 
   setUser: (
     user: User | null
@@ -91,8 +98,22 @@ interface AuthState {
 
   fetchCurrentUser: () => Promise<void>;
 
-  logout: () => Promise<void>;
+  // Update XP immediately after an activity
+  updateXP: (
+    xp: number,
+    level: string,
+    amount: number
+  ) => void;
 
+  // Show XP popup
+  showXPReward: (
+    amount: number
+  ) => void;
+
+  // Hide XP popup
+  clearXPReward: () => void;
+
+  logout: () => Promise<void>;
 }
 
 // ======================================================
@@ -110,17 +131,19 @@ export const useAuthStore =
 
     loading: true,
 
+    xpReward: null,
+
     // ==================================================
     // SET USER
     // ==================================================
 
-    setUser: (user) =>
+    setUser: (user) => {
 
       set({
-
         user,
+      });
 
-      }),
+    },
 
     // ==================================================
     // FETCH CURRENT USER
@@ -136,40 +159,11 @@ export const useAuthStore =
           // ============================================
 
           set({
-
             loading: true,
-
           });
 
           // ============================================
-          // CHECK ACCESS TOKEN
-          // ============================================
-
-          const token =
-            localStorage.getItem(
-              "accessToken"
-            );
-
-          // ============================================
-          // NO TOKEN
-          // ============================================
-
-          if (!token) {
-
-            set({
-
-              user: null,
-
-              loading: false,
-
-            });
-
-            return;
-
-          }
-
-          // ============================================
-          // FETCH USER
+          // FETCH CURRENT USER
           // ============================================
 
           const res =
@@ -178,24 +172,28 @@ export const useAuthStore =
             );
 
           // ============================================
-          // SAVE USER
+          // GET USER FROM BACKEND
+          // ============================================
+
+          const currentUser =
+            res.data.user as User;
+
+          // ============================================
+          // SAVE CURRENT USER
+          //
+          // XP + LEVEL COME DIRECTLY FROM BACKEND
           // ============================================
 
           set({
-
-            user:
-              res.data.user,
+            user: currentUser,
 
             loading: false,
-
           });
 
         } catch (error) {
 
           console.log(
-
             "Session restoration failed"
-
           );
 
           // ============================================
@@ -211,11 +209,9 @@ export const useAuthStore =
           // ============================================
 
           set({
-
             user: null,
 
             loading: false,
-
           });
 
         }
@@ -223,55 +219,179 @@ export const useAuthStore =
       },
 
     // ==================================================
-    // LOGOUT
+    // UPDATE XP
+    //
+    // Used after:
+    // Daily Problem
+    // Chapter Test
+    // Subject Test
+    // Mock Test
+    // PYQ
+    // Practice
+    // Daily Login
     // ==================================================
 
-    logout: async () => {
+    updateXP:
+      (
+        xp,
+        level,
+        amount
+      ) => {
 
-      try {
+        set((state) => {
 
-        // ============================================
-        // BACKEND LOGOUT
-        // ============================================
+          // ==========================================
+          // USER NOT AVAILABLE
+          // ==========================================
 
-        await api.post(
-          "/auth/logout"
-        );
+          if (!state.user) {
 
-      } catch (error) {
+            return state;
 
-        console.error(
+          }
 
-          "Logout failed:",
+          // ==========================================
+          // UPDATE USER XP + LEVEL
+          // ==========================================
 
-          error
+          const updatedUser: User = {
 
-        );
+            ...state.user,
 
-      } finally {
+            xp,
 
-        // ============================================
-        // REMOVE ACCESS TOKEN
-        // ============================================
+            level,
 
-        localStorage.removeItem(
-          "accessToken"
-        );
+          };
 
-        // ============================================
-        // CLEAR STORE
-        // ============================================
+          // ==========================================
+          // SHOW XP POPUP
+          // ==========================================
 
-        set({
+          if (amount > 0) {
 
-          user: null,
+            return {
 
-          loading: false,
+              user: updatedUser,
+
+              xpReward: {
+
+                amount,
+
+                id: Date.now(),
+
+              },
+
+            };
+
+          }
+
+          // ==========================================
+          // XP WAS NOT AWARDED
+          // ==========================================
+
+          return {
+
+            user: updatedUser,
+
+          };
 
         });
 
-      }
+      },
 
-    },
+    // ==================================================
+    // SHOW XP REWARD
+    // ==================================================
+
+    showXPReward:
+      (amount) => {
+
+        if (amount <= 0) {
+
+          return;
+
+        }
+
+        set({
+
+          xpReward: {
+
+            amount,
+
+            id: Date.now(),
+
+          },
+
+        });
+
+      },
+
+    // ==================================================
+    // CLEAR XP REWARD
+    // ==================================================
+
+    clearXPReward:
+      () => {
+
+        set({
+
+          xpReward: null,
+
+        });
+
+      },
+
+    // ==================================================
+    // LOGOUT
+    // ==================================================
+
+    logout:
+      async () => {
+
+        try {
+
+          // ============================================
+          // BACKEND LOGOUT
+          // ============================================
+
+          await api.post(
+            "/auth/logout"
+          );
+
+        } catch (error) {
+
+          console.error(
+            "Logout failed:",
+            error
+          );
+
+        } finally {
+
+          // ============================================
+          // REMOVE ACCESS TOKEN
+          // ============================================
+
+          localStorage.removeItem(
+            "accessToken"
+          );
+
+          // ============================================
+          // CLEAR STORE
+          // ============================================
+
+          set({
+
+            user: null,
+
+            loading: false,
+
+            xpReward: null,
+
+          });
+
+        }
+
+      },
 
   }));

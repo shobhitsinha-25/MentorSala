@@ -3,7 +3,7 @@ import {
   Prisma,
 } from "@prisma/client";
 
-import {
+import type {
   CreateQuestionInput,GetQuestionsInput,UpdateQuestionInput
 } from "../question.types";
 import { buildWordSearch } from "../../../utils/buildSearchFilter";

@@ -4,11 +4,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import ExamLayout from "../layout/ExamLayout";
 import QuestionCard from "../components/QuestionCard";
 import SubmitModal from "../components/SubmitModal";
+
 import {
   saveAnswer,
   markForReview,
-} from "../../../../api/studentTestApi";
-import {
   getAttempt,
   submitTest,
 } from "../../../../api/studentTestApi";
@@ -17,6 +16,8 @@ import type { Exam } from "../types/exam";
 import type { Question } from "../types/question";
 
 import SecurityGuard from "../components/SecurityGuard";
+
+import { useAuthStore } from "../../../../store/auth.store";
 
 const TestEngine = () => {
   const navigate = useNavigate();
@@ -27,25 +28,75 @@ const TestEngine = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] =
     useState(0);
 
-  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] =
+    useState(false);
 
   // ==========================================
-  // AUTO SUBMIT
+  // AUTH / XP
   // ==========================================
 
-  const handleSubmitTest = async () => {
-    if (!attemptId) return;
+  const user = useAuthStore(
+    (state) => state.user
+  );
 
-    try {
+  const setUser = useAuthStore(
+    (state) => state.setUser
+  );
+
+  const showXPReward = useAuthStore(
+    (state) => state.showXPReward
+  );
+
+  // ==========================================
+  // SUBMIT TEST
+  // ==========================================
+
+const handleSubmitTest = async () => {
+  if (!attemptId) {
+    return;
+  }
+
+  try {
+    const response =
       await submitTest(attemptId);
 
-      navigate(
-        `/student/tests/attempts/${attemptId}/result`
-      );
-    } catch (error) {
-      console.error("Submit failed:", error);
+    const result =
+      response.result;
+
+    if (
+      result?.user &&
+      user
+    ) {
+      setUser({
+        ...user,
+        ...result.user,
+      });
     }
-  };
+
+    if (
+      result?.xpAwarded &&
+      result.xpAwarded > 0
+    ) {
+      showXPReward(
+        result.xpAwarded
+      );
+
+      await new Promise(
+        (resolve) =>
+          setTimeout(
+            resolve,
+            3000
+          )
+      );
+    }
+
+    navigate(
+      `/student/tests/attempts/${attemptId}/result`
+    );
+  } catch {
+    // Submission failed
+  }
+};
 
   const handleTimeUp = () => {
     handleSubmitTest();
@@ -62,22 +113,30 @@ const TestEngine = () => {
       try {
         setLoading(true);
 
-        const res = await getAttempt(attemptId);
+        const res =
+          await getAttempt(attemptId);
 
         const attempt: Exam = {
           ...res.attempt,
-          questions: res.attempt.questions.map(
-            (question: Question, index: number) =>
-              index === 0
-                ? {
-                    ...question,
-                    answerState: {
-                      ...question.answerState,
-                      visited: true,
-                    },
-                  }
-                : question
-          ),
+
+          questions:
+            res.attempt.questions.map(
+              (
+                question: Question,
+                index: number
+              ) =>
+                index === 0
+                  ? {
+                      ...question,
+
+                      answerState: {
+                        ...question.answerState,
+
+                        visited: true,
+                      },
+                    }
+                  : question
+            ),
         };
 
         setExam(attempt);
@@ -103,6 +162,7 @@ const TestEngine = () => {
       <div className="flex h-screen items-center justify-center bg-[#F8FAFC]">
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#6366F1] border-t-transparent"></div>
+
           <p className="text-lg font-semibold text-[#2A0080]">
             Loading Exam...
           </p>
@@ -122,8 +182,11 @@ const TestEngine = () => {
           <p className="font-semibold text-red-600">
             Unable to load exam.
           </p>
-          <button 
-            onClick={() => window.location.reload()}
+
+          <button
+            onClick={() =>
+              window.location.reload()
+            }
             className="mt-4 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-sm font-medium hover:bg-[#5B21B6] transition"
           >
             Retry
@@ -134,33 +197,45 @@ const TestEngine = () => {
   }
 
   const currentQuestion =
-    exam.questions[currentQuestionIndex];
+    exam.questions[
+      currentQuestionIndex
+    ];
 
-  const answered = exam.questions.filter(
-    (q) => q.answerState.selectedAnswer
-  ).length;
+  const answered =
+    exam.questions.filter(
+      (q) =>
+        q.answerState.selectedAnswer
+    ).length;
 
-  const markedForReview = exam.questions.filter(
-    (q) => q.answerState.markedForReview
-  ).length;
+  const markedForReview =
+    exam.questions.filter(
+      (q) =>
+        q.answerState.markedForReview
+    ).length;
 
-  const notVisited = exam.questions.filter(
-    (q) => !q.answerState.visited
-  ).length;
+  const notVisited =
+    exam.questions.filter(
+      (q) =>
+        !q.answerState.visited
+    ).length;
 
-  const notAnswered = exam.questions.filter(
-    (q) =>
-      q.answerState.visited &&
-      !q.answerState.selectedAnswer &&
-      !q.answerState.markedForReview
-  ).length;
+  const notAnswered =
+    exam.questions.filter(
+      (q) =>
+        q.answerState.visited &&
+        !q.answerState.selectedAnswer &&
+        !q.answerState.markedForReview
+    ).length;
 
   // ==========================================
   // UPDATE ANSWER
   // ==========================================
 
   const handleAnswerSelect = async (
-    answer: string | string[] | number
+    answer:
+      | string
+      | string[]
+      | number
   ) => {
     // Update UI immediately
     setExam((prev) => {
@@ -168,17 +243,24 @@ const TestEngine = () => {
 
       return {
         ...prev,
-        questions: prev.questions.map((question) =>
-          question.id === currentQuestion.id
-            ? {
-                ...question,
-                answerState: {
-                  ...question.answerState,
-                  selectedAnswer: answer,
-                },
-              }
-            : question
-        ),
+
+        questions:
+          prev.questions.map(
+            (question) =>
+              question.id ===
+              currentQuestion.id
+                ? {
+                    ...question,
+
+                    answerState: {
+                      ...question.answerState,
+
+                      selectedAnswer:
+                        answer,
+                    },
+                  }
+                : question
+          ),
       };
     });
 
@@ -187,10 +269,13 @@ const TestEngine = () => {
         exam.id,
         currentQuestion.id,
         answer,
-        0 // Replace with actual time spent later
+        0
       );
     } catch (error) {
-      console.error("Failed to save answer:", error);
+      console.error(
+        "Failed to save answer:",
+        error
+      );
     }
   };
 
@@ -198,24 +283,33 @@ const TestEngine = () => {
   // GO TO QUESTION
   // ==========================================
 
-  const goToQuestion = (index: number) => {
+  const goToQuestion = (
+    index: number
+  ) => {
     setExam((prev) => {
       if (!prev) return prev;
 
       return {
         ...prev,
-        questions: prev.questions.map(
-          (question, questionIndex) =>
-            questionIndex === index
-              ? {
-                  ...question,
-                  answerState: {
-                    ...question.answerState,
-                    visited: true,
-                  },
-                }
-              : question
-        ),
+
+        questions:
+          prev.questions.map(
+            (
+              question,
+              questionIndex
+            ) =>
+              questionIndex === index
+                ? {
+                    ...question,
+
+                    answerState: {
+                      ...question.answerState,
+
+                      visited: true,
+                    },
+                  }
+                : question
+          ),
       };
     });
 
@@ -228,7 +322,10 @@ const TestEngine = () => {
 
   const handlePrevious = () => {
     goToQuestion(
-      Math.max(currentQuestionIndex - 1, 0)
+      Math.max(
+        currentQuestionIndex - 1,
+        0
+      )
     );
   };
 
@@ -245,85 +342,104 @@ const TestEngine = () => {
   // CLEAR RESPONSE
   // ==========================================
 
-  const handleClearResponse = async () => {
-    // Update UI immediately
-    setExam((prev) => {
-      if (!prev) return prev;
+  const handleClearResponse =
+    async () => {
+      // Update UI immediately
+      setExam((prev) => {
+        if (!prev) return prev;
 
-      return {
-        ...prev,
-        questions: prev.questions.map((question) =>
-          question.id === currentQuestion.id
-            ? {
-                ...question,
-                answerState: {
-                  ...question.answerState,
-                  selectedAnswer: null,
-                },
-              }
-            : question
-        ),
-      };
-    });
+        return {
+          ...prev,
 
-    try {
-      await saveAnswer(
-        exam.id,
-        currentQuestion.id,
-        null,
-        0
-      );
-    } catch (error) {
-      console.error("Failed to clear response:", error);
-    }
-  };
+          questions:
+            prev.questions.map(
+              (question) =>
+                question.id ===
+                currentQuestion.id
+                  ? {
+                      ...question,
+
+                      answerState: {
+                        ...question.answerState,
+
+                        selectedAnswer:
+                          null,
+                      },
+                    }
+                  : question
+            ),
+        };
+      });
+
+      try {
+        await saveAnswer(
+          exam.id,
+          currentQuestion.id,
+          null,
+          0
+        );
+      } catch (error) {
+        console.error(
+          "Failed to clear response:",
+          error
+        );
+      }
+    };
 
   // ==========================================
   // MARK FOR REVIEW
   // ==========================================
 
-  const handleMarkForReview = async () => {
-    const newReviewState =
-      !currentQuestion.answerState.markedForReview;
+  const handleMarkForReview =
+    async () => {
+      const newReviewState =
+        !currentQuestion.answerState
+          .markedForReview;
 
-    // Update UI immediately
-    setExam((prev) => {
-      if (!prev) return prev;
+      // Update UI immediately
+      setExam((prev) => {
+        if (!prev) return prev;
 
-      return {
-        ...prev,
-        questions: prev.questions.map((question) =>
-          question.id === currentQuestion.id
-            ? {
-                ...question,
-                answerState: {
-                  ...question.answerState,
-                  markedForReview: newReviewState,
-                },
-              }
-            : question
-        ),
-      };
-    });
+        return {
+          ...prev,
 
-    try {
-      await markForReview(
-        exam.id,
-        currentQuestion.id,
-        newReviewState
-      );
+          questions:
+            prev.questions.map(
+              (question) =>
+                question.id ===
+                currentQuestion.id
+                  ? {
+                      ...question,
 
-      // Only go to the next question when marking for review
-      if (newReviewState) {
-        handleNext();
+                      answerState: {
+                        ...question.answerState,
+
+                        markedForReview:
+                          newReviewState,
+                      },
+                    }
+                  : question
+            ),
+        };
+      });
+
+      try {
+        await markForReview(
+          exam.id,
+          currentQuestion.id,
+          newReviewState
+        );
+
+        if (newReviewState) {
+          handleNext();
+        }
+      } catch (error) {
+        console.error(
+          "Failed to update review status:",
+          error
+        );
       }
-    } catch (error) {
-      console.error(
-        "Failed to update review status:",
-        error
-      );
-    }
-  };
+    };
 
   // ==========================================
   // MAIN UI
@@ -334,44 +450,84 @@ const TestEngine = () => {
       <SecurityGuard
         enabled
         maxViolations={3}
-        onAutoSubmit={handleSubmitTest}
+        onAutoSubmit={
+          handleSubmitTest
+        }
       />
 
       <ExamLayout
         exam={exam}
         onTimeUp={handleTimeUp}
-        currentQuestion={currentQuestionIndex}
-        onSubjectChange={goToQuestion}
-        totalQuestions={exam.questions.length}
-        onPrevious={handlePrevious}
+        currentQuestion={
+          currentQuestionIndex
+        }
+        onSubjectChange={
+          goToQuestion
+        }
+        totalQuestions={
+          exam.questions.length
+        }
+        onPrevious={
+          handlePrevious
+        }
         onNext={handleNext}
-        onClear={handleClearResponse}
-        onMarkForReview={handleMarkForReview}
-        onQuestionSelect={goToQuestion}
-        onSubmit={() => setShowSubmitModal(true)}
+        onClear={
+          handleClearResponse
+        }
+        onMarkForReview={
+          handleMarkForReview
+        }
+        onQuestionSelect={
+          goToQuestion
+        }
+        onSubmit={() =>
+          setShowSubmitModal(true)
+        }
         isMarkedForReview={
-          currentQuestion.answerState.markedForReview
+          currentQuestion.answerState
+            .markedForReview
         }
       >
         <QuestionCard
-          question={currentQuestion}
-          totalQuestions={exam.questions.length}
-          selectedAnswer={
-            currentQuestion.answerState.selectedAnswer
+          question={
+            currentQuestion
           }
-          onSelect={handleAnswerSelect}
+          totalQuestions={
+            exam.questions.length
+          }
+          selectedAnswer={
+            currentQuestion.answerState
+              .selectedAnswer
+          }
+          onSelect={
+            handleAnswerSelect
+          }
         />
       </ExamLayout>
 
       <SubmitModal
-        isOpen={showSubmitModal}
-        totalQuestions={exam.questions.length}
+        isOpen={
+          showSubmitModal
+        }
+        totalQuestions={
+          exam.questions.length
+        }
         answered={answered}
-        notAnswered={notAnswered}
-        markedForReview={markedForReview}
-        notVisited={notVisited}
-        onClose={() => setShowSubmitModal(false)}
-        onSubmit={handleSubmitTest}
+        notAnswered={
+          notAnswered
+        }
+        markedForReview={
+          markedForReview
+        }
+        notVisited={
+          notVisited
+        }
+        onClose={() =>
+          setShowSubmitModal(false)
+        }
+        onSubmit={
+          handleSubmitTest
+        }
       />
     </div>
   );

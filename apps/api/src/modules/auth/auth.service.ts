@@ -5,12 +5,13 @@ import jwt from "jsonwebtoken";
 import prisma from "../../config/prisma";
 
 import {
-
   Role,
-
   ExamType,
-
 } from "@prisma/client";
+
+import {
+  awardDailyLoginXP,
+} from "../gamification/gamification.service";
 
 // ======================================================
 // REGISTER USER
@@ -229,6 +230,36 @@ export const loginUser = async (
   }
 
   // ====================================================
+  // DAILY LOGIN XP
+  // ====================================================
+
+  const xpResult =
+    await awardDailyLoginXP(
+      user.id
+    );
+
+  // ====================================================
+  // UPDATE LAST ACTIVE
+  // ====================================================
+
+  await prisma.user.update({
+
+    where: {
+
+      id: user.id,
+
+    },
+
+    data: {
+
+      lastActiveAt:
+        new Date(),
+
+    },
+
+  });
+
+  // ====================================================
   // ACCESS TOKEN
   // ====================================================
 
@@ -292,6 +323,19 @@ export const loginUser = async (
 
     refreshToken,
 
+    // ================================================
+    // DAILY LOGIN XP RESULT
+    // ================================================
+
+    xpAwarded:
+      xpResult.amount,
+
+    xp:
+      xpResult.xp,
+
+    level:
+      xpResult.level,
+
     user: {
 
       id:
@@ -313,13 +357,13 @@ export const loginUser = async (
         user.targetExam,
 
       xp:
-        user.xp,
+        xpResult.xp,
 
       streak:
         user.streak,
 
       level:
-        user.level,
+        xpResult.level,
 
       onboardingCompleted:
         user.onboardingCompleted,

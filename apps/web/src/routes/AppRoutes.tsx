@@ -5,6 +5,7 @@ import { useAuthStore } from "../store/auth.store";
 import Home from "../pages/home/Home";
 import Signup from "../pages/auth/Signup";
 import Login from "../pages/auth/Login";
+import Greeting from "../features/auth/pages/Greeting";
 import Onboarding from "../pages/student/Onboarding";
 import RoleProtectedRoute from "./RoleProtectedRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -15,7 +16,9 @@ import Dashboard from "../pages/student/Dashboard";
 import Subscriptions from "../pages/student/Subscriptions";
 import Analytics from "../pages/student/Analytics";
 import Tests from "../pages/Admin/Tests/Tests";
-import Leaderboard from "../pages/student/Leaderboard";
+import DashboardLeaderboard from "../../src/features/student/leaderboard/components/DashboardLeaderboard";
+import Leaderboard from "../../src/features/student/leaderboard/components/Leaderboard";
+
 import Achievements from "../pages/student/Achievements";
 import Community from "../pages/student/Community";
 import Sessions from "../pages/mentor/Sessions";
@@ -25,8 +28,11 @@ import PrivacyPolicy from "../pages/PrivacyPolicy/PrivacyPolicy";
 import HelpCenter from "../pages/HelpCentre/HelpCenter";
 import Careers from "../pages/careers/careers"
 
+import StudentPlans from "../pages/student/Plans/pages/Plans";
+import PlanDetails from "../pages/student/Plans/pages/PlanDetails";
 import MentorOnboarding
 from "../pages/mentor/MentorOnboarding";
+import Mentors from "../pages/public/Mentors";
 
 import UnderReview
 from "../pages/mentor/UnderReview";
@@ -54,7 +60,6 @@ import AdminMentors from "../pages/Admin/Mentors";
 import AdminStudents from "../pages/Admin/Students";
 import PracticeQuestions from "../pages/Admin/Problems";
 import PracticeProblems from "../pages/student/PracticeProblems";
-import Plans from "../pages/Admin/Plans";
 import Profile from "../pages/student/Profile";
 import MentorDashboardProfile from "../pages/mentor/MentorDashboardProfile";
 import Chapters from "../pages/Admin/Chapters/Chapters";
@@ -72,6 +77,22 @@ import TestEngine from "../pages/student/tests/pages/TestEngine";
 import Result from "../pages/student/tests/pages/Result";
 import Review from "../pages/student/tests/pages/Review";
 import SuccessStories from"../pages/Feedback/SuccessStories";
+import CreatePlan from "@/pages/Admin/Plans/CreatePlan";
+import Plans from "../pages/Admin/Plans/Plans";
+import EditPlan from "@/pages/Admin/Plans/EditPlan";
+import ViewPlan from "@/pages/Admin/Plans/ViewPlan";
+import PaymentResult from "../pages/student/Payment/pages/PaymentResult";
+import VideoCall from "../features/mentorship/video-call/pages/VideoCall";
+import AdminDailyProblem from "@/pages/Admin/Questions/AdminDailyProblem";
+import AdminBlogs from "@/features/admin/blogs/pages/AdminBlogs";
+
+import TestProgress from "../features/student/test-progress/components/TestProgressChart";
+
+import Blogs from "../features/blog/pages/Blogs";
+import BlogDetails from "../features/blog/pages/BlogDetails";
+import PublicCourses from "../pages/public/PublicCourses";
+import Mentorship from "../pages/public/Mentorship";
+import TestSeries from "../pages/public/TestSeries";
 
 
 
@@ -112,6 +133,26 @@ function AppRoutes() {
   path="/help"
   element={<HelpCenter />}
 />
+
+<Route
+  path="/blogs"
+  element={<Blogs />}
+/>
+
+<Route path="/courses" element={<PublicCourses />} />
+<Route path="/mentorship" element={<Mentorship />} />
+<Route path="/test-series" element={<TestSeries />} />
+
+<Route
+  path="/blogs/:slug"
+  element={<BlogDetails />}
+/>
+
+<Route
+  path="/mentors"
+  element={<Mentors />}
+/>
+
 <Route 
 path="/careers"
 element={<Careers />}
@@ -132,11 +173,18 @@ element={<Careers />}
   element={<Login />}
 />
 
+<Route path="/greeting" element={<Greeting />} />
+
 {/* Admin Routes */}
 
 <Route
   path="/admin/login"
   element={<AdminLogin />}
+/>
+
+<Route
+  path="/admin/blogs"
+  element={<AdminBlogs />}
 />
 
 <Route
@@ -214,10 +262,29 @@ element={<Careers />}
   />
 
   <Route
-    path="plans"
-    element={<Plans />}
-  />
+  path="/admin/plans/create"
+  element={<CreatePlan />}
+/>
 
+<Route
+  path="/admin/daily-problem"
+  element={<AdminDailyProblem />}
+/>
+
+<Route
+  path="plans"
+  element={<Plans />}
+/>
+<Route
+  path="plans/:planId/edit"
+  element={<EditPlan />}
+
+/>
+
+<Route
+  path="plans/:planId"
+  element={<ViewPlan />}
+/>
 </Route>
     {/* ==========================================
     MENTOR ROUTES
@@ -399,6 +466,18 @@ MENTOR ROUTES
   element={<Subscriptions />}
 />
 
+<Route
+  path="leaderboard"
+  element={<Leaderboard />}
+/>
+
+
+
+<Route
+  path="/student/test-progress"
+  element={<TestProgress />}
+/>
+
         <Route
           path="analytics"
           element={<Analytics />}
@@ -427,10 +506,7 @@ MENTOR ROUTES
 
 
 
-        <Route
-          path="leaderboard"
-          element={<Leaderboard />}
-        />
+       
 
         <Route
           path="achievements"
@@ -455,6 +531,21 @@ MENTOR ROUTES
   <Route
   path="my-sessions"
   element={<MySessions />}
+/>
+
+<Route
+  path="/student/plans"
+  element={<StudentPlans />}
+/>
+
+<Route
+  path="/student/plans/:planId"
+  element={<PlanDetails />}
+/>
+
+<Route
+  path="/student/payment/result/:paymentId"
+  element={<PaymentResult />}
 />
 
       </Route>
@@ -488,6 +579,11 @@ MENTOR ROUTES
       <Review />
     </RoleProtectedRoute>
   }
+/>
+
+<Route
+  path="/mentorship/video-call/:sessionId"
+  element={<VideoCall />}
 />
 
       {/* 🛑 Catch All */}

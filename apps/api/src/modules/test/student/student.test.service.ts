@@ -1,5 +1,8 @@
 import prisma from "../../../config/prisma";
 
+import {
+  awardXP,
+} from "../../gamification/gamification.service";
 
 import {
   Prisma,
@@ -14,6 +17,10 @@ import { validateAttemptAccess } from "./student.test.helper";
 import {
   calculateScore,evaluateAnswer
 } from "./student.test.scoring";
+
+import {
+  consumeTestSeries,getActiveSubscription
+} from "../../user/subscription/entitlement/entitlement.service";
 
 
 export interface SaveAnswerInput {
@@ -44,88 +51,82 @@ export interface MarkForReviewInput {
 
 
 // ======================================================
+// ACTIVE SUBSCRIPTION ACCESS
+// ======================================================
+//
+// Actual test access requires an active subscription, including
+// trial subscriptions. The test catalogue remains visible without
+// a subscription, while startTest() performs atomic entitlement
+// validation through consumeTestSeries().
+//
+// ======================================================
+
+const requireActiveTestSubscription = async (
+  userId: string
+) => {
+  const subscription = await getActiveSubscription(userId);
+
+  if (!subscription) {
+    throw new Error(
+      "An active subscription is required to access tests."
+    );
+  }
+
+  return subscription;
+};
+
+
+// ======================================================
 // GET ALL AVAILABLE TESTS
 // ======================================================
 
 export const getTests = async (
-
   userId: string,
-
   {
-
     page = 1,
-
     limit = 10,
-
     type,
-
     subjectId,
-
     chapterId,
-
     search,
-
   }: GetTestsInput
-
 ) => {
-
-  const skip =
-    (page - 1) * limit;
+  const skip = (page - 1) * limit;
 
   // ==========================================
   // GET STUDENT TARGET EXAM
   // ==========================================
 
-  const user =
-    await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
 
-      where: {
-
-        id: userId,
-
-      },
-
-      select: {
-
-        targetExam: true,
-
-      },
-
-    });
+    select: {
+      targetExam: true,
+    },
+  });
 
   if (!user) {
-
-    throw new Error(
-
-      "User not found."
-
-    );
-
+    throw new Error("User not found.");
   }
 
   if (!user.targetExam) {
-
     throw new Error(
-
       "Student has not selected a target exam."
-
     );
-
   }
 
   // ==========================================
   // WHERE CLAUSE
   // ==========================================
 
-  const where:
-    Prisma.TestWhereInput = {
-
+  const where: Prisma.TestWhereInput = {
     status: "PUBLISHED",
 
     isDeleted: false,
 
-    examType: user.targetExam!,
-
+    examType: user.targetExam,
   };
 
   // ==========================================
@@ -133,73 +134,44 @@ export const getTests = async (
   // ==========================================
 
   if (type) {
-
     where.type = type;
-
   }
 
   if (subjectId) {
-
     where.subjectId = subjectId;
-
   }
 
   if (chapterId) {
-
     where.chapterId = chapterId;
-
   }
 
   if (search) {
-
     where.OR = [
-
       {
-
         title: {
-
           contains: search,
-
           mode: "insensitive",
-
         },
-
       },
 
       {
-
         description: {
-
           contains: search,
-
           mode: "insensitive",
-
         },
-
       },
-
     ];
-
   }
 
   // ==========================================
   // LOAD TESTS
   // ==========================================
 
-  const [
-
-    tests,
-
-    total,
-
-  ] = await prisma.$transaction([
-
+  const [tests, total] = await prisma.$transaction([
     prisma.test.findMany({
-
       where,
 
       select: {
-
         id: true,
 
         title: true,
@@ -224,84 +196,138 @@ export const getTests = async (
 
         status: true,
 
+        // ======================================
+        // SUBJECT
+        // ======================================
+
         subject: {
-
           select: {
-
             id: true,
-
             name: true,
-
           },
-
         },
+
+        // ======================================
+        // CHAPTER
+        // ======================================
 
         chapter: {
-
           select: {
-
             id: true,
-
             title: true,
-
           },
-
         },
 
+        // ======================================
+        // STUDENT ATTEMPT
+        // ======================================
+        // Fetch the student's latest attempt.
+        //
+        // If no attempt exists:
+        // attempt = null
+        //
+        // If any attempt exists:
+        // attempt = latest attempt
+        //
+        // This allows frontend to separate:
+        // New Test       -> attempt === null
+        // Attempted Test -> attempt !== null
+        // ======================================
+
+        attempts: {
+          where: {
+            userId,
+          },
+
+          orderBy: {
+            attemptNumber: "desc",
+          },
+
+          take: 1,
+
+          select: {
+            id: true,
+
+            attemptNumber: true,
+
+            status: true,
+
+            startedAt: true,
+
+            submittedAt: true,
+
+            expiresAt: true,
+
+            score: true,
+
+            percentage: true,
+
+            correctAnswers: true,
+
+            wrongAnswers: true,
+
+            unanswered: true,
+
+            timeTaken: true,
+          },
+        },
       },
 
       orderBy: {
-
         createdAt: "desc",
-
       },
 
       skip,
 
       take: limit,
-
     }),
+
+    // ==========================================
+    // TOTAL TEST COUNT
+    // ==========================================
 
     prisma.test.count({
-
       where,
-
     }),
-
   ]);
+
+  // ==========================================
+  // FORMAT TESTS
+  // ==========================================
+
+  const formattedTests = tests.map((test) => ({
+    ...test,
+
+    // Convert the Prisma array into a single
+    // attempt object for the frontend.
+    attempt: test.attempts[0] ?? null,
+
+    // We don't need to expose the internal
+    // attempts array.
+    attempts: undefined,
+  }));
 
   // ==========================================
   // RETURN
   // ==========================================
 
   return {
-
-    tests,
+    tests: formattedTests,
 
     pagination: {
-
       page,
 
       limit,
 
       total,
 
-      totalPages:
+      totalPages: Math.ceil(total / limit),
 
-        Math.ceil(total / limit),
+      hasNextPage: page * limit < total,
 
-      hasNextPage:
-
-        page * limit < total,
-
-      hasPreviousPage:
-
-        page > 1,
-
+      hasPreviousPage: page > 1,
     },
-
   };
-
 };
 // ======================================================
 // GET TEST DETAILS
@@ -314,6 +340,8 @@ export const getTestDetails = async (
   userId: string
 
 ) => {
+  await requireActiveTestSubscription(userId);
+
 
   const test =
     await prisma.test.findFirst({
@@ -422,12 +450,32 @@ export const getTestDetails = async (
 // START TEST
 // ======================================================
 
+class ConcurrentAttemptFoundError extends Error {
+
+  constructor(
+    public attempt: {
+      id: string;
+      attemptNumber: number;
+      startedAt: Date;
+      expiresAt: Date;
+      status: string;
+    }
+  ) {
+
+    super(
+      "Another request already created an active test attempt."
+    );
+
+    this.name =
+      "ConcurrentAttemptFoundError";
+
+  }
+
+}
+
 export const startTest = async (
-
   testId: string,
-
   userId: string
-
 ) => {
 
   // ==========================================
@@ -453,6 +501,8 @@ export const startTest = async (
 
         duration: true,
 
+        type: true,
+
       },
 
     });
@@ -460,32 +510,306 @@ export const startTest = async (
   if (!test) {
 
     throw new Error(
-
       "Test not found."
-
     );
 
   }
 
   // ==========================================
-  // START / RESUME ATTEMPT
+  // START / RESUME / RE-ATTEMPT
   // ==========================================
 
-  
+  try {
 
-try {
+    const attempt =
+      await prisma.$transaction(
 
-  const attempt =
-  await prisma.$transaction(
+        async (tx) => {
 
-    async (tx) => {
+          // ======================================
+          // CURRENT TIME
+          // ======================================
 
-      // ======================================
-      // RESUME EXISTING ATTEMPT
-      // ======================================
+          const now =
+            new Date();
 
-      const activeAttempt =
-        await tx.testAttempt.findFirst({
+          // ======================================
+          // CONSUME / VALIDATE TEST ENTITLEMENT
+          // ======================================
+          //
+          // IMPORTANT:
+          //
+          // consumeTestSeries() does all of this
+          // atomically:
+          //
+          // 1. Locks active subscription
+          // 2. Verifies active subscription
+          // 3. Checks test type entitlement
+          // 4. Checks whether this test has EVER
+          //    been attempted by this student
+          // 5. Consumes quota ONLY for first attempt
+          //
+          // Therefore:
+          //
+          // First test       -> usage +1
+          // Same test        -> usage +0
+          // Different test   -> usage +1
+          // Quota exhausted  -> denied
+          // No subscription  -> denied
+          //
+          // ======================================
+
+          const entitlement =
+            await consumeTestSeries(
+              tx,
+              userId,
+              testId,
+              test.type
+            );
+
+          // ======================================
+          // ENTITLEMENT DENIED
+          // ======================================
+
+          if (!entitlement.allowed) {
+
+            throw new Error(
+              entitlement.reason ??
+                "You are not eligible to access this test."
+            );
+
+          }
+
+          // ======================================
+          // CHECK EXISTING IN-PROGRESS ATTEMPT
+          // ======================================
+          //
+          // This check happens AFTER the subscription
+          // lock inside consumeTestSeries().
+          //
+          // Therefore concurrent requests for the same
+          // user are serialized through the subscription
+          // row.
+          //
+          // ======================================
+
+          const activeAttempt =
+            await tx.testAttempt.findFirst({
+
+              where: {
+
+                testId,
+
+                userId,
+
+                status:
+                  "IN_PROGRESS",
+
+              },
+
+              select: {
+
+                id: true,
+
+                attemptNumber: true,
+
+                startedAt: true,
+
+                expiresAt: true,
+
+                status: true,
+
+              },
+
+            });
+
+          // ======================================
+          // RESUME ACTIVE ATTEMPT
+          // ======================================
+          //
+          // The test has already been attempted.
+          //
+          // consumeTestSeries() therefore consumed
+          // ZERO quota.
+          //
+          // ======================================
+
+          if (
+            activeAttempt &&
+            activeAttempt.expiresAt > now
+          ) {
+
+            return activeAttempt;
+
+          }
+
+          // ======================================
+          // FINALIZE EXPIRED ATTEMPT
+          // ======================================
+          //
+          // If an IN_PROGRESS attempt exists but
+          // its time has expired, finalize it first.
+          //
+          // This does NOT consume another quota because
+          // consumeTestSeries() already found that this
+          // test has been attempted before.
+          //
+          // ======================================
+
+          if (activeAttempt) {
+
+            await tx.testAttempt.update({
+
+              where: {
+
+                id:
+                  activeAttempt.id,
+
+              },
+
+              data: {
+
+                status:
+                  "AUTO_SUBMITTED",
+
+                submittedAt:
+                  now,
+
+              },
+
+            });
+
+          }
+
+          // ======================================
+          // FIND LAST ATTEMPT NUMBER
+          // ======================================
+
+          const lastAttempt =
+            await tx.testAttempt.findFirst({
+
+              where: {
+
+                testId,
+
+                userId,
+
+              },
+
+              orderBy: {
+
+                attemptNumber:
+                  "desc",
+
+              },
+
+              select: {
+
+                attemptNumber:
+                  true,
+
+              },
+
+            });
+
+          const attemptNumber =
+            lastAttempt
+              ? lastAttempt.attemptNumber + 1
+              : 1;
+
+          // ======================================
+          // CALCULATE ATTEMPT TIMES
+          // ======================================
+
+          const startedAt =
+            new Date();
+
+          const expiresAt =
+            new Date(
+
+              startedAt.getTime() +
+
+              test.duration *
+                60 *
+                1000
+
+            );
+
+          // ======================================
+          // CREATE NEW ATTEMPT
+          // ======================================
+
+          return tx.testAttempt.create({
+
+            data: {
+
+              userId,
+
+              testId,
+
+              attemptNumber,
+
+              startedAt,
+
+              expiresAt,
+
+              status:
+                "IN_PROGRESS",
+
+            },
+
+            select: {
+
+              id: true,
+
+              attemptNumber: true,
+
+              startedAt: true,
+
+              expiresAt: true,
+
+              status: true,
+
+            },
+
+          });
+
+        },
+
+        {
+          timeout: 10000,
+        }
+
+      );
+
+    return attempt;
+
+  } catch (error) {
+
+    // ==========================================
+    // CONCURRENT / UNIQUE CONSTRAINT FALLBACK
+    // ==========================================
+    //
+    // Normally the subscription lock prevents
+    // concurrent requests from creating duplicate
+    // attempts.
+    //
+    // This fallback is still useful if another
+    // code path creates an attempt concurrently.
+    //
+    // ==========================================
+
+    if (
+
+      error instanceof
+        Prisma.PrismaClientKnownRequestError &&
+
+      error.code === "P2002"
+
+    ) {
+
+      const existingAttempt =
+        await prisma.testAttempt.findFirst({
 
           where: {
 
@@ -493,7 +817,8 @@ try {
 
             userId,
 
-            status: "IN_PROGRESS",
+            status:
+              "IN_PROGRESS",
 
           },
 
@@ -512,177 +837,18 @@ try {
           },
 
         });
-if (activeAttempt) {
 
-    if (
-        activeAttempt.expiresAt > new Date()
-    ) {
+      if (existingAttempt) {
 
-        return activeAttempt;
+        return existingAttempt;
 
-    }
-
-    await tx.testAttempt.update({
-
-        where:{
-            id:activeAttempt.id
-        },
-
-        data:{
-            status:"SUBMITTED",
-            submittedAt:new Date()
-        }
-
-    });
-
-}
-
-      // ======================================
-      // FIND LAST ATTEMPT
-      // ======================================
-
-      const lastAttempt =
-        await tx.testAttempt.findFirst({
-
-          where: {
-
-            testId,
-
-            userId,
-
-          },
-
-          orderBy: {
-
-            attemptNumber: "desc",
-
-          },
-
-          select: {
-
-            attemptNumber: true,
-
-          },
-
-        });
-
-      const attemptNumber =
-        lastAttempt
-          ? lastAttempt.attemptNumber + 1
-          : 1;
-
-      // ======================================
-      // CALCULATE TIME
-      // ======================================
-
-      const startedAt =
-        new Date();
-
-      const expiresAt =
-        new Date(
-
-          startedAt.getTime() +
-
-          test.duration * 60 * 1000
-
-        );
-
-      // ======================================
-      // CREATE ATTEMPT
-      // ======================================
-
-      return tx.testAttempt.create({
-
-        data: {
-
-          userId,
-
-          testId,
-
-          attemptNumber,
-
-          startedAt,
-
-          expiresAt,
-
-          status: "IN_PROGRESS",
-
-        },
-
-        select: {
-
-          id: true,
-
-          attemptNumber: true,
-
-          startedAt: true,
-
-          expiresAt: true,
-
-          status: true,
-
-        },
-
-      });
+      }
 
     }
-    
 
-  );
-  return attempt;
-
-} catch (error) {
-
-  if (
-
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-
-    error.code === "P2002"
-
-  ) {
-
-    const existingAttempt =
-      await prisma.testAttempt.findFirst({
-
-        where: {
-
-          testId,
-
-          userId,
-
-          status: "IN_PROGRESS",
-
-        },
-
-        select: {
-
-          id: true,
-
-          attemptNumber: true,
-
-          startedAt: true,
-
-          expiresAt: true,
-
-          status: true,
-
-        },
-
-      });
-
-    if (existingAttempt) {
-
-      return existingAttempt;
-
-    }
+    throw error;
 
   }
-
-  throw error;
-
-}
-
-
 
 };
 
@@ -697,6 +863,8 @@ export const getAttempt = async (
   userId: string
 
 ) => {
+  await requireActiveTestSubscription(userId);
+
 
   // ==========================================
   // ATTEMPT EXISTS
@@ -1086,6 +1254,8 @@ export const saveAnswer = async ({
   timeSpent,
 
 }: SaveAnswerInput) => {
+  await requireActiveTestSubscription(userId);
+
 
   // ==========================================
   // VALIDATE ATTEMPT & QUESTION
@@ -1216,6 +1386,8 @@ export const markForReview = async ({
   markedForReview,
 
 }: MarkForReviewInput) => {
+  await requireActiveTestSubscription(userId);
+
 
   // ==========================================
   // VALIDATE ATTEMPT ACCESS
@@ -1300,12 +1472,10 @@ export const markForReview = async ({
 // ======================================================
 
 export const submitTest = async (
-
   attemptId: string,
-
   userId: string
-
 ) => {
+  await requireActiveTestSubscription(userId);
 
   // ==========================================
   // FIND ATTEMPT
@@ -1313,39 +1483,30 @@ export const submitTest = async (
 
   const attempt =
     await prisma.testAttempt.findFirst({
-
       where: {
-
         id: attemptId,
-
         userId,
-
       },
 
       select: {
-
         id: true,
-
         testId: true,
-
         startedAt: true,
-
         expiresAt: true,
-
         status: true,
 
+        test: {
+          select: {
+            type: true,
+          },
+        },
       },
-
     });
 
   if (!attempt) {
-
     throw new Error(
-
       "Test attempt not found."
-
     );
-
   }
 
   // ==========================================
@@ -1353,13 +1514,9 @@ export const submitTest = async (
   // ==========================================
 
   if (attempt.status === "SUBMITTED") {
-
     throw new Error(
-
       "This test has already been submitted."
-
     );
-
   }
 
   // ==========================================
@@ -1367,13 +1524,9 @@ export const submitTest = async (
   // ==========================================
 
   if (attempt.status !== "IN_PROGRESS") {
-
     throw new Error(
-
       "Only active test attempts can be submitted."
-
     );
-
   }
 
   // ==========================================
@@ -1382,41 +1535,26 @@ export const submitTest = async (
 
   const questions =
     await prisma.testQuestion.findMany({
-
       where: {
-
         testId: attempt.testId,
-
       },
 
       orderBy: {
-
         displayOrder: "asc",
-
       },
 
       select: {
-
         marks: true,
-
         negativeMarks: true,
 
         question: {
-
           select: {
-
             id: true,
-
             questionType: true,
-
             answer: true,
-
           },
-
         },
-
       },
-
     });
 
   // ==========================================
@@ -1425,23 +1563,15 @@ export const submitTest = async (
 
   const studentAnswers =
     await prisma.attemptAnswer.findMany({
-
       where: {
-
         attemptId,
-
       },
 
       select: {
-
         questionId: true,
-
         selectedAnswer: true,
-
         timeSpent: true,
-
       },
-
     });
 
   // ==========================================
@@ -1450,19 +1580,12 @@ export const submitTest = async (
 
   const answerMap =
     new Map(
-
       studentAnswers.map(
-
         (answer) => [
-
           answer.questionId,
-
           answer,
-
         ]
-
       )
-
     );
 
   // ==========================================
@@ -1471,11 +1594,8 @@ export const submitTest = async (
 
   const result =
     calculateScore(
-
       questions,
-
       answerMap
-
     );
 
   // ==========================================
@@ -1484,13 +1604,9 @@ export const submitTest = async (
 
   const totalMarks =
     questions.reduce(
-
       (sum, question) =>
-
         sum + (question.marks ?? 0),
-
       0
-
     );
 
   // ==========================================
@@ -1499,21 +1615,16 @@ export const submitTest = async (
 
   const percentage =
     totalMarks > 0
-
       ? Number(
-
           (
-
-            (Math.max(result.score, 0) /
-
+            (Math.max(
+              result.score,
+              0
+            ) /
               totalMarks) *
-
             100
-
           ).toFixed(2)
-
         )
-
       : 0;
 
   // ==========================================
@@ -1525,15 +1636,10 @@ export const submitTest = async (
 
   const timeTaken =
     Math.floor(
-
       (
-
         submittedAt.getTime() -
-
         attempt.startedAt.getTime()
-
       ) / 1000
-
     );
 
   // ==========================================
@@ -1541,22 +1647,19 @@ export const submitTest = async (
   // ==========================================
 
   await prisma.testAttempt.update({
-
     where: {
-
       id: attemptId,
-
     },
 
     data: {
-
       status: "SUBMITTED",
 
       submittedAt,
 
       timeTaken,
 
-      score: result.score,
+      score:
+        result.score,
 
       percentage,
 
@@ -1568,17 +1671,147 @@ export const submitTest = async (
 
       unanswered:
         result.unanswered,
-
     },
-
   });
+
+  // ==========================================
+  // AWARD XP
+  // ==========================================
+
+  let xpAwarded = 0;
+
+  if (
+    attempt.test.type ===
+    "CHAPTER"
+  ) {
+    const xpResult =
+      await awardXP({
+        userId,
+
+        type:
+          "CHAPTER_TEST",
+
+        referenceId:
+          attemptId,
+
+        description:
+          "Completed chapter test",
+      });
+
+    xpAwarded =
+      xpResult.amount;
+  }
+
+  if (
+    attempt.test.type ===
+    "SUBJECT"
+  ) {
+    const xpResult =
+      await awardXP({
+        userId,
+
+        type:
+          "SUBJECT_TEST",
+
+        referenceId:
+          attemptId,
+
+        description:
+          "Completed subject test",
+      });
+
+    xpAwarded =
+      xpResult.amount;
+  }
+
+  if (
+    attempt.test.type ===
+    "MOCK"
+  ) {
+    const xpResult =
+      await awardXP({
+        userId,
+
+        type:
+          "MOCK_TEST",
+
+        referenceId:
+          attemptId,
+
+        description:
+          "Completed mock test",
+      });
+
+    xpAwarded =
+      xpResult.amount;
+  }
+
+  if (
+    attempt.test.type ===
+    "PYQ"
+  ) {
+    const xpResult =
+      await awardXP({
+        userId,
+
+        type:
+          "PYQ",
+
+        referenceId:
+          attemptId,
+
+        description:
+          "Completed PYQ test",
+      });
+
+    xpAwarded =
+      xpResult.amount;
+  }
+
+  if (
+    attempt.test.type ===
+    "PRACTICE"
+  ) {
+    const xpResult =
+      await awardXP({
+        userId,
+
+        type:
+          "PRACTICE",
+
+        referenceId:
+          attemptId,
+
+        description:
+          "Completed practice test",
+      });
+
+    xpAwarded =
+      xpResult.amount;
+  }
+
+  // ==========================================
+  // GET UPDATED USER
+  // ==========================================
+
+  const updatedUser =
+    await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+
+      select: {
+        xp: true,
+        streak: true,
+        level: true,
+      },
+    });
 
   // ==========================================
   // RETURN SUMMARY
   // ==========================================
 
   return {
-
     attemptId,
 
     score:
@@ -1607,8 +1840,15 @@ export const submitTest = async (
 
     submittedAt,
 
-  };
+    // ========================================
+    // GAMIFICATION
+    // ========================================
 
+    xpAwarded,
+
+    user:
+      updatedUser,
+  };
 };
 
 // ======================================================
@@ -1622,6 +1862,8 @@ export const getResult = async (
   userId: string
 
 ) => {
+  await requireActiveTestSubscription(userId);
+
 
   // ==========================================
   // LOAD SUBMITTED ATTEMPT
@@ -1783,6 +2025,8 @@ export const getReview = async (
   userId: string
 
 ) => {
+  await requireActiveTestSubscription(userId);
+
 
   // ==========================================
   // VALIDATE SUBMITTED ATTEMPT

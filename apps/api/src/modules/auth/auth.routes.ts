@@ -8,6 +8,9 @@ import {
   refreshAccessToken,
   logout,
   adminRoute,
+  changeForgottenPassword,
+  verifyResetCode,
+  forgotPassword,
 } from "./auth.controller";
 
 import { googleAuth } from "./auth.google.controller";
@@ -26,6 +29,20 @@ const router = Router();
 // Standard Form Authentication Entries
 router.post("/signup", signup);
 router.post("/login", login);
+router.post(
+  "/forgot-password",
+  forgotPassword
+);
+
+router.post(
+  "/verify-reset-code",
+  verifyResetCode
+);
+
+router.post(
+  "/reset-password",
+  changeForgottenPassword
+);
 
 // Google Single Sign-On Identity Token Handshake
 router.post("/google", googleAuth);

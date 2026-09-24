@@ -4,7 +4,7 @@ import MentorSidebar from "../components/mentorSidebar/MentorSidebar";
 export default function MentorLayout() {
   return (
     // ✅ FIXED: Theme architecture consolidated into unified production light-grey framework
-    <div className="min-h-screen bg-[#020617] text-[#0F172A] flex overflow-hidden select-none">
+    <div className="min-h-screen bg-white text-[#0F172A] flex overflow-hidden select-none">
       
       {/* Decoupled Light-Themed Navigation Sidebar */}
       <MentorSidebar />

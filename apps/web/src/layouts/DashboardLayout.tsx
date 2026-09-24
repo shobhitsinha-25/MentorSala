@@ -6,26 +6,13 @@ export default function DashboardLayout() {
   const { collapsed } = useLayoutStore();
 
   return (
-    <div className="w-screen h-screen bg-[#020617] flex overflow-hidden relative">
+    <div className="w-screen h-screen bg-[#020617] flex overflow-hidden">
       {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
-      <div
-        className={`
-          flex-1
-          flex
-          flex-col
-          min-w-0
-          h-full
-          overflow-hidden
-          transition-all
-          duration-300
-          ease-in-out
-          ${collapsed ? "ml-0" : "ml-0"}
-        `}
-      >
-        <main className="flex-1 overflow-y-auto custom-page-scroll px-6 py-6">
+      {/* Right Side / Main Area */}
+      <div className="flex-1 min-w-0 h-screen flex flex-col overflow-hidden bg-white">
+        <main className="flex-1 min-h-0 w-full overflow-y-auto custom-page-scroll px-6 py-6 bg-white text-slate-900">
           <Outlet />
         </main>
       </div>

@@ -1,72 +1,55 @@
-import { Router }
-from "express";
+import { Router } from "express";
 
-import { protect }
-from "../auth/auth.middleware";
+import { protect } from "../auth/auth.middleware";
 
-import upload
-from "../../middleware/upload.middleware";
-import {
-  authorizeRoles,
-} from "../../middleware/role.middleware";
+import upload from "../../middleware/upload.middleware";
 
 import {
-  
   getMentorsController,
   getMentorByIdController,
-} from "./mentor.controller";
-
-import {
-
+  getPublicMentorsController,
   submitMentorApplication,
-
 } from "./mentor.controller";
 
-const router =
-  Router();
+const router = Router();
 
 // ==========================================
 // MENTOR ONBOARDING
 // ==========================================
 
 router.post(
-
   "/onboarding",
-
   protect,
-
   upload.single("resume"),
-
   submitMentorApplication
-
 );
 
 // ==========================================
-// GET ASSIGNED SUBJECTS
+// PUBLIC MENTOR ROUTES
 // ==========================================
 
+// Get verified mentors for public Mentors page
+router.get(
+  "/public",
+  getPublicMentorsController
+);
 
+// ==========================================
+// PROTECTED MENTOR ROUTES
+// ==========================================
 
-
-
-
-// ======================================================
-// GET ALL MENTORS
-// ======================================================
-
+// Get all mentors
 router.get(
   "/",
   protect,
   getMentorsController
 );
 
+// Get mentor by ID
 router.get(
-
   "/:mentorId",
   protect,
   getMentorByIdController
-
 );
-
 
 export default router;

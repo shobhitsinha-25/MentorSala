@@ -1,22 +1,25 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Loader2, ShieldCheck, AlertCircle, Play, Sparkles } from "lucide-react";
+import {
+  Loader2,
+  ShieldCheck,
+  AlertCircle,
+  Play,
+  Sparkles,
+  Maximize2,
+  ArrowLeft,
+} from "lucide-react";
 
 import { startTest } from "../../../api/studentTestApi";
 import { enterFullscreen } from "../../student/tests/utils/security";
 
 const ReadyScreen = () => {
-
   const navigate = useNavigate();
-
   const { testId } = useParams();
 
   const [countdown, setCountdown] = useState(5);
-
   const [starting, setStarting] = useState(false);
-
   const [error, setError] = useState("");
-
   const [readyToStart, setReadyToStart] = useState(false);
 
   // ==========================================
@@ -51,144 +54,135 @@ const ReadyScreen = () => {
       await enterFullscreen();
 
       if (!document.fullscreenElement) {
-        setError(
-          "Fullscreen permission is required to start the exam."
-        );
+        setError("Fullscreen permission is required to start the exam.");
         return;
       }
 
       const res = await startTest(testId);
-
       navigate(`/student/tests/attempts/${res.attempt.id}`);
     } catch (err) {
       console.error(err);
-
-      setError(
-        "Unable to start the test. Please try again."
-      );
+      setError("Unable to start the test. Please try again.");
     } finally {
       setStarting(false);
     }
   };
 
   return (
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden select-none">
+      {/* Ambient Light Glows */}
+      <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-purple-200/40 blur-[130px] rounded-full" />
+      <div className="pointer-events-none absolute bottom-0 right-0 w-[450px] h-[350px] bg-indigo-100/60 blur-[120px] rounded-full" />
 
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center px-6 relative overflow-hidden">
-      {/* Background Subtle Radial Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 blur-[140px] pointer-events-none rounded-full" />
+      <div className="w-full max-w-lg relative z-10">
+        {/* Main Card */}
+        <div className="bg-white border border-purple-100/90 rounded-2xl sm:rounded-3xl shadow-xl shadow-purple-500/5 p-6 sm:p-10 md:p-12 text-center relative overflow-hidden flex flex-col items-center">
+          {/* Subtle Corner Light Glow */}
+          <div className="absolute -top-16 -right-16 w-36 h-36 bg-purple-100/50 rounded-full blur-2xl pointer-events-none" />
 
-      <div className="w-full max-w-xl relative z-10">
+          
 
-        <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 rounded-3xl shadow-2xl shadow-slate-950/80 p-8 sm:p-12 text-center relative overflow-hidden">
-
-          {/* Top Decorative Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-8">
-            <ShieldCheck size={14} />
-            Secure Examination Environment
-          </div>
-
-          {/* Countdown / Icon Visual */}
-          <div className="mb-8 relative flex items-center justify-center">
-
-            <div className="relative w-28 h-28 rounded-full bg-gradient-to-b from-indigo-500/20 to-indigo-600/5 border border-indigo-500/30 flex items-center justify-center shadow-lg shadow-indigo-500/10">
-
+          {/* Countdown / Visual Orb Container */}
+          <div className="mb-6 sm:mb-8 relative flex items-center justify-center">
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-b from-purple-100/80 via-purple-50 to-white border-2 border-purple-200 flex items-center justify-center shadow-lg shadow-purple-500/10">
               {!readyToStart ? (
-                <span className="text-5xl font-extrabold text-indigo-400 tracking-tight transition-all duration-300">
+                <span className="text-4xl sm:text-5xl font-black text-purple-700 tracking-tight transition-all duration-300">
                   {countdown}
                 </span>
               ) : (
-                <Sparkles className="text-indigo-400 animate-pulse" size={44} />
+                <Sparkles className="text-purple-600 animate-pulse" size={38} />
               )}
 
-              {/* Outer Pulsing Ring */}
+              {/* Outer Pulsing Ping Ring */}
               {!readyToStart && (
-                <div className="absolute inset-0 rounded-full border border-indigo-500/40 animate-ping opacity-25" />
+                <div className="absolute inset-0 rounded-full border-2 border-purple-400 animate-ping opacity-25" />
               )}
-
             </div>
-
           </div>
 
           {/* Main Title & Subtitle */}
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2 sm:mb-3">
             {readyToStart ? "You're All Set!" : "Get Ready"}
           </h1>
 
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed max-w-md mx-auto">
-            Please stay focused during the examination.
-            The exam will start in fullscreen mode for security.
-
-            <br className="hidden sm:block" />
-
-            Please stay focused and avoid refreshing the page.
+          <p className="text-slate-500 text-xs sm:text-sm md:text-base leading-relaxed max-w-sm mx-auto font-normal">
+            The exam will launch in fullscreen mode for integrity. Avoid switching tabs, minimizing, or refreshing the page.
           </p>
 
-          {/* Countdown State Message */}
+          {/* Notice Chip */}
+          <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100/80 text-slate-600 text-[11px] sm:text-xs font-semibold">
+            <Maximize2 size={12} className="text-purple-600" />
+            <span>Fullscreen required</span>
+          </div>
+
+          {/* Countdown State Notice */}
           {!readyToStart ? (
-            <div className="mt-8 py-3 px-6 rounded-2xl bg-slate-950/50 border border-slate-800/60 inline-flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
-              <p className="text-indigo-300 text-sm sm:text-base font-medium">
-                Starting in <span className="font-bold text-white">{countdown}</span> second{countdown !== 1 ? "s" : ""}...
+            <div className="mt-6 sm:mt-8 py-2.5 sm:py-3 px-5 sm:px-6 rounded-2xl bg-purple-50/70 border border-purple-100 inline-flex items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-purple-600 animate-ping" />
+              <p className="text-purple-800 text-xs sm:text-sm font-semibold">
+                Starting in{" "}
+                <span className="font-extrabold text-purple-950">{countdown}</span>{" "}
+                second{countdown !== 1 ? "s" : ""}...
               </p>
             </div>
           ) : (
-            <div className="mt-8">
+            <div className="mt-6 sm:mt-8 w-full flex flex-col sm:flex-row items-center justify-center gap-3">
               {!starting && !error && (
-                <button
-                  onClick={startExam}
-                  disabled={starting}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-9 py-4 text-base font-semibold text-white shadow-xl shadow-indigo-600/25 transition-all duration-200 hover:bg-indigo-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <Play size={18} className="fill-current" />
-                  Start Exam
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-all duration-200 active:scale-[0.98] cursor-pointer"
+                  >
+                    <ArrowLeft size={16} />
+                    <span>Back</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={startExam}
+                    disabled={starting}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-purple-600 px-8 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-purple-600/25 transition-all duration-200 hover:bg-purple-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                  >
+                    <Play size={16} className="fill-current" />
+                    <span>Start Exam</span>
+                  </button>
+                </>
               )}
             </div>
           )}
 
           {/* Loading Indicator */}
           {starting && (
-            <div className="mt-8 p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex flex-col items-center gap-3">
-
-              <Loader2
-                className="animate-spin text-indigo-400"
-                size={36}
-              />
-
-              <p className="text-slate-300 text-sm font-medium">
-                Preparing your test environment...
+            <div className="mt-6 sm:mt-8 p-4 rounded-2xl bg-purple-50/70 border border-purple-100 flex flex-col items-center gap-2.5 w-full">
+              <Loader2 className="animate-spin text-purple-600" size={30} />
+              <p className="text-purple-900 text-xs sm:text-sm font-semibold">
+                Initializing test session & fullscreen...
               </p>
-
             </div>
           )}
 
           {/* Error Banner */}
           {error && (
-            <div className="mt-8 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-center">
-
-              <div className="flex items-center justify-center gap-2 text-rose-400 font-medium mb-3 text-sm">
-                <AlertCircle size={18} />
-                {error}
+            <div className="mt-6 sm:mt-8 p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-center w-full">
+              <div className="flex items-center justify-center gap-1.5 text-rose-700 font-semibold mb-3 text-xs sm:text-sm">
+                <AlertCircle size={16} className="shrink-0" />
+                <span>{error}</span>
               </div>
 
               <button
+                type="button"
                 onClick={startExam}
-                className="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-md shadow-rose-600/20 transition-all duration-200 active:scale-[0.98]"
+                className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-2 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-rose-600/20 transition-all duration-200 active:scale-[0.98] cursor-pointer"
               >
                 Retry
               </button>
-
             </div>
           )}
-
         </div>
-
       </div>
-
     </div>
-
   );
-
 };
 
 export default ReadyScreen;

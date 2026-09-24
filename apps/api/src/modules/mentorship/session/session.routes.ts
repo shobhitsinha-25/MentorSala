@@ -9,6 +9,7 @@ import {
   getMySessions,
   getNextSessionController,
   saveMeetingLink,
+  getStudentSessionJoinInfoController
 } from "./session.controller";
 
 import {
@@ -99,6 +100,10 @@ router.get(
   getNextSessionController
 );
 
-
+router.get(
+  "/:sessionId/join",
+  protect,
+  getStudentSessionJoinInfoController
+);
 
 export default router;

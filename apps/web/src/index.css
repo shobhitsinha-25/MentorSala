@@ -64,3 +64,38 @@ a {
     background-position: -100% 0;
   }
 }
+
+/* ======================================================
+   XP REWARD POPUP
+   ====================================================== */
+
+@keyframes xpRewardPopup {
+
+  0% {
+    opacity: 0;
+    transform: translateY(25px) scale(0.8);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  80% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(1.05);
+  }
+
+}
+
+.xp-reward-popup {
+
+  animation:
+    xpRewardPopup 3s ease-in-out forwards;
+
+}

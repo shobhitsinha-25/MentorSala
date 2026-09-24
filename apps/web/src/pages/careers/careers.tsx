@@ -1,5 +1,6 @@
 import { Briefcase, Clock3 } from "lucide-react";
 import AboutNavbar from "../About/AboutNavbar";
+import Footer from "../home/Footer";
 
 const Careers = () => {
   return (
@@ -44,6 +45,9 @@ const Careers = () => {
           </div>
         </div>
       </main>
+      <div className="dark w-full bg-[#07090E] text-zinc-100 selection:bg-purple-500/30 isolate">
+              <Footer />
+            </div>
     </div>
   );
 };

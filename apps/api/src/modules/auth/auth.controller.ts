@@ -1,4 +1,4 @@
-import {
+import type {
   Request,
   Response,
 } from "express";
@@ -17,19 +17,19 @@ import {
 } from "../../utils/asyncHandler";
 
 import {
-
   signupSchema,
-
   loginSchema,
-
 } from "./auth.validation";
 
 import {
+  sendPasswordResetCode,
+  verifyPasswordResetCode,
+  resetPassword,
+} from "./password-reset.service";
 
+import {
   registerUser,
-
   loginUser,
-
 } from "./auth.service";
 
 // ======================================================
@@ -54,17 +54,11 @@ export const signup =
         );
 
       const {
-
         name,
-
         email,
-
         password,
-
         role,
-
         targetExam,
-
       } = validatedData;
 
       // ==================================================
@@ -79,18 +73,14 @@ export const signup =
       // ==================================================
 
       if (
-
         role?.toUpperCase() ===
         "MENTOR"
-
       ) {
 
         finalRole =
           Role.MENTOR;
 
       }
-
-     
 
       // ==================================================
       // CREATE USER
@@ -135,13 +125,15 @@ export const signup =
 
           where: {
 
-            id: user.id,
+            id:
+              user.id,
 
           },
 
           include: {
 
-            mentorProfile: true,
+            mentorProfile:
+              true,
 
           },
 
@@ -260,6 +252,19 @@ export const signup =
         refreshToken:
           data.refreshToken,
 
+        // ==============================================
+        // DAILY LOGIN XP
+        // ==============================================
+
+        xpAwarded:
+          data.xpAwarded,
+
+        xp:
+          data.xp,
+
+        level:
+          data.level,
+
         user:
           safeUser,
 
@@ -291,11 +296,8 @@ export const login =
         );
 
       const {
-
         email,
-
         password,
-
       } = validatedData;
 
       // ==================================================
@@ -320,13 +322,15 @@ export const login =
 
           where: {
 
-            id: data.user.id,
+            id:
+              data.user.id,
 
           },
 
           include: {
 
-            mentorProfile: true,
+            mentorProfile:
+              true,
 
           },
 
@@ -337,7 +341,8 @@ export const login =
       // ==================================================
 
       const finalUser =
-        fullUser || data.user;
+        fullUser ||
+        data.user;
 
       // ==================================================
       // REMOVE PASSWORD
@@ -352,7 +357,10 @@ export const login =
       // COOKIE OPTIONS
       // ==================================================
 
-      console.log("NODE_ENV:", process.env.NODE_ENV);
+      console.log(
+        "NODE_ENV:",
+        process.env.NODE_ENV
+      );
 
       const cookieOptions = {
 
@@ -437,6 +445,19 @@ export const login =
         refreshToken:
           data.refreshToken,
 
+        // ==============================================
+        // DAILY LOGIN XP
+        // ==============================================
+
+        xpAwarded:
+          data.xpAwarded,
+
+        xp:
+          data.xp,
+
+        level:
+          data.level,
+
         user:
           safeUser,
 
@@ -487,13 +508,15 @@ export const getCurrentUser =
 
           where: {
 
-            id: userId,
+            id:
+              userId,
 
           },
 
           include: {
 
-            mentorProfile: true,
+            mentorProfile:
+              true,
 
           },
 
@@ -610,7 +633,8 @@ export const refreshAccessToken =
 
             include: {
 
-              mentorProfile: true,
+              mentorProfile:
+                true,
 
             },
 
@@ -684,9 +708,9 @@ export const refreshAccessToken =
               process.env.NODE_ENV ===
               "production"
 
-                ? ("none" as const)
+                ? "none"
 
-                : ("lax" as const),
+                : "lax",
 
             path: "/",
 
@@ -812,3 +836,162 @@ export const adminRoute =
     });
 
   };
+
+  // ======================================================
+// FORGOT PASSWORD - SEND CODE
+// ======================================================
+
+export const forgotPassword =
+  asyncHandler(
+    async (
+      req: Request,
+      res: Response
+    ) => {
+      const email =
+        String(
+          req.body.email || ""
+        )
+          .trim()
+          .toLowerCase();
+
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Email is required",
+        });
+      }
+
+      await sendPasswordResetCode(
+        email
+      );
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "If an account exists with this email, a verification code has been sent.",
+      });
+    }
+  );
+
+
+// ======================================================
+// VERIFY PASSWORD RESET CODE
+// ======================================================
+
+export const verifyResetCode =
+  asyncHandler(
+    async (
+      req: Request,
+      res: Response
+    ) => {
+      const email =
+        String(
+          req.body.email || ""
+        )
+          .trim()
+          .toLowerCase();
+
+      const code =
+        String(
+          req.body.code || ""
+        ).trim();
+
+      if (!email || !code) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Email and verification code are required",
+        });
+      }
+
+      if (!/^\d{6}$/.test(code)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Verification code must contain 6 digits",
+        });
+      }
+
+      await verifyPasswordResetCode(
+        email,
+        code
+      );
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "Email verified successfully",
+      });
+    }
+  );
+
+
+// ======================================================
+// RESET PASSWORD
+// ======================================================
+
+export const changeForgottenPassword =
+  asyncHandler(
+    async (
+      req: Request,
+      res: Response
+    ) => {
+      const email =
+        String(
+          req.body.email || ""
+        )
+          .trim()
+          .toLowerCase();
+
+      const code =
+        String(
+          req.body.code || ""
+        ).trim();
+
+      const newPassword =
+        String(
+          req.body.newPassword || ""
+        );
+
+      if (
+        !email ||
+        !code ||
+        !newPassword
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Email, verification code and new password are required",
+        });
+      }
+
+      if (!/^\d{6}$/.test(code)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid verification code",
+        });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Password must be at least 6 characters long",
+        });
+      }
+
+      await resetPassword(
+        email,
+        code,
+        newPassword
+      );
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "Password changed successfully. You can now login with your new password.",
+      });
+    }
+  );

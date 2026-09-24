@@ -5,6 +5,7 @@ import AppRoutes from "./routes/AppRoutes";
 import { useAuthStore } from "./store/auth.store";
 import { initGA, trackPageView } from "./utils/analytics";
 import PageLoader from "./components/common/PageLoader";
+import XPRewardPopup from "./components/gamification/XPRewardPopup";
 
 function App() {
   const location = useLocation();
@@ -17,30 +18,52 @@ function App() {
     (state) => state.loading
   );
 
-  // Fetch current user only once when application starts
+  // ======================================================
+  // FETCH CURRENT USER
+  // ======================================================
+
   useEffect(() => {
     fetchCurrentUser();
   }, [fetchCurrentUser]);
 
-  // Initialize Google Analytics
+  // ======================================================
+  // GOOGLE ANALYTICS
+  // ======================================================
+
   useEffect(() => {
     initGA();
   }, []);
 
-  // Track page views whenever route changes
+  // ======================================================
+  // PAGE VIEW TRACKING
+  // ======================================================
+
   useEffect(() => {
     trackPageView(
       location.pathname + location.search
     );
   }, [location]);
 
-  // Show MentorSala loader while authentication state
-  // is being initialized
+  // ======================================================
+  // LOADING
+  // ======================================================
+
   if (loading) {
     return <PageLoader />;
   }
 
-  return <AppRoutes />;
+  // ======================================================
+  // APP
+  // ======================================================
+
+  return (
+    <>
+      <AppRoutes />
+
+      {/* Global XP Reward Popup */}
+      <XPRewardPopup />
+    </>
+  );
 }
 
 export default App;

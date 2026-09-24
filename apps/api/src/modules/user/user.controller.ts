@@ -30,6 +30,10 @@ import {
 } from "./user.service";
 import uploadAvatar from "../../middleware/uploadAvatar";
 
+import {
+  ensureFreeTrial,
+} from "./subscription/entitlement/free-trial.service";
+
 // ======================================================
 // GET PROFILE
 // ======================================================
@@ -85,54 +89,143 @@ export const getProfile =
 
   );
 
-  // ======================================================
-  // COMPLETE ONBOARDING of student
+// ======================================================
+// COMPLETE ONBOARDING OF STUDENT
+// ======================================================
 
-  export const completeOnboardingController =
+export const completeOnboardingController =
   asyncHandler(
     async (
       req: Request,
       res: Response
     ) => {
 
-      if (!req.user) {
+      // ================================================
+      // AUTH CHECK
+      // ================================================
 
+      if (!req.user) {
         return res.status(401).json({
           success: false,
           message: "Unauthorized",
         });
-
       }
 
-      const { targetExam } =
-        req.body;
+      // ================================================
+      // REQUEST DATA
+      // ================================================
 
-      const user =
-        await prisma.user.update({
+      const {
+        targetExam,
+      } = req.body;
 
+      if (!targetExam) {
+        return res.status(400).json({
+          success: false,
+          message: "Target exam is required.",
+        });
+      }
+
+      // ================================================
+      // VALIDATE TARGET EXAM
+      // ================================================
+
+      if (
+        !Object.values(ExamType).includes(
+          targetExam as ExamType
+        )
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid target exam.",
+        });
+      }
+
+      // ================================================
+      // CHECK CURRENT USER
+      // ================================================
+
+      const existingUser =
+        await prisma.user.findUnique({
           where: {
             id: req.user.userId,
           },
 
-          data: {
-
-            targetExam,
-
-            onboardingCompleted:
-              true,
-
+          select: {
+            id: true,
+            onboardingCompleted: true,
           },
-
         });
 
+      if (!existingUser) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found.",
+        });
+      }
+
+      // ================================================
+      // ONBOARDING ALREADY COMPLETED
+      // ================================================
+
+      if (
+        existingUser.onboardingCompleted
+      ) {
+        const user =
+          await prisma.user.findUnique({
+            where: {
+              id: req.user.userId,
+            },
+          });
+
+        return res.status(200).json({
+          success: true,
+          message: "Onboarding already completed.",
+          user,
+        });
+      }
+
+      // ================================================
+      // START FREE TRIAL
+      // ================================================
+      //
+      // ensureFreeTrial() is responsible for:
+      //
+      // 1. Finding the correct trial plan
+      // 2. Creating the UserSubscription
+      // 3. Setting trialStartedAt
+      // 4. Setting trialExpiresAt
+      // 5. Marking the subscription as isTrial = true
+      //
+      // Trial starts ONLY after onboarding is completed.
+      //
+
+      await ensureFreeTrial(
+        req.user.userId,
+        targetExam as ExamType
+      );
+
+      // ================================================
+      // FETCH UPDATED USER
+      // ================================================
+
+      const user =
+        await prisma.user.findUnique({
+          where: {
+            id: req.user.userId,
+          },
+        });
+
+      // ================================================
+      // RESPONSE
+      // ================================================
+
       return res.status(200).json({
-
         success: true,
-
+        message:
+          "Onboarding completed and free trial started successfully.",
         user,
-
       });
-
     }
   );
 

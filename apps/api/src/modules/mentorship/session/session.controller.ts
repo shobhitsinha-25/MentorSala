@@ -1,4 +1,4 @@
-import {
+import type {
   Request,
   Response,
 } from "express";
@@ -20,6 +20,7 @@ import {
   updateMeetingLink,
   getMentorSessions,
   getStudentSessions,
+  getStudentSessionJoinInfo
 } from "./session.service";
 
 import {
@@ -615,4 +616,59 @@ export const getMentorSessionsController =
 
   );
 
-  
+// ======================================================
+// GET STUDENT SESSION JOIN INFO
+// ======================================================
+
+export const getStudentSessionJoinInfoController =
+  asyncHandler(
+    async (
+      req: Request,
+      res: Response
+    ) => {
+      // ==========================================
+      // AUTH CHECK
+      // ==========================================
+
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+      }
+
+      // ==========================================
+      // PARAMS
+      // ==========================================
+
+      const sessionId =
+        req.params.sessionId as string;
+
+      if (!sessionId) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Session ID is required",
+        });
+      }
+
+      // ==========================================
+      // CHECK JOIN ELIGIBILITY
+      // ==========================================
+
+      const joinInfo =
+        await getStudentSessionJoinInfo(
+          sessionId,
+          req.user.userId
+        );
+
+      // ==========================================
+      // RESPONSE
+      // ==========================================
+
+      return res.status(200).json({
+        success: true,
+        data: joinInfo,
+      });
+    }
+  );

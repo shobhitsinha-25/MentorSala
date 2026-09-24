@@ -1,5 +1,19 @@
-import { ShieldCheck, BookOpen, CreditCard, Brain, FileText, Gavel, Mail } from "lucide-react";
+import React from "react";
+import {
+  ShieldCheck,
+  BookOpen,
+  CreditCard,
+  Brain,
+  FileText,
+  Gavel,
+  Mail,
+  Globe,
+  Sparkles,
+  CheckCircle2,
+  ArrowUpRight,
+} from "lucide-react";
 import AboutNavbar from "../About/AboutNavbar";
+import Footer from "../home/Footer";
 
 const sections = [
   {
@@ -273,106 +287,114 @@ const sections = [
 
 export default function TermsConditions() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
+    <div className="min-h-screen flex flex-col bg-white text-slate-900 font-sans antialiased selection:bg-indigo-500/20 overflow-x-hidden">
+      {/* Navbar rendered cleanly matching About.tsx */}
       <AboutNavbar />
-      
-      <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
 
-        {/* Hero Header */}
+      {/* Main Content Area */}
+      <main className="relative flex-1 px-4 sm:px-6 md:px-8 py-12 sm:py-16 lg:py-20 overflow-hidden bg-slate-50/70">
+        {/* Soft Ambient Light Glows */}
+        <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[650px] h-[350px] bg-indigo-200/40 blur-[140px] rounded-full" />
+        <div className="pointer-events-none absolute top-1/3 left-1/4 w-[450px] h-[250px] bg-purple-200/40 blur-[130px] rounded-full" />
 
-        <div className="text-center max-w-3xl mx-auto">
+        <div className="relative z-10 mx-auto max-w-5xl">
+          {/* Hero Header */}
+          <header className="text-center max-w-3xl mx-auto">
+            
 
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 border border-indigo-100 px-4 py-1 text-xs font-semibold text-indigo-600 tracking-wide uppercase">
-            Legal Agreement
-          </span>
+            <h1 className="mt-5 text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-950">
+              Terms &{" "}
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Conditions
+              </span>
+            </h1>
 
-          <h1 className="mt-6 text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">
-            Terms & Conditions
-          </h1>
+            <p className="mt-4 text-sm sm:text-base lg:text-lg leading-relaxed text-slate-600 font-normal max-w-2xl mx-auto">
+              These Terms & Conditions govern your access to MentorSala,
+              including our website, mentorship services, AI-powered learning
+              tools, mock tests, analytics and educational resources.
+            </p>
 
-     
+            <div className="mt-6 flex items-center justify-center gap-2 text-xs font-semibold text-slate-500">
+              <CheckCircle2 size={15} className="text-emerald-500" />
+              <span>Last Updated: 2026</span>
+              <span className="text-slate-300">•</span>
+              <span>Effective across all enrolled students & mentors</span>
+            </div>
+          </header>
 
-          <p className="mt-6 text-base sm:text-lg leading-relaxed text-slate-600 font-medium">
-            These Terms & Conditions govern your access to MentorSala,
-            including our website, mentorship services, AI-powered learning
-            tools, mock tests, analytics and educational resources.
-          </p>
+          {/* Sections List */}
+          <div className="mt-12 sm:mt-16 space-y-5 sm:space-y-6">
+            {sections.map((section) => {
+              const Icon = section.icon;
 
-        </div>
+              return (
+                <div
+                  key={section.title}
+                  className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs transition-all duration-300 hover:shadow-md hover:border-indigo-200/80"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600">
+                      <Icon className="h-5 w-5" />
+                    </div>
 
-        {/* Sections Grid */}
-
-        <div className="mt-12 sm:mt-16 space-y-6">
-
-          {sections.map((section) => {
-            const Icon = section.icon;
-
-            return (
-              <div
-                key={section.title}
-                className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:border-indigo-100"
-              >
-                <div className="flex items-center gap-3.5">
-
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600">
-                    <Icon className="h-5 w-5" />
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-900">
+                      {section.title}
+                    </h2>
                   </div>
 
-                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-                    {section.title}
-                  </h2>
-
+                  <div className="mt-4 sm:mt-5 text-sm sm:text-base leading-relaxed text-slate-600 font-normal">
+                    {section.content}
+                  </div>
                 </div>
-
-                <div className="mt-5 text-sm sm:text-base leading-relaxed text-slate-600 font-normal">
-                  {section.content}
-                </div>
-
-              </div>
-            );
-          })}
-
-        </div>
-
-        {/* Contact Us Card */}
-
-        <div className="mt-12 sm:mt-16 rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50/60 via-white to-blue-50/40 p-8 sm:p-10 text-center shadow-xs">
-
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20 mb-5">
-            <Mail className="h-6 w-6" />
+              );
+            })}
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-            Contact Us
-          </h2>
-
-          <p className="mt-3 max-w-xl mx-auto text-sm sm:text-base text-slate-600 font-medium">
-            If you have any questions regarding these Terms & Conditions,
-            please contact our support team.
-          </p>
-
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm font-semibold text-slate-800">
-
-            <div className="flex items-center gap-2 rounded-xl bg-white border border-slate-200/80 px-4 py-2.5 shadow-xs">
-              <span className="text-slate-400">Email:</span>
-              <a href="mailto:support@mentorsala.com" className="text-indigo-600 hover:underline">
-                support@mentorsala.com
-              </a>
+          {/* Contact Us Card */}
+          <div className="mt-14 sm:mt-18 rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50/70 via-white to-blue-50/50 p-7 sm:p-10 text-center shadow-xs">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md shadow-indigo-600/25 mb-5">
+              <Mail className="h-6 w-6" />
             </div>
 
-            <div className="flex items-center gap-2 rounded-xl bg-white border border-slate-200/80 px-4 py-2.5 shadow-xs">
-              <span className="text-slate-400">Website:</span>
-              <a href="https://www.mentorsala.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
-                www.mentorsala.com
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              Questions Regarding Our Terms?
+            </h2>
+
+            <p className="mt-2.5 max-w-xl mx-auto text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+              If you have any questions or require legal clarification regarding these
+              Terms & Conditions, our dedicated compliance and support desk is here to assist.
+            </p>
+
+            <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-semibold text-slate-800">
+              <a
+                href="mailto:support@mentorsala.com"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200/90 px-5 py-3 shadow-xs hover:border-indigo-300 hover:text-indigo-600 transition-all cursor-pointer"
+              >
+                <Mail size={16} className="text-indigo-600" />
+                <span>support@mentorsala.com</span>
+                <ArrowUpRight size={14} className="text-slate-400" />
+              </a>
+
+              <a
+                href="https://www.mentorsala.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200/90 px-5 py-3 shadow-xs hover:border-indigo-300 hover:text-indigo-600 transition-all cursor-pointer"
+              >
+                <Globe size={16} className="text-indigo-600" />
+                <span>www.mentorsala.com</span>
+                <ArrowUpRight size={14} className="text-slate-400" />
               </a>
             </div>
-
           </div>
-
         </div>
+      </main>
 
+      {/* Footer (Isolated Dark Container) */}
+      <div className="dark w-full bg-[#07090E] text-zinc-100 selection:bg-purple-500/30 isolate">
+        <Footer />
       </div>
-
     </div>
   );
 }

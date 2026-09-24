@@ -1,9 +1,7 @@
 import api from "./axios";
 
 import type {
-
   GetTestsResponse,
-
 } from "../types/studentTest.types";
 
 // ======================================================
@@ -11,55 +9,52 @@ import type {
 // ======================================================
 
 export const getTests = async (
-
   params?: {
-
     page?: number;
-
     limit?: number;
-
     search?: string;
-
     examType?: string;
-
     type?: string;
-
     subjectId?: string;
-
     chapterId?: string;
-
   }
-
 ): Promise<GetTestsResponse> => {
-  const queryParams: Record<string, string | number> = {};
+  const queryParams: Record<
+    string,
+    string | number
+  > = {};
 
-if (params?.page)
-  queryParams.page = params.page;
+  if (params?.page)
+    queryParams.page = params.page;
 
-if (params?.limit)
-  queryParams.limit = params.limit;
+  if (params?.limit)
+    queryParams.limit = params.limit;
 
-if (params?.search?.trim())
-  queryParams.search = params.search;
+  if (params?.search?.trim())
+    queryParams.search = params.search;
 
-if (params?.examType)
-  queryParams.examType = params.examType;
+  if (params?.examType)
+    queryParams.examType = params.examType;
 
-if (params?.type)
-  queryParams.type = params.type;
+  if (params?.type)
+    queryParams.type = params.type;
 
-if (params?.subjectId)
-  queryParams.subjectId = params.subjectId;
+  if (params?.subjectId)
+    queryParams.subjectId =
+      params.subjectId;
 
-if (params?.chapterId)
-  queryParams.chapterId = params.chapterId;
+  if (params?.chapterId)
+    queryParams.chapterId =
+      params.chapterId;
 
-const { data } = await api.get("/student/tests", {
-  params: queryParams,
-});
+  const { data } = await api.get(
+    "/student/tests",
+    {
+      params: queryParams,
+    }
+  );
 
-return data;
-
+  return data;
 };
 
 // ======================================================
@@ -67,20 +62,14 @@ return data;
 // ======================================================
 
 export const getTestDetails = async (
-
   testId: string
-
 ) => {
-
   const { data } =
     await api.get(
-
       `/student/tests/${testId}`
-
     );
 
   return data;
-
 };
 
 // ======================================================
@@ -88,33 +77,34 @@ export const getTestDetails = async (
 // ======================================================
 
 export const startTest = async (
-
   testId: string
-
 ) => {
-
   const { data } =
     await api.post(
-
       `/student/tests/${testId}/start`
-
     );
 
   return data;
-
 };
 
 // ======================================================
 // LOAD ATTEMPT
 // ======================================================
 
-export const getAttempt = async (attemptId: string) => {
-  const { data } = await api.get(
-    `/student/tests/attempts/${attemptId}`
-  );
+export const getAttempt = async (
+  attemptId: string
+) => {
+  const { data } =
+    await api.get(
+      `/student/tests/attempts/${attemptId}`
+    );
 
   return data;
 };
+
+// ======================================================
+// STUDENT SUBJECT / CHAPTER
+// ======================================================
 
 export interface StudentSubject {
   id: string;
@@ -127,17 +117,27 @@ export interface StudentChapter {
   title: string;
 }
 
-export const getStudentSubjects = async () => {
-  const { data } = await api.get("/student/tests/subjects");
-  return data;
-};
+export const getStudentSubjects =
+  async () => {
+    const { data } =
+      await api.get(
+        "/student/tests/subjects"
+      );
 
-export const getStudentChapters = async (subjectId: string) => {
-  const { data } = await api.get(
-    `/student/tests/subjects/${subjectId}/chapters`
-  );
-  return data;
-};
+    return data;
+  };
+
+export const getStudentChapters =
+  async (
+    subjectId: string
+  ) => {
+    const { data } =
+      await api.get(
+        `/student/tests/subjects/${subjectId}/chapters`
+      );
+
+    return data;
+  };
 
 // ======================================================
 // SAVE ANSWER
@@ -146,17 +146,22 @@ export const getStudentChapters = async (subjectId: string) => {
 export const saveAnswer = async (
   attemptId: string,
   questionId: string,
-  selectedAnswer: string | string[] | number | null,
+  selectedAnswer:
+    | string
+    | string[]
+    | number
+    | null,
   timeSpent: number
 ) => {
-  const { data } = await api.patch(
-    `/student/tests/attempts/${attemptId}/answer`,
-    {
-      questionId,
-      selectedAnswer,
-      timeSpent,
-    }
-  );
+  const { data } =
+    await api.patch(
+      `/student/tests/attempts/${attemptId}/answer`,
+      {
+        questionId,
+        selectedAnswer,
+        timeSpent,
+      }
+    );
 
   return data;
 };
@@ -170,13 +175,14 @@ export const markForReview = async (
   questionId: string,
   markedForReview: boolean
 ) => {
-  const { data } = await api.patch(
-    `/student/tests/attempts/${attemptId}/review`,
-    {
-      questionId,
-      markedForReview,
-    }
-  );
+  const { data } =
+    await api.patch(
+      `/student/tests/attempts/${attemptId}/review`,
+      {
+        questionId,
+        markedForReview,
+      }
+    );
 
   return data;
 };
@@ -185,10 +191,57 @@ export const markForReview = async (
 // SUBMIT TEST
 // ======================================================
 
-export const submitTest = async (attemptId: string) => {
-  const { data } = await api.post(
-    `/student/tests/attempts/${attemptId}/submit`
-  );
+export interface SubmitTestUser {
+  xp: number;
+  streak: number;
+  level: string;
+}
+
+export interface SubmitTestResult {
+  attemptId: string;
+
+  score: number;
+
+  percentage: number;
+
+  correctAnswers: number;
+
+  wrongAnswers: number;
+
+  unanswered: number;
+
+  totalQuestions: number;
+
+  totalMarks: number;
+
+  obtainedMarks: number;
+
+  timeTaken: number;
+
+  submittedAt: string;
+
+  // XP earned from this test
+  xpAwarded: number;
+
+  // Updated gamification information
+  user?: SubmitTestUser | null;
+}
+
+export interface SubmitTestResponse {
+  success: boolean;
+
+  message: string;
+
+  result: SubmitTestResult;
+}
+
+export const submitTest = async (
+  attemptId: string
+): Promise<SubmitTestResponse> => {
+  const { data } =
+    await api.post(
+      `/student/tests/attempts/${attemptId}/submit`
+    );
 
   return data;
 };
@@ -197,10 +250,13 @@ export const submitTest = async (attemptId: string) => {
 // GET RESULT
 // ======================================================
 
-export const getResult = async (attemptId: string) => {
-  const { data } = await api.get(
-    `/student/tests/attempts/${attemptId}/result`
-  );
+export const getResult = async (
+  attemptId: string
+) => {
+  const { data } =
+    await api.get(
+      `/student/tests/attempts/${attemptId}/result`
+    );
 
   return data;
 };
@@ -209,10 +265,13 @@ export const getResult = async (attemptId: string) => {
 // GET REVIEW
 // ======================================================
 
-export const getReview = async (attemptId: string) => {
-  const { data } = await api.get(
-    `/student/tests/attempts/${attemptId}/review`
-  );
+export const getReview = async (
+  attemptId: string
+) => {
+  const { data } =
+    await api.get(
+      `/student/tests/attempts/${attemptId}/review`
+    );
 
   return data;
 };

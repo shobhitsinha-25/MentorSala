@@ -1,11 +1,26 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
+
 import { OAuth2Client } from "google-auth-library";
+
 import prisma from "../../config/prisma";
+
 import jwt from "jsonwebtoken";
+
+import {
+  awardDailyLoginXP,
+} from "../gamification/gamification.service";
+
+// ======================================================
+// GOOGLE CLIENT
+// ======================================================
 
 const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID
 );
+
+// ======================================================
+// GOOGLE AUTH
+// ======================================================
 
 export const googleAuth = async (
   req: Request,
@@ -19,6 +34,10 @@ export const googleAuth = async (
       role,
     } = req.body;
 
+    // ==================================================
+    // CREDENTIAL REQUIRED
+    // ==================================================
+
     if (!credential) {
 
       return res.status(400).json({
@@ -31,6 +50,10 @@ export const googleAuth = async (
       });
 
     }
+
+    // ==================================================
+    // VERIFY GOOGLE TOKEN
+    // ==================================================
 
     const ticket =
       await client.verifyIdToken({
@@ -46,6 +69,10 @@ export const googleAuth = async (
 
     const payload =
       ticket.getPayload();
+
+    // ==================================================
+    // INVALID GOOGLE TOKEN
+    // ==================================================
 
     if (
       !payload ||
@@ -63,26 +90,44 @@ export const googleAuth = async (
 
     }
 
+    // ==================================================
+    // GOOGLE USER DATA
+    // ==================================================
+
     const {
       email,
       name,
       picture,
     } = payload;
 
-    console.log("Google picture:", picture);
+    console.log(
+      "Google picture:",
+      picture
+    );
+
+    // ==================================================
+    // FIND EXISTING USER
+    // ==================================================
 
     let user =
       await prisma.user.findUnique({
 
         where: {
+
           email,
+
         },
 
       });
-console.log("Database avatar:", user?.avatar);
-    // ==========================
+
+    console.log(
+      "Database avatar:",
+      user?.avatar
+    );
+
+    // ==================================================
     // CREATE NEW USER
-    // ==========================
+    // ==================================================
 
     if (!user) {
 
@@ -116,9 +161,9 @@ console.log("Database avatar:", user?.avatar);
 
         });
 
-      // ==========================
+      // ================================================
       // CREATE MENTOR PROFILE
-      // ==========================
+      // ================================================
 
       if (
         user.role ===
@@ -143,15 +188,17 @@ console.log("Database avatar:", user?.avatar);
 
     }
 
-    // ==========================
+    // ==================================================
     // GET FULL USER
-    // ==========================
+    // ==================================================
 
     const fullUser =
       await prisma.user.findUnique({
 
         where: {
+
           id: user.id,
+
         },
 
         include: {
@@ -162,6 +209,10 @@ console.log("Database avatar:", user?.avatar);
         },
 
       });
+
+    // ==================================================
+    // USER NOT FOUND
+    // ==================================================
 
     if (!fullUser) {
 
@@ -176,9 +227,40 @@ console.log("Database avatar:", user?.avatar);
 
     }
 
-    // ==========================
+    // ==================================================
+    // DAILY LOGIN XP
+    // ==================================================
+
+    const xpResult =
+      await awardDailyLoginXP(
+        fullUser.id
+      );
+
+    // ==================================================
+    // UPDATE LAST ACTIVE
+    // ==================================================
+
+    await prisma.user.update({
+
+      where: {
+
+        id:
+          fullUser.id,
+
+      },
+
+      data: {
+
+        lastActiveAt:
+          new Date(),
+
+      },
+
+    });
+
+    // ==================================================
     // JWT CONFIG
-    // ==========================
+    // ==================================================
 
     const jwtSecret =
       process.env.JWT_SECRET;
@@ -186,6 +268,10 @@ console.log("Database avatar:", user?.avatar);
     const refreshSecret =
       process.env
         .REFRESH_TOKEN_SECRET;
+
+    // ==================================================
+    // JWT CONFIG REQUIRED
+    // ==================================================
 
     if (
       !jwtSecret ||
@@ -202,6 +288,10 @@ console.log("Database avatar:", user?.avatar);
       });
 
     }
+
+    // ==================================================
+    // ACCESS TOKEN
+    // ==================================================
 
     const accessToken =
       jwt.sign(
@@ -227,6 +317,10 @@ console.log("Database avatar:", user?.avatar);
 
       );
 
+    // ==================================================
+    // REFRESH TOKEN
+    // ==================================================
+
     const refreshToken =
       jwt.sign(
 
@@ -248,11 +342,20 @@ console.log("Database avatar:", user?.avatar);
 
       );
 
+    // ==================================================
+    // COOKIE ENVIRONMENT
+    // ==================================================
+
     const isProduction =
       process.env.NODE_ENV ===
       "production";
 
+    // ==================================================
+    // ACCESS TOKEN COOKIE
+    // ==================================================
+
     res.cookie(
+
       "accessToken",
 
       accessToken,
@@ -275,10 +378,19 @@ console.log("Database avatar:", user?.avatar);
           60 *
           1000,
 
+        path:
+          "/",
+
       }
+
     );
 
+    // ==================================================
+    // REFRESH TOKEN COOKIE
+    // ==================================================
+
     res.cookie(
+
       "refreshToken",
 
       refreshToken,
@@ -303,23 +415,49 @@ console.log("Database avatar:", user?.avatar);
           60 *
           1000,
 
+        path:
+          "/",
+
       }
+
     );
 
-    // ==========================
+    // ==================================================
     // RETURN USER
-    // ==========================
+    // ==================================================
 
     return res.status(200).json({
 
       success: true,
 
-      user:
-        fullUser,
+      xpAwarded:
+        xpResult.amount,
+
+      xp:
+        xpResult.xp,
+
+      level:
+        xpResult.level,
+
+      user: {
+
+        ...fullUser,
+
+        xp:
+          xpResult.xp,
+
+        level:
+          xpResult.level,
+
+      },
 
     });
 
   } catch (error) {
+
+    // ==================================================
+    // GOOGLE AUTH ERROR
+    // ==================================================
 
     console.error(
       "Google Auth Error:",
