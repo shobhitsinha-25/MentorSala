@@ -11,24 +11,7 @@ export default function Footer() {
       <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[320px] sm:w-[500px] md:w-[650px] h-[200px] sm:h-[260px] bg-purple-600/10 blur-[100px] sm:blur-[130px] rounded-full" />
       <div className="pointer-events-none absolute bottom-0 left-1/4 w-[260px] sm:w-[380px] md:w-[450px] h-[160px] sm:h-[220px] bg-blue-600/10 blur-[90px] sm:blur-[120px] rounded-full" />
 
-      {/* Watermark Text */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-0 flex justify-center items-end overflow-hidden h-[48px] sm:h-[70px] md:h-[95px] lg:h-[120px]"
-      >
-        <div className="w-[70vw] max-w-[70vw] flex justify-center overflow-hidden">
-          <span
-            className="select-none font-black uppercase text-transparent bg-clip-text bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-transparent whitespace-nowrap leading-[0.70] tracking-tight block"
-            style={{
-              fontSize: "clamp(2rem, 9.2vw, 8.5rem)",
-              fontFamily:
-                'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-            }}
-          >
-            MentorSala
-          </span>
-        </div>
-      </div>
+      
 
       <div className="relative z-10 max-w-6xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 pb-8 sm:pb-10">
