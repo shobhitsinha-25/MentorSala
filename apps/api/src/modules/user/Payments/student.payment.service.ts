@@ -630,7 +630,9 @@ export const verifyPayment = async ({
         razorpayPayment.email,
 
       contact:
-        razorpayPayment.contact,
+  razorpayPayment.contact != null
+    ? String(razorpayPayment.contact)
+    : null,
     });
 
 

@@ -1320,7 +1320,10 @@ export const saveAnswer = async ({
 
           update: {
 
-            selectedAnswer,
+            selectedAnswer:
+    selectedAnswer === null
+      ? Prisma.JsonNull
+      : selectedAnswer,
 
             visited: true,
 
@@ -1337,7 +1340,7 @@ export const saveAnswer = async ({
 
             questionId,
 
-            selectedAnswer,
+            selectedAnswer: Prisma.JsonNull,
 
             visited: true,
 
@@ -1436,7 +1439,7 @@ export const markForReview = async ({
 
         questionId,
 
-        selectedAnswer: null,
+        selectedAnswer: Prisma.JsonNull,
 
         visited: true,
 

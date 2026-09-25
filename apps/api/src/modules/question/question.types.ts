@@ -12,49 +12,42 @@ export interface QuestionOption {
 
 }
 
-export interface CreateQuestionInput {
-
-  questionType: QuestionType;
-
+type BaseCreateQuestionInput = {
   question: string;
-
-  // Cloudinary URL
   questionImageUrl?: string;
-
   options: QuestionOption[];
-
-  // Option image URLs
   optionImages?: Record<string, string | null>;
-
-  // JSON answer
-  answer: string[];
-
   solution?: string;
-
-  // Cloudinary URL
   solutionImageUrl?: string;
-
   difficulty: DifficultyLevel;
-
   examType: ExamType;
-
   subjectId: string;
-
   chapterId: string;
-
   year?: number;
-
   marks?: number;
-
   negativeMarks?: number;
-
   isPremium?: boolean;
-
   published?: boolean;
-
   createdBy: string;
+};
 
-}
+export type CreateQuestionInput =
+  | (BaseCreateQuestionInput & {
+      questionType: "SINGLE_CORRECT";
+      answer: string;
+    })
+  | (BaseCreateQuestionInput & {
+      questionType: "MULTIPLE_CORRECT";
+      answer: string[];
+    })
+  | (BaseCreateQuestionInput & {
+      questionType: "INTEGER";
+      answer: number;
+    })
+  | (BaseCreateQuestionInput & {
+      questionType: "ASSERTION_REASON";
+      answer: string;
+    });
 
 export interface GetQuestionsInput {
 
