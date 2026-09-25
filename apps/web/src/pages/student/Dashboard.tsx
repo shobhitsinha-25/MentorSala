@@ -394,9 +394,6 @@ export default function Dashboard() {
             ) : (
               <div className="mt-5 space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-lg bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-black uppercase tracking-wide text-indigo-700">
-                    {dailyProblem.question.examType}
-                  </span>
 
                   <span className="rounded-lg bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide text-slate-600">
                     {dailyProblem.question.questionType.replace(/_/g, " ")}
