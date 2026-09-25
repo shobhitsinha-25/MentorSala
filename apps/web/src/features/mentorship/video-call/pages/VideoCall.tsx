@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -82,36 +83,15 @@ const VideoCall = () => {
   const roleRef =
     useRef<UserRole>(null);
 
-  /**
-   * Prevent creating multiple offers
-   * during the same connection.
-   */
   const offerCreatedRef =
     useRef(false);
 
-  /**
-   * Twilio STUN/TURN servers.
-   */
   const iceServersRef =
     useRef<RTCIceServer[]>([]);
 
-  /**
-   * Indicates whether the current
-   * initialization successfully joined
-   * the Socket.IO session room.
-   */
   const joinedRoomRef =
     useRef(false);
 
-  /**
-   * Unique initialization generation.
-   *
-   * React StrictMode can execute:
-   * mount -> cleanup -> mount
-   *
-   * This generation prevents an old initialization
-   * from continuing after cleanup.
-   */
   const initializationIdRef =
     useRef(0);
 
@@ -157,8 +137,10 @@ const VideoCall = () => {
   // WEBRTC STATE
   // ======================================================
 
-  const [webRTCConnectionState, setWebRTCConnectionState] =
-    useState<RTCPeerConnectionState>("new");
+  const [
+    webRTCConnectionState,
+    setWebRTCConnectionState,
+  ] = useState<RTCPeerConnectionState>("new");
 
   // ======================================================
   // INITIALIZATION VALIDATION
@@ -184,12 +166,78 @@ const VideoCall = () => {
       return;
     }
 
-    stream
-      .getTracks()
-      .forEach((track) => {
-        track.stop();
-      });
+    stream.getTracks().forEach((track) => {
+      track.stop();
+    });
   };
+
+  // ======================================================
+  // ATTACH LOCAL VIDEO
+  //
+  // IMPORTANT:
+  // Callback ref is used instead of relying only on
+  // useEffect + useRef.
+  //
+  // This guarantees that the stream is attached when
+  // the actual <video> DOM element exists.
+  // ======================================================
+
+  const attachLocalVideo = useCallback(
+    (element: HTMLVideoElement | null) => {
+      localVideoRef.current = element;
+
+      if (!element) {
+        console.log(
+          "[VideoCall] Local video element unmounted."
+        );
+
+        return;
+      }
+
+      const stream =
+        localStreamRef.current;
+
+      console.log(
+        "[VideoCall] Local video element mounted:",
+        {
+          hasStream: !!stream,
+          videoTracks:
+            stream?.getVideoTracks().length ?? 0,
+          audioTracks:
+            stream?.getAudioTracks().length ?? 0,
+        }
+      );
+
+      if (!stream) {
+        return;
+      }
+
+      console.log(
+        "[VideoCall] Attaching local stream to video element."
+      );
+
+      element.srcObject = stream;
+
+      element.muted = true;
+      element.autoplay = true;
+      element.playsInline = true;
+
+      void element
+        .play()
+        .then(() => {
+          console.log(
+            "[VideoCall] Local video playback started."
+          );
+        })
+        .catch((playError) => {
+          console.error(
+            "[VideoCall] Local video playback failed:",
+            playError
+          );
+        });
+    },
+    []
+  );
 
   // ======================================================
   // START LOCAL MEDIA
@@ -220,13 +268,63 @@ const VideoCall = () => {
           });
 
         console.log(
-          "[VideoCall] Local media acquired."
+          "[VideoCall] Local media acquired:",
+          {
+            videoTracks:
+              stream.getVideoTracks().map(
+                (track) => ({
+                  id: track.id,
+                  enabled: track.enabled,
+                  readyState: track.readyState,
+                })
+              ),
+            audioTracks:
+              stream.getAudioTracks().map(
+                (track) => ({
+                  id: track.id,
+                  enabled: track.enabled,
+                  readyState: track.readyState,
+                })
+              ),
+          }
         );
 
         localStreamRef.current =
           stream;
 
         setLocalStream(stream);
+
+        // If the video element already exists,
+        // attach immediately.
+        const videoElement =
+          localVideoRef.current;
+
+        if (videoElement) {
+          console.log(
+            "[VideoCall] Video element already exists. Attaching stream immediately."
+          );
+
+          videoElement.srcObject =
+            stream;
+
+          videoElement.muted = true;
+          videoElement.autoplay = true;
+          videoElement.playsInline = true;
+
+          void videoElement
+            .play()
+            .then(() => {
+              console.log(
+                "[VideoCall] Local video playback started after media acquisition."
+              );
+            })
+            .catch((playError) => {
+              console.error(
+                "[VideoCall] Local video playback failed:",
+                playError
+              );
+            });
+        }
 
         return stream;
       } catch (error) {
@@ -285,7 +383,9 @@ const VideoCall = () => {
     stream: MediaStream,
     iceServers: RTCIceServer[]
   ): WebRTCService => {
-    if (webRTCServiceRef.current) {
+    if (
+      webRTCServiceRef.current
+    ) {
       return webRTCServiceRef.current;
     }
 
@@ -304,7 +404,15 @@ const VideoCall = () => {
           incomingStream
         ) => {
           console.log(
-            "[VideoCall] Remote stream received."
+            "[VideoCall] Remote stream received.",
+            {
+              videoTracks:
+                incomingStream.getVideoTracks()
+                  .length,
+              audioTracks:
+                incomingStream.getAudioTracks()
+                  .length,
+            }
           );
 
           setRemoteStream(
@@ -428,7 +536,9 @@ const VideoCall = () => {
     const handleParticipantJoined = (
       data: {
         userId: string;
-        role: "STUDENT" | "MENTOR";
+        role:
+          | "STUDENT"
+          | "MENTOR";
       }
     ) => {
       if (
@@ -477,7 +587,9 @@ const VideoCall = () => {
     const handleParticipantLeft = (
       data: {
         userId: string;
-        role: "STUDENT" | "MENTOR";
+        role:
+          | "STUDENT"
+          | "MENTOR";
       }
     ) => {
       if (
@@ -533,7 +645,8 @@ const VideoCall = () => {
     const joinSession =
       async () => {
         let acquiredStream:
-          MediaStream | null = null;
+          | MediaStream
+          | null = null;
 
         try {
           console.log(
@@ -605,7 +718,8 @@ const VideoCall = () => {
                       return;
                     }
 
-                    settled = true;
+                    settled =
+                      true;
 
                     console.log(
                       "[VideoCall] Socket connected:",
@@ -627,7 +741,8 @@ const VideoCall = () => {
                       return;
                     }
 
-                    settled = true;
+                    settled =
+                      true;
 
                     console.error(
                       "[VideoCall] Socket connection failed:",
@@ -676,6 +791,10 @@ const VideoCall = () => {
             return;
           }
 
+          // ----------------------------------------------
+          // CAMERA + MICROPHONE
+          // ----------------------------------------------
+
           acquiredStream =
             await startLocalMedia();
 
@@ -705,6 +824,10 @@ const VideoCall = () => {
               "Camera and microphone are required to join the mentorship call."
             );
           }
+
+          // ----------------------------------------------
+          // ICE SERVERS
+          // ----------------------------------------------
 
           console.log(
             "[VideoCall] Fetching Twilio ICE servers..."
@@ -757,10 +880,14 @@ const VideoCall = () => {
             `[VideoCall] Twilio ICE credentials TTL: ${ttl} seconds.`
           );
 
+          // ----------------------------------------------
+          // WEBRTC SERVICE
+          // ----------------------------------------------
+
           createWebRTCService(
             socket,
             acquiredStream,
-            iceServersRef.current
+            iceServers
           );
 
           if (
@@ -792,6 +919,10 @@ const VideoCall = () => {
 
             return;
           }
+
+          // ----------------------------------------------
+          // JOIN SERVER SESSION
+          // ----------------------------------------------
 
           console.log(
             "[VideoCall] Sending join-session:",
@@ -868,6 +999,10 @@ const VideoCall = () => {
           console.log(
             "[VideoCall] Successfully joined session."
           );
+
+          // ----------------------------------------------
+          // MENTOR CREATES OFFER
+          // ----------------------------------------------
 
           if (
             currentRole ===
@@ -1037,7 +1172,13 @@ const VideoCall = () => {
   }, [sessionId]);
 
   // ======================================================
-  // ATTACH LOCAL VIDEO STREAM
+  // KEEP LOCAL VIDEO ATTACHED
+  //
+  // This is a safety net.
+  //
+  // The callback ref above is the primary mechanism.
+  // This effect handles cases where React re-renders while
+  // the same video element remains mounted.
   // ======================================================
 
   useEffect(() => {
@@ -1052,33 +1193,41 @@ const VideoCall = () => {
     }
 
     console.log(
-      "[VideoCall] Attaching local video stream."
+      "[VideoCall] Re-attaching local video stream."
     );
 
-    videoElement.srcObject =
-      localStream;
+    if (
+      videoElement.srcObject !==
+      localStream
+    ) {
+      videoElement.srcObject =
+        localStream;
+    }
 
-    const playVideo =
-      async () => {
-        try {
-          await videoElement.play();
+    videoElement.muted = true;
+    videoElement.autoplay = true;
+    videoElement.playsInline = true;
 
-          console.log(
-            "[VideoCall] Local video playback started."
-          );
-        } catch (error) {
-          console.error(
-            "[VideoCall] Local video playback failed:",
-            error
-          );
-        }
-      };
-
-    void playVideo();
+    void videoElement
+      .play()
+      .then(() => {
+        console.log(
+          "[VideoCall] Local video playback confirmed."
+        );
+      })
+      .catch((playError) => {
+        console.error(
+          "[VideoCall] Local video playback failed:",
+          playError
+        );
+      });
 
     return () => {
-      videoElement.srcObject =
-        null;
+      // IMPORTANT:
+      // Do NOT clear srcObject here.
+      //
+      // Clearing it during a render/effect transition can
+      // cause the local preview to disappear.
     };
   }, [localStream]);
 
@@ -1087,8 +1236,11 @@ const VideoCall = () => {
   // ======================================================
 
   useEffect(() => {
+    const videoElement =
+      remoteVideoRef.current;
+
     if (
-      !remoteVideoRef.current ||
+      !videoElement ||
       !remoteStream
     ) {
       return;
@@ -1098,14 +1250,27 @@ const VideoCall = () => {
       "[VideoCall] Attaching remote video stream."
     );
 
-    remoteVideoRef.current.srcObject =
+    videoElement.srcObject =
       remoteStream;
+
+    videoElement.autoplay = true;
+    videoElement.playsInline = true;
+
+    void videoElement
+      .play()
+      .catch((error) => {
+        console.error(
+          "[VideoCall] Remote video playback failed:",
+          error
+        );
+      });
 
     return () => {
       if (
-        remoteVideoRef.current
+        remoteVideoRef.current ===
+        videoElement
       ) {
-        remoteVideoRef.current.srcObject =
+        videoElement.srcObject =
           null;
       }
     };
@@ -1435,10 +1600,11 @@ const VideoCall = () => {
     return (
       <div className="relative flex min-h-screen items-center justify-center bg-zinc-950 font-sans text-zinc-100 antialiased selection:bg-indigo-500/30">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]" />
-        
-        <div className="relative z-10 flex flex-col items-center max-w-sm px-6 text-center">
+
+        <div className="relative z-10 flex max-w-sm flex-col items-center px-6 text-center">
           <div className="relative mb-6 flex h-20 w-20 items-center justify-center">
             <div className="absolute inset-0 animate-ping rounded-full bg-indigo-500/20 duration-1000" />
+
             <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900/80 shadow-2xl shadow-indigo-500/10 backdrop-blur-xl">
               <div className="h-7 w-7 animate-spin rounded-full border-2 border-zinc-600 border-t-indigo-400" />
             </div>
@@ -1448,13 +1614,15 @@ const VideoCall = () => {
             Connecting to Session
           </h2>
 
-          <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
+          <p className="mt-2 text-sm leading-relaxed text-zinc-400">
             Setting up encrypted WebRTC channel and optimizing audio/video feeds...
           </p>
 
           <div className="mt-6 flex items-center gap-2 rounded-full border border-zinc-800/80 bg-zinc-900/60 px-3.5 py-1.5 text-xs font-medium text-zinc-400 shadow-sm backdrop-blur-md">
             <ShieldCheck className="h-4 w-4 text-emerald-400" />
-            <span>End-to-End Encrypted</span>
+            <span>
+              End-to-End Encrypted
+            </span>
           </div>
         </div>
       </div>
@@ -1474,7 +1642,10 @@ const VideoCall = () => {
 
         <div className="relative z-10 w-full max-w-md rounded-3xl border border-zinc-800/80 bg-zinc-900/90 p-8 shadow-2xl backdrop-blur-2xl">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 text-red-400 shadow-inner">
-            <PhoneOff size={28} className="stroke-[2.2]" />
+            <PhoneOff
+              size={28}
+              className="stroke-[2.2]"
+            />
           </div>
 
           <div className="text-center">
@@ -1489,7 +1660,10 @@ const VideoCall = () => {
 
           {mediaError && (
             <div className="mt-5 rounded-xl border border-red-500/30 bg-red-950/30 p-4 text-left text-xs leading-relaxed text-red-300">
-              <span className="font-semibold block mb-0.5 text-red-200">Device Access Warning:</span>
+              <span className="mb-0.5 block font-semibold text-red-200">
+                Device Access Warning:
+              </span>
+
               {mediaError}
             </div>
           )}
@@ -1501,9 +1675,7 @@ const VideoCall = () => {
             }
             className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-zinc-950 shadow-md transition-all duration-150 hover:bg-zinc-200 active:scale-[0.98]"
           >
-            <ArrowLeft
-              size={18}
-            />
+            <ArrowLeft size={18} />
             Return to Dashboard
           </button>
         </div>
@@ -1519,12 +1691,11 @@ const VideoCall = () => {
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-zinc-950 font-sans text-zinc-100 antialiased selection:bg-indigo-500/30">
 
       {/* ==================================================
-          HEADER / TOP BAR
+          HEADER
       ================================================== */}
 
       <header className="relative z-20 flex h-16 shrink-0 items-center justify-between border-b border-zinc-800/80 bg-zinc-900/60 px-5 backdrop-blur-xl md:px-8">
 
-        {/* SESSION INFO */}
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-700/60 bg-zinc-800/80 text-zinc-300 shadow-sm">
             <User className="h-4 w-4" />
@@ -1535,42 +1706,60 @@ const VideoCall = () => {
               <h1 className="text-sm font-semibold tracking-tight text-zinc-100">
                 Mentorship Session
               </h1>
+
               <span className="rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
-                {role === "STUDENT" ? "Student" : "Mentor"}
+                {role ===
+                "STUDENT"
+                  ? "Student"
+                  : "Mentor"}
               </span>
             </div>
 
             <div className="flex items-center gap-2 text-xs text-zinc-400">
               <div className="flex items-center gap-1.5">
                 <Users className="h-3 w-3 text-zinc-500" />
-                <span>{participantCount} / 2</span>
+
+                <span>
+                  {participantCount} / 2
+                </span>
               </div>
 
-              {participantCount >= 2 && (
+              {participantCount >=
+                2 && (
                 <>
-                  <span className="text-zinc-600">•</span>
+                  <span className="text-zinc-600">
+                    •
+                  </span>
+
                   <div className="flex items-center gap-1.5">
                     <span
                       className={`inline-block h-2 w-2 rounded-full ${
-                        webRTCConnectionState === "connected"
+                        webRTCConnectionState ===
+                        "connected"
                           ? "bg-emerald-400 ring-4 ring-emerald-400/20"
-                          : webRTCConnectionState === "connecting"
-                          ? "bg-amber-400 animate-pulse ring-4 ring-amber-400/20"
+                          : webRTCConnectionState ===
+                            "connecting"
+                          ? "animate-pulse bg-amber-400 ring-4 ring-amber-400/20"
                           : "bg-zinc-500"
                       }`}
                     />
+
                     <span
                       className={`text-[11px] font-medium ${
-                        webRTCConnectionState === "connected"
+                        webRTCConnectionState ===
+                        "connected"
                           ? "text-emerald-400"
-                          : webRTCConnectionState === "connecting"
+                          : webRTCConnectionState ===
+                            "connecting"
                           ? "text-amber-400"
                           : "text-zinc-500"
                       }`}
                     >
-                      {webRTCConnectionState === "connected"
+                      {webRTCConnectionState ===
+                      "connected"
                         ? "Encrypted Peer Link"
-                        : webRTCConnectionState === "connecting"
+                        : webRTCConnectionState ===
+                          "connecting"
                         ? "Negotiating..."
                         : "Waiting for stream"}
                     </span>
@@ -1581,41 +1770,40 @@ const VideoCall = () => {
           </div>
         </div>
 
-        {/* TIME CHIP */}
         <div className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-950/70 px-3.5 py-1.5 shadow-inner">
           <Clock className="h-3.5 w-3.5 text-zinc-400" />
+
           <span className="font-mono text-xs font-medium tracking-widest text-zinc-200">
-            {formatTime(remainingSeconds)}
+            {formatTime(
+              remainingSeconds
+            )}
           </span>
         </div>
-
       </header>
 
       {/* ==================================================
-          MAIN STAGE
+          MAIN
       ================================================== */}
 
-      <main className="relative flex flex-1 flex-col items-center justify-center p-3 sm:p-5 md:p-6 overflow-hidden">
+      <main className="relative flex flex-1 flex-col items-center justify-center overflow-hidden p-3 sm:p-5 md:p-6">
 
-        {/* SYSTEM MEDIA BANNER */}
         {mediaError && (
           <div className="mb-4 w-full max-w-5xl rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-200 backdrop-blur-md">
             {mediaError}
           </div>
         )}
 
-        {/* VIDEO MATRIX CONTAINER */}
-        <div className="grid h-full w-full max-w-7xl grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-center justify-center">
+        <div className="grid h-full w-full max-w-7xl grid-cols-1 items-center justify-center gap-3 sm:gap-4 md:grid-cols-2">
 
           {/* ==================================================
               LOCAL TILE
           ================================================== */}
 
-          <div className="group relative flex h-full w-full max-h-[480px] md:max-h-[620px] aspect-video flex-col items-center justify-center overflow-hidden rounded-2xl sm:rounded-3xl border border-zinc-800/80 bg-zinc-900/90 shadow-2xl transition-all duration-300">
-            
+          <div className="group relative flex aspect-video h-full max-h-[480px] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/90 shadow-2xl transition-all duration-300 sm:rounded-3xl md:max-h-[620px]">
+
             {localStream ? (
               <video
-                ref={localVideoRef}
+                ref={attachLocalVideo}
                 autoPlay
                 playsInline
                 muted
@@ -1626,19 +1814,34 @@ const VideoCall = () => {
                 <div className="mb-3 flex h-20 w-20 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-950/60 shadow-xl">
                   <User className="h-8 w-8 text-zinc-400" />
                 </div>
-                <h3 className="text-sm font-medium text-zinc-200">Camera Paused</h3>
-                <p className="mt-1 text-xs text-zinc-500">Enable your webcam to share video</p>
+
+                <h3 className="text-sm font-medium text-zinc-200">
+                  Camera Paused
+                </h3>
+
+                <p className="mt-1 text-xs text-zinc-500">
+                  Enable your webcam to share video
+                </p>
               </div>
             )}
 
-            {/* OVERLAY BADGES */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between p-3.5 sm:p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-              <div className="flex items-center gap-2 rounded-lg bg-zinc-950/70 border border-zinc-800/80 px-2.5 py-1 backdrop-blur-md">
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3.5 sm:p-4">
+
+              <div className="flex items-center gap-2 rounded-lg border border-zinc-800/80 bg-zinc-950/70 px-2.5 py-1 backdrop-blur-md">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                <span className="text-xs font-medium text-zinc-200">You ({role === "STUDENT" ? "Student" : "Mentor"})</span>
+
+                <span className="text-xs font-medium text-zinc-200">
+                  You (
+                  {role ===
+                  "STUDENT"
+                    ? "Student"
+                    : "Mentor"}
+                  )
+                </span>
               </div>
 
               <div className="flex items-center gap-1.5">
+
                 <div
                   className={`flex h-7 w-7 items-center justify-center rounded-lg border backdrop-blur-md ${
                     isMuted
@@ -1646,7 +1849,11 @@ const VideoCall = () => {
                       : "border-zinc-800/80 bg-zinc-950/70 text-zinc-300"
                   }`}
                 >
-                  {isMuted ? <MicOff size={13} /> : <Mic size={13} />}
+                  {isMuted ? (
+                    <MicOff size={13} />
+                  ) : (
+                    <Mic size={13} />
+                  )}
                 </div>
 
                 <div
@@ -1656,18 +1863,22 @@ const VideoCall = () => {
                       : "border-zinc-800/80 bg-zinc-950/70 text-zinc-300"
                   }`}
                 >
-                  {isVideoEnabled ? <Video size={13} /> : <VideoOff size={13} />}
+                  {isVideoEnabled ? (
+                    <Video size={13} />
+                  ) : (
+                    <VideoOff size={13} />
+                  )}
                 </div>
+
               </div>
             </div>
-
           </div>
 
           {/* ==================================================
               REMOTE TILE
           ================================================== */}
 
-          <div className="group relative flex h-full w-full max-h-[480px] md:max-h-[620px] aspect-video flex-col items-center justify-center overflow-hidden rounded-2xl sm:rounded-3xl border border-zinc-800/80 bg-zinc-900/90 shadow-2xl transition-all duration-300">
+          <div className="group relative flex aspect-video h-full max-h-[480px] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/90 shadow-2xl transition-all duration-300 sm:rounded-3xl md:max-h-[620px]">
 
             {remoteStream ? (
               <>
@@ -1678,28 +1889,39 @@ const VideoCall = () => {
                   className="h-full w-full object-cover"
                 />
 
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between p-3.5 sm:p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-                  <div className="flex items-center gap-2 rounded-lg bg-zinc-950/70 border border-zinc-800/80 px-2.5 py-1 backdrop-blur-md">
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3.5 sm:p-4">
+
+                  <div className="flex items-center gap-2 rounded-lg border border-zinc-800/80 bg-zinc-950/70 px-2.5 py-1 backdrop-blur-md">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+
                     <span className="text-xs font-medium text-zinc-200">
-                      {role === "STUDENT" ? "Mentor" : "Student"}
+                      {role ===
+                      "STUDENT"
+                        ? "Mentor"
+                        : "Student"}
                     </span>
                   </div>
+
                 </div>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center p-6 text-center">
-                {participantCount >= 2 ? (
+
+                {participantCount >=
+                2 ? (
                   <>
                     <div className="relative mb-4 flex h-16 w-16 items-center justify-center">
                       <div className="absolute inset-0 animate-ping rounded-2xl bg-indigo-500/10 duration-1000" />
+
                       <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-950/80">
                         <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-600 border-t-indigo-400" />
                       </div>
                     </div>
+
                     <p className="text-sm font-semibold tracking-tight text-zinc-200">
                       Syncing Video Streams...
                     </p>
+
                     <p className="mt-1 text-xs text-zinc-500">
                       Negotiating secure peer connection
                     </p>
@@ -1709,90 +1931,132 @@ const VideoCall = () => {
                     <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-950/80 text-zinc-600">
                       <Users size={28} />
                     </div>
+
                     <p className="text-sm font-semibold tracking-tight text-zinc-200">
-                      Waiting for {role === "STUDENT" ? "Mentor" : "Student"} to join
+                      Waiting for{" "}
+                      {role ===
+                      "STUDENT"
+                        ? "Mentor"
+                        : "Student"}{" "}
+                      to join
                     </p>
+
                     <p className="mt-1 text-xs text-zinc-500">
                       The call will link automatically once they arrive
                     </p>
                   </>
                 )}
+
               </div>
             )}
-
           </div>
-
         </div>
-
       </main>
 
       {/* ==================================================
-          BOTTOM FLOATING CONTROLS
+          CONTROLS
       ================================================== */}
 
-      <footer className="relative z-20 flex h-20 shrink-0 items-center justify-center border-t border-zinc-800/80 bg-zinc-900/60 backdrop-blur-xl px-4">
+      <footer className="relative z-20 flex h-20 shrink-0 items-center justify-center border-t border-zinc-800/80 bg-zinc-900/60 px-4 backdrop-blur-xl">
 
-        <div className="flex items-center gap-3 sm:gap-4 rounded-2xl border border-zinc-800/80 bg-zinc-950/80 px-4 py-2 shadow-2xl backdrop-blur-2xl">
+        <div className="flex items-center gap-3 rounded-2xl border border-zinc-800/80 bg-zinc-950/80 px-4 py-2 shadow-2xl backdrop-blur-2xl sm:gap-4">
 
-          {/* TOGGLE MIC */}
+          {/* MICROPHONE */}
+
           <button
             type="button"
-            onClick={toggleMute}
-            disabled={!localStream}
-            title={isMuted ? "Unmute Microphone" : "Mute Microphone"}
+            onClick={
+              toggleMute
+            }
+            disabled={
+              !localStream
+            }
+            title={
+              isMuted
+                ? "Unmute Microphone"
+                : "Mute Microphone"
+            }
             className={`flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200 active:scale-95 ${
               !localStream
                 ? "cursor-not-allowed bg-zinc-900 text-zinc-600"
                 : isMuted
-                ? "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
-                : "bg-zinc-800/80 text-zinc-200 border border-zinc-700/60 hover:bg-zinc-700"
+                ? "border border-red-500/30 bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                : "border border-zinc-700/60 bg-zinc-800/80 text-zinc-200 hover:bg-zinc-700"
             }`}
           >
             {isMuted ? (
-              <MicOff size={19} className="stroke-[2.2]" />
+              <MicOff
+                size={19}
+                className="stroke-[2.2]"
+              />
             ) : (
-              <Mic size={19} className="stroke-[2.2]" />
+              <Mic
+                size={19}
+                className="stroke-[2.2]"
+              />
             )}
           </button>
 
-          {/* TOGGLE CAMERA */}
+          {/* CAMERA */}
+
           <button
             type="button"
-            onClick={toggleVideo}
-            disabled={!localStream}
-            title={isVideoEnabled ? "Turn Off Camera" : "Turn On Camera"}
+            onClick={
+              toggleVideo
+            }
+            disabled={
+              !localStream
+            }
+            title={
+              isVideoEnabled
+                ? "Turn Off Camera"
+                : "Turn On Camera"
+            }
             className={`flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200 active:scale-95 ${
               !localStream
                 ? "cursor-not-allowed bg-zinc-900 text-zinc-600"
                 : !isVideoEnabled
-                ? "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
-                : "bg-zinc-800/80 text-zinc-200 border border-zinc-700/60 hover:bg-zinc-700"
+                ? "border border-red-500/30 bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                : "border border-zinc-700/60 bg-zinc-800/80 text-zinc-200 hover:bg-zinc-700"
             }`}
           >
             {isVideoEnabled ? (
-              <Video size={19} className="stroke-[2.2]" />
+              <Video
+                size={19}
+                className="stroke-[2.2]"
+              />
             ) : (
-              <VideoOff size={19} className="stroke-[2.2]" />
+              <VideoOff
+                size={19}
+                className="stroke-[2.2]"
+              />
             )}
           </button>
 
           <div className="h-6 w-px bg-zinc-800" />
 
-          {/* LEAVE CALL */}
+          {/* LEAVE */}
+
           <button
             type="button"
-            onClick={handleLeave}
+            onClick={
+              handleLeave
+            }
             title="Leave Session"
-            className="flex h-11 items-center gap-2 rounded-xl bg-red-600 hover:bg-red-700 px-5 text-xs font-semibold text-white shadow-lg shadow-red-600/20 transition-all duration-200 active:scale-95"
+            className="flex h-11 items-center gap-2 rounded-xl bg-red-600 px-5 text-xs font-semibold text-white shadow-lg shadow-red-600/20 transition-all duration-200 hover:bg-red-700 active:scale-95"
           >
-            <PhoneOff size={17} className="stroke-[2.2]" />
-            <span className="hidden sm:inline">Leave Session</span>
+            <PhoneOff
+              size={17}
+              className="stroke-[2.2]"
+            />
+
+            <span className="hidden sm:inline">
+              Leave Session
+            </span>
           </button>
 
         </div>
-
       </footer>
-
     </div>
   );
 };
