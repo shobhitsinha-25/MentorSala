@@ -33,7 +33,7 @@ import paymentRoutes from "./modules/user/Payments/payment.routes";
 
 import razorpayWebhookRoutes from "./modules/razorpay/payment/webhook/razorpay.webhook.routes";
 
-import studentSubscriptionRoutes from "../../api/src/modules/user/subscription/student.subscription.routes"
+import studentSubscriptionRoutes from "./modules/user/subscription/student.subscription.routes";
 import videoCallRoutes from "./modules/mentorship/video-call/videoCall.routes";
 import adminDailyProblemRoutes from "./modules/question/admin/daily-problem/admin.dailyProblem.routes";
 import studentDailyProblemRoutes from "./modules/question/student/daily-problem/student.dailyProblem.routes";
