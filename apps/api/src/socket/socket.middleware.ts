@@ -22,6 +22,46 @@ export interface AuthenticatedSocket extends Socket {
 }
 
 // ======================================================
+// COOKIE HELPER
+// ======================================================
+
+const getCookieValue = (
+  cookieHeader: string | undefined,
+  cookieName: string
+): string | undefined => {
+  if (!cookieHeader) {
+    return undefined;
+  }
+
+  const cookies = cookieHeader
+    .split(";")
+    .map((cookie) => cookie.trim());
+
+  for (const cookie of cookies) {
+    const separatorIndex = cookie.indexOf("=");
+
+    if (separatorIndex === -1) {
+      continue;
+    }
+
+    const name = cookie.slice(
+      0,
+      separatorIndex
+    );
+
+    const value = cookie.slice(
+      separatorIndex + 1
+    );
+
+    if (name === cookieName) {
+      return decodeURIComponent(value);
+    }
+  }
+
+  return undefined;
+};
+
+// ======================================================
 // SOCKET AUTHENTICATION
 // ======================================================
 
@@ -31,10 +71,10 @@ export const socketAuthMiddleware = (
 ) => {
   try {
     // ==================================================
-    // GET ACCESS TOKEN
+    // GET TOKEN FROM SOCKET AUTH
     // ==================================================
 
-    const token =
+    let token =
       socket.handshake.auth?.token ||
       socket.handshake.headers.authorization?.replace(
         "Bearer ",
@@ -42,12 +82,28 @@ export const socketAuthMiddleware = (
       );
 
     // ==================================================
+    // FALLBACK: GET TOKEN FROM COOKIE
+    // ==================================================
+
+    if (!token) {
+      const cookieHeader =
+        socket.handshake.headers.cookie;
+
+      token = getCookieValue(
+        cookieHeader,
+        "accessToken"
+      );
+    }
+
+    // ==================================================
     // TOKEN REQUIRED
     // ==================================================
 
     if (!token) {
       return next(
-        new Error("Authentication required")
+        new Error(
+          "Authentication required"
+        )
       );
     }
 
@@ -55,7 +111,8 @@ export const socketAuthMiddleware = (
     // JWT SECRET
     // ==================================================
 
-    const jwtSecret = process.env.JWT_SECRET;
+    const jwtSecret =
+      process.env.JWT_SECRET;
 
     if (!jwtSecret) {
       console.error(
@@ -95,7 +152,7 @@ export const socketAuthMiddleware = (
     }
 
     // ==================================================
-    // ATTACH USER TO SOCKET
+    // ATTACH USER
     // ==================================================
 
     const authenticatedSocket =
@@ -114,7 +171,6 @@ export const socketAuthMiddleware = (
     next();
 
   } catch (error) {
-
     console.error(
       "Socket authentication failed:",
       error
