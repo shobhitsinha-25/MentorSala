@@ -1,5 +1,4 @@
-import { Router }
-from "express";
+import { Router } from "express";
 
 import {
   bookSession,
@@ -9,7 +8,8 @@ import {
   getMySessions,
   getNextSessionController,
   saveMeetingLink,
-  getStudentSessionJoinInfoController
+  getStudentSessionJoinInfoController,
+  createMentorReviewController,
 } from "./session.controller";
 
 import {
@@ -20,80 +20,47 @@ import {
 const router = Router();
 
 router.post(
-
   "/book",
-
   protect,
-
   authorizeRoles("STUDENT"),
-
   bookSession
-
 );
 
 router.get(
-
   "/student",
-
   protect,
-
   authorizeRoles("STUDENT"),
-
   getMySessions
-
 );
 
 router.get(
-
   "/mentor",
-
   protect,
-
   authorizeRoles("MENTOR"),
-
   getMentorUpcomingSessions
-
 );
 
 router.patch(
-
   "/:sessionId/complete",
-
   protect,
-
-  authorizeRoles(
-    "MENTOR"
-  ),
-
+  authorizeRoles("MENTOR"),
   completeMentorshipSession
-
 );
 
 router.patch(
-
   "/:sessionId/cancel",
-
   protect,
-
   authorizeRoles("STUDENT"),
-
   cancelBookedSession
-
 );
 
 router.patch(
-
   "/:sessionId/meeting-link",
-
   protect,
-
-  authorizeRoles(
-    "MENTOR"
-  ),
-
+  authorizeRoles("MENTOR"),
   saveMeetingLink
-
 );
+
 router.get(
   "/next",
   protect,
@@ -104,6 +71,14 @@ router.get(
   "/:sessionId/join",
   protect,
   getStudentSessionJoinInfoController
+);
+
+// ⭐ Rate mentor after completed session
+router.post(
+  "/:sessionId/review",
+  protect,
+  authorizeRoles("STUDENT"),
+  createMentorReviewController
 );
 
 export default router;

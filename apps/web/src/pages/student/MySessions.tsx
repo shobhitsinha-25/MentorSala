@@ -28,11 +28,16 @@ interface Session {
   scheduledAt: string;
   meetingLink?: string | null;
   duration: number;
-
   status:
     | "SCHEDULED"
     | "COMPLETED"
     | "CANCELLED";
+
+  review?: {
+    id: string;
+    rating: number;
+    comment: string | null;
+  } | null;
 
   mentor: {
     user: {
@@ -77,7 +82,8 @@ const getUserFriendlyError = (
       }
     ).response;
 
-    const status = response?.status;
+    const status =
+      response?.status;
 
     // ========================================================
     // USE BACKEND BUSINESS MESSAGE WHEN AVAILABLE
@@ -151,7 +157,8 @@ const getUserFriendlyError = (
 // ============================================================
 
 const MySessions = () => {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   // ==========================================================
   // STATE
@@ -173,17 +180,42 @@ const MySessions = () => {
     useState<SessionTab>("UPCOMING");
 
   // ==========================================================
+  // REVIEW STATE
+  // ==========================================================
+
+  const [reviewingSessionId, setReviewingSessionId] =
+    useState<string | null>(null);
+
+  const [selectedRating, setSelectedRating] =
+    useState<number>(0);
+
+  const [reviewComment, setReviewComment] =
+    useState<string>("");
+
+  const [submittingReview, setSubmittingReview] =
+    useState(false);
+
+  // ==========================================================
+  // AUTO REVIEW POPUP STATE
+  // ==========================================================
+
+  /*
+   * Prevents the automatic review popup from opening repeatedly
+   * during the same dashboard visit.
+   *
+   * Example:
+   * - Session becomes COMPLETED
+   * - Dashboard fetches sessions
+   * - Popup opens automatically
+   * - Student closes popup
+   * - Popup does not immediately reopen
+   */
+  const [autoReviewOpened, setAutoReviewOpened] =
+    useState(false);
+
+  // ==========================================================
   // CURRENT TIME
   // ==========================================================
-  //
-  // Used to automatically update the session category.
-  //
-  // A session moves to Past ONLY after:
-  //
-  // scheduledAt + duration
-  //
-  // has passed.
-  //
 
   const [currentTime, setCurrentTime] =
     useState(Date.now());
@@ -195,9 +227,47 @@ const MySessions = () => {
   const fetchSessions = async () => {
     try {
       const res =
-        await api.get("/sessions/student");
+        await api.get(
+          "/sessions/student"
+        );
 
-      setSessions(res.data.sessions);
+      const fetchedSessions =
+        res.data.sessions as Session[];
+
+      setSessions(
+        fetchedSessions
+      );
+
+      // ======================================================
+      // AUTOMATIC REVIEW POPUP
+      // ======================================================
+
+      /*
+       * Find the first completed session that has not been
+       * reviewed yet.
+       *
+       * This means the popup will appear after the mentor
+       * marks the session as COMPLETED.
+       */
+      if (!autoReviewOpened) {
+        const completedSessionWithoutReview =
+          fetchedSessions.find(
+            (session) =>
+              session.status === "COMPLETED" &&
+              !session.review
+          );
+
+        if (completedSessionWithoutReview) {
+          setAutoReviewOpened(true);
+
+          setReviewingSessionId(
+            completedSessionWithoutReview.id
+          );
+
+          setSelectedRating(0);
+          setReviewComment("");
+        }
+      }
     } catch (error: unknown) {
       console.error(
         "[MySessions] Failed to fetch sessions:",
@@ -227,18 +297,21 @@ const MySessions = () => {
     }
 
     try {
-      setJoiningSessionId(sessionId);
+      setJoiningSessionId(
+        sessionId
+      );
 
       const res =
         await api.get(
           `/sessions/${sessionId}/join`
         );
 
-      const data = res.data?.data;
+      const data =
+        res.data?.data;
 
-      // ========================================================
+      // ======================================================
       // CHECK WHETHER SESSION CAN BE JOINED
-      // ========================================================
+      // ======================================================
 
       if (!data?.canJoin) {
         toast.error(
@@ -248,9 +321,9 @@ const MySessions = () => {
         return;
       }
 
-      // ========================================================
+      // ======================================================
       // OPEN VIDEO CALL PAGE
-      // ========================================================
+      // ======================================================
 
       navigate(
         `/mentorship/video-call/${sessionId}`
@@ -284,7 +357,9 @@ const MySessions = () => {
     }
 
     try {
-      setCancellingSessionId(sessionId);
+      setCancellingSessionId(
+        sessionId
+      );
 
       await api.patch(
         `/sessions/${sessionId}/cancel`
@@ -317,6 +392,111 @@ const MySessions = () => {
   };
 
   // ==========================================================
+  // OPEN REVIEW MODAL
+  // ==========================================================
+
+  const openReviewModal = (
+    sessionId: string
+  ) => {
+    setReviewingSessionId(
+      sessionId
+    );
+
+    setSelectedRating(0);
+
+    setReviewComment("");
+  };
+
+  // ==========================================================
+  // CLOSE REVIEW MODAL
+  // ==========================================================
+
+  const closeReviewModal = () => {
+    if (submittingReview) {
+      return;
+    }
+
+    setReviewingSessionId(null);
+
+    setSelectedRating(0);
+
+    setReviewComment("");
+  };
+
+  // ==========================================================
+  // SUBMIT REVIEW
+  // ==========================================================
+
+  const submitReview = async () => {
+    if (!reviewingSessionId) {
+      return;
+    }
+
+    // ========================================================
+    // VALIDATE RATING
+    // ========================================================
+
+    if (
+      selectedRating < 1 ||
+      selectedRating > 5
+    ) {
+      toast.error(
+        "Please select a rating from 1 to 5."
+      );
+
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+
+      await api.post(
+        `/sessions/${reviewingSessionId}/review`,
+        {
+          rating: selectedRating,
+          comment:
+            reviewComment.trim() ||
+            undefined,
+        }
+      );
+
+      toast.success(
+        "Thank you! Your review has been submitted."
+      );
+
+      // ======================================================
+      // CLOSE MODAL
+      // ======================================================
+
+      setReviewingSessionId(null);
+
+      setSelectedRating(0);
+
+      setReviewComment("");
+
+      // ======================================================
+      // REFRESH SESSIONS
+      // ======================================================
+
+      await fetchSessions();
+    } catch (error: unknown) {
+      console.error(
+        "[MySessions] Failed to submit review:",
+        error
+      );
+
+      toast.error(
+        getUserFriendlyError(
+          error,
+          "Unable to submit your review. Please try again."
+        )
+      );
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  // ==========================================================
   // INITIAL FETCH
   // ==========================================================
 
@@ -327,27 +507,19 @@ const MySessions = () => {
   // ==========================================================
   // REFRESH CURRENT TIME
   // ==========================================================
-  //
-  // The UI checks the session time every 30 seconds.
-  //
-  // IMPORTANT:
-  // A session does NOT move to Past when its START time passes.
-  //
-  // It moves to Past only when:
-  //
-  // START TIME + DURATION
-  //
-  // has passed.
-  //
 
   useEffect(() => {
     const interval =
       window.setInterval(() => {
-        setCurrentTime(Date.now());
+        setCurrentTime(
+          Date.now()
+        );
       }, 30000);
 
     return () => {
-      window.clearInterval(interval);
+      window.clearInterval(
+        interval
+      );
     };
   }, []);
 
@@ -377,17 +549,6 @@ const MySessions = () => {
   // ==========================================================
   // HELPER: CHECK WHETHER SESSION IS PAST
   // ==========================================================
-  //
-  // Example:
-  //
-  // scheduledAt = 5:00 PM
-  // duration    = 30 minutes
-  //
-  // end time    = 5:30 PM
-  //
-  // Before 5:30 PM -> NOT PAST
-  // After 5:30 PM  -> PAST
-  //
 
   const isSessionPast = (
     session: Session
@@ -399,70 +560,77 @@ const MySessions = () => {
     }
 
     const sessionEndTime =
-      getSessionEndTime(session);
+      getSessionEndTime(
+        session
+      );
 
     return (
-      currentTime >= sessionEndTime
+      currentTime >=
+      sessionEndTime
     );
   };
 
   // ==========================================================
   // UPCOMING SESSIONS
   // ==========================================================
-  //
-  // SCHEDULED sessions remain Upcoming until their
-  // COMPLETE duration has passed.
-  //
 
-  const upcoming = sessions.filter(
-    (session) => {
-      if (
-        session.status !== "SCHEDULED"
-      ) {
-        return false;
+  const upcoming =
+    sessions.filter(
+      (session) => {
+        if (
+          session.status !==
+          "SCHEDULED"
+        ) {
+          return false;
+        }
+
+        return !isSessionPast(
+          session
+        );
       }
-
-      return !isSessionPast(session);
-    }
-  );
+    );
 
   // ==========================================================
   // PAST SESSIONS
   // ==========================================================
-  //
-  // Only SCHEDULED sessions whose complete duration
-  // has passed are placed here.
-  //
 
-  const past = sessions.filter(
-    (session) => {
-      if (
-        session.status !== "SCHEDULED"
-      ) {
-        return false;
+  const past =
+    sessions.filter(
+      (session) => {
+        if (
+          session.status !==
+          "SCHEDULED"
+        ) {
+          return false;
+        }
+
+        return isSessionPast(
+          session
+        );
       }
-
-      return isSessionPast(session);
-    }
-  );
+    );
 
   // ==========================================================
   // COMPLETED
   // ==========================================================
 
-  const completed = sessions.filter(
-    (session) =>
-      session.status === "COMPLETED"
-  );
+  const completed =
+    sessions.filter(
+      (session) =>
+        session.status ===
+        "COMPLETED"
+    );
 
   // ==========================================================
   // CANCELLED
   // ==========================================================
 
-  const cancelled = sessions.filter(
-    (session) =>
-      session.status === "CANCELLED"
-  );
+  const cancelled =
+    sessions.filter(
+      (session) =>
+        session.status ===
+        "CANCELLED"
+    );
 
   // ==========================================================
   // ACTIVE SESSION LIST
@@ -491,16 +659,19 @@ const MySessions = () => {
       label: "Upcoming",
       count: upcoming.length,
     },
+
     {
       id: "PAST",
       label: "Past",
       count: past.length,
     },
+
     {
       id: "COMPLETED",
       label: "Completed",
       count: completed.length,
     },
+
     {
       id: "CANCELLED",
       label: "Cancelled",
@@ -532,16 +703,21 @@ const MySessions = () => {
     showCancel?: boolean;
   }) => {
     const isJoining =
-      joiningSessionId === session.id;
+      joiningSessionId ===
+      session.id;
 
     const isCancelling =
-      cancellingSessionId === session.id;
+      cancellingSessionId ===
+      session.id;
 
     const isActionInProgress =
-      isJoining || isCancelling;
+      isJoining ||
+      isCancelling;
 
     const sessionEndTime =
-      getSessionEndTime(session);
+      getSessionEndTime(
+        session
+      );
 
     const sessionHasStarted =
       currentTime >=
@@ -567,7 +743,6 @@ const MySessions = () => {
           ================================================== */}
 
           <div className="flex items-center gap-4 relative z-10">
-
             <img
               src={
                 session.mentor.user.avatar ||
@@ -580,7 +755,6 @@ const MySessions = () => {
             />
 
             <div className="min-w-0">
-
               <h3 className="text-slate-900 font-bold tracking-tight text-base truncate group-hover:text-purple-900 transition-colors">
                 {session.mentor.user.name}
               </h3>
@@ -588,9 +762,7 @@ const MySessions = () => {
               <p className="text-purple-600/90 text-xs font-semibold mt-0.5 tracking-wide uppercase">
                 Mentor Profile
               </p>
-
             </div>
-
           </div>
 
           {/* ==================================================
@@ -602,7 +774,6 @@ const MySessions = () => {
             {/* DATE */}
 
             <div className="flex items-center gap-3 text-xs font-semibold text-slate-700 bg-purple-50/50 rounded-xl px-3 py-2 border border-purple-100/60">
-
               <Calendar
                 size={15}
                 className="text-purple-600 shrink-0"
@@ -620,13 +791,11 @@ const MySessions = () => {
                   }
                 )}
               </span>
-
             </div>
 
             {/* TIME */}
 
             <div className="flex items-center gap-3 text-xs font-semibold text-slate-700 bg-violet-50/50 rounded-xl px-3 py-2 border border-violet-100/60">
-
               <Clock
                 size={15}
                 className="text-violet-600 shrink-0"
@@ -644,13 +813,11 @@ const MySessions = () => {
                   }
                 )}
               </span>
-
             </div>
 
             {/* DURATION */}
 
             <div className="flex items-center gap-3 text-xs font-semibold text-slate-700 bg-fuchsia-50/50 rounded-xl px-3 py-2 border border-fuchsia-100/60">
-
               <User
                 size={15}
                 className="text-fuchsia-600 shrink-0"
@@ -659,11 +826,8 @@ const MySessions = () => {
               <span className="font-bold text-slate-800">
                 {session.duration} minutes slot
               </span>
-
             </div>
-
           </div>
-
         </div>
 
         {/* ====================================================
@@ -675,168 +839,229 @@ const MySessions = () => {
           {/* STATUS */}
 
           <div>
-
             <span
               className={`
                 px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase border inline-flex items-center gap-1.5
                 ${
                   sessionHasEnded &&
-                  session.status === "SCHEDULED"
+                  session.status ===
+                    "SCHEDULED"
                     ? "bg-amber-100/80 text-amber-700 border-amber-200"
-                    : session.status === "SCHEDULED"
+                    : session.status ===
+                      "SCHEDULED"
                     ? "bg-purple-100/80 text-purple-700 border-purple-200"
-                    : session.status === "COMPLETED"
+                    : session.status ===
+                      "COMPLETED"
                     ? "bg-emerald-100/80 text-emerald-700 border-emerald-200"
                     : "bg-rose-100/80 text-rose-700 border-rose-200"
                 }
               `}
             >
-
               <span
                 className={`w-1.5 h-1.5 rounded-full ${
                   sessionHasEnded &&
-                  session.status === "SCHEDULED"
+                  session.status ===
+                    "SCHEDULED"
                     ? "bg-amber-600"
-                    : session.status === "SCHEDULED"
+                    : session.status ===
+                      "SCHEDULED"
                     ? "bg-purple-600"
-                    : session.status === "COMPLETED"
+                    : session.status ===
+                      "COMPLETED"
                     ? "bg-emerald-600"
                     : "bg-rose-600"
                 }`}
               />
 
               {sessionHasEnded &&
-              session.status === "SCHEDULED"
+              session.status ===
+                "SCHEDULED"
                 ? "PAST"
                 : session.status}
-
             </span>
-
           </div>
 
           {/* ==================================================
               SESSION IN PROGRESS
           ================================================== */}
 
-          {session.status === "SCHEDULED" &&
+          {session.status ===
+            "SCHEDULED" &&
             sessionHasStarted &&
             !sessionHasEnded &&
-            activeTab === "UPCOMING" && (
-              <div className="w-full h-10 rounded-xl bg-green-50 border border-green-200 text-green-700 text-xs font-bold flex items-center justify-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            activeTab ===
+              "UPCOMING" && (
+            <div className="w-full h-10 rounded-xl bg-green-50 border border-green-200 text-green-700 text-xs font-bold flex items-center justify-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
 
-                Session is in progress
-              </div>
-            )}
+              Session is in progress
+            </div>
+          )}
 
           {/* ==================================================
               START / JOIN CALL
           ================================================== */}
 
-          {session.status === "SCHEDULED" &&
-            activeTab === "UPCOMING" && (
-              <button
-                type="button"
-                onClick={() =>
-                  handleJoinCall(
-                    session.id
-                  )
-                }
-                disabled={
-                  isActionInProgress ||
+          {session.status ===
+            "SCHEDULED" &&
+            activeTab ===
+              "UPCOMING" && (
+            <button
+              type="button"
+              onClick={() =>
+                handleJoinCall(
+                  session.id
+                )
+              }
+              disabled={
+                isActionInProgress ||
+                sessionHasEnded
+              }
+              className={`
+                w-full
+                h-11
+                rounded-xl
+                text-white
+                text-sm
+                font-semibold
+                flex
+                items-center
+                justify-center
+                gap-2
+                transition-all
+                duration-200
+                active:scale-[0.98]
+                shadow-sm
+                ${
+                  isJoining ||
                   sessionHasEnded
+                    ? "bg-purple-400 cursor-not-allowed shadow-none"
+                    : "bg-purple-600 hover:bg-purple-700 shadow-purple-600/20 hover:shadow-md"
                 }
-                className={`
-                  w-full
-                  h-11
-                  rounded-xl
-                  text-white
-                  text-sm
-                  font-semibold
-                  flex
-                  items-center
-                  justify-center
-                  gap-2
-                  transition-all
-                  duration-200
-                  active:scale-[0.98]
-                  shadow-sm
-                  ${
-                    isJoining ||
-                    sessionHasEnded
-                      ? "bg-purple-400 cursor-not-allowed shadow-none"
-                      : "bg-purple-600 hover:bg-purple-700 shadow-purple-600/20 hover:shadow-md"
-                  }
-                `}
-              >
+              `}
+            >
+              {isJoining ? (
+                <>
+                  <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
 
-                {isJoining ? (
-                  <>
-                    <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                  Checking session...
+                </>
+              ) : (
+                <>
+                  <Video size={16} />
 
-                    Checking session...
-                  </>
-                ) : (
-                  <>
-                    <Video size={16} />
-
-                    Start / Join Call
-                  </>
-                )}
-
-              </button>
-            )}
+                  Start / Join Call
+                </>
+              )}
+            </button>
+          )}
 
           {/* ==================================================
               PAST SESSION MESSAGE
           ================================================== */}
 
-          {session.status === "SCHEDULED" &&
+          {session.status ===
+            "SCHEDULED" &&
             sessionHasEnded &&
-            activeTab === "PAST" && (
-              <div className="w-full min-h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold flex items-center justify-center gap-2 px-3 text-center">
+            activeTab ===
+              "PAST" && (
+            <div className="w-full min-h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold flex items-center justify-center gap-2 px-3 text-center">
+              <History
+                size={14}
+                className="shrink-0"
+              />
 
-                <History
-                  size={14}
-                  className="shrink-0"
-                />
+              <span>
+                Session time has passed
+              </span>
+            </div>
+          )}
 
-                <span>
-                  Session time has passed
-                </span>
+          {/* ==================================================
+              RATE MENTOR
+          ================================================== */}
 
-              </div>
-            )}
+          {session.status ===
+            "COMPLETED" && (
+            <div className="mt-1">
+              {!session.review ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    openReviewModal(
+                      session.id
+                    )
+                  }
+                  className="w-full h-11 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm font-bold hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  <span className="text-lg">
+                    ★
+                  </span>
+
+                  Rate Your Mentor
+                </button>
+              ) : (
+                <div className="w-full rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-bold text-emerald-700">
+                      Your Rating
+                    </span>
+
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map(
+                        (star) => (
+                          <span
+                            key={star}
+                            className={
+                              star <=
+                              session.review!.rating
+                                ? "text-yellow-400 text-lg"
+                                : "text-gray-300 text-lg"
+                            }
+                          >
+                            ★
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
+
+                  {session.review.comment && (
+                    <p className="mt-2 text-xs text-emerald-800/80 italic">
+                      "{session.review.comment}"
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ==================================================
               CANCEL SESSION
           ================================================== */}
 
           {showCancel &&
-            session.status === "SCHEDULED" &&
+            session.status ===
+              "SCHEDULED" &&
             !sessionHasEnded && (
-              <button
-                type="button"
-                onClick={() =>
-                  cancelSession(
-                    session.id
-                  )
-                }
-                disabled={
-                  isActionInProgress
-                }
-                className="w-full h-10 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all duration-200 active:scale-[0.98] shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-
-                {isCancelling
-                  ? "Cancelling session..."
-                  : "Cancel Session Allocation"}
-
-              </button>
-            )}
-
+            <button
+              type="button"
+              onClick={() =>
+                cancelSession(
+                  session.id
+                )
+              }
+              disabled={
+                isActionInProgress
+              }
+              className="w-full h-10 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all duration-200 active:scale-[0.98] shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isCancelling
+                ? "Cancelling session..."
+                : "Cancel Session Allocation"}
+            </button>
+          )}
         </div>
-
       </div>
     );
   };
@@ -876,19 +1101,21 @@ const MySessions = () => {
       ====================================================== */}
 
       <div>
-
         <div className="flex items-center gap-1.5 p-1.5 bg-purple-50/60 border border-purple-100 rounded-2xl w-full sm:w-fit overflow-x-auto shadow-2xs">
 
           {tabs.map((tab) => {
             const isActive =
-              activeTab === tab.id;
+              activeTab ===
+              tab.id;
 
             return (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() =>
-                  setActiveTab(tab.id)
+                  setActiveTab(
+                    tab.id
+                  )
                 }
                 className={`
                   relative
@@ -911,7 +1138,6 @@ const MySessions = () => {
                   }
                 `}
               >
-
                 <span>
                   {tab.label}
                 </span>
@@ -937,13 +1163,10 @@ const MySessions = () => {
                 >
                   {tab.count}
                 </span>
-
               </button>
             );
           })}
-
         </div>
-
       </div>
 
       {/* ======================================================
@@ -951,19 +1174,14 @@ const MySessions = () => {
       ====================================================== */}
 
       <div className="mb-5 flex items-center justify-between">
-
         <div />
 
         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200/60">
-
           {activeSessions.length}{" "}
-
           {activeSessions.length === 1
             ? "Session"
             : "Sessions"}
-
         </span>
-
       </div>
 
       {/* ======================================================
@@ -971,16 +1189,12 @@ const MySessions = () => {
       ====================================================== */}
 
       {activeSessions.length === 0 ? (
-
         <div className="flex flex-col items-center justify-center min-h-[280px] bg-purple-50/20 border border-dashed border-purple-200 rounded-3xl px-6">
-
           <div className="w-12 h-12 rounded-2xl bg-purple-100/70 border border-purple-200 flex items-center justify-center mb-4 text-purple-600">
-
             <Calendar
               size={20}
               className="text-purple-600"
             />
-
           </div>
 
           <p className="text-sm font-semibold text-slate-700 text-center">
@@ -990,29 +1204,210 @@ const MySessions = () => {
           <p className="text-xs text-slate-500 mt-1 text-center">
             Your session history will appear here.
           </p>
-
         </div>
-
       ) : (
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
           {activeSessions.map(
             (session) => (
               <SessionCard
                 key={session.id}
                 session={session}
                 showCancel={
-                  activeTab === "UPCOMING"
+                  activeTab ===
+                  "UPCOMING"
                 }
               />
             )
           )}
-
         </div>
-
       )}
 
+      {/* ======================================================
+          REVIEW MODAL
+      ====================================================== */}
+
+      {reviewingSessionId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+          onMouseDown={(event) => {
+            if (
+              event.target ===
+                event.currentTarget &&
+              !submittingReview
+            ) {
+              closeReviewModal();
+            }
+          }}
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+
+            {/* ==================================================
+                MODAL HEADER
+            ================================================== */}
+
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Rate Your Mentor
+                </h2>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  Share your experience from the session.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={
+                  closeReviewModal
+                }
+                disabled={
+                  submittingReview
+                }
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-xl text-gray-400 hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* ==================================================
+                STAR RATING
+            ================================================== */}
+
+            <div className="mb-6">
+              <p className="mb-3 text-sm font-semibold text-gray-700">
+                How was your mentorship session?
+              </p>
+
+              <div className="flex items-center justify-center gap-2">
+                {[1, 2, 3, 4, 5].map(
+                  (star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() =>
+                        setSelectedRating(
+                          star
+                        )
+                      }
+                      disabled={
+                        submittingReview
+                      }
+                      className={`
+                        text-4xl
+                        leading-none
+                        transition-all
+                        duration-150
+                        hover:scale-110
+                        disabled:cursor-not-allowed
+                        ${
+                          star <=
+                          selectedRating
+                            ? "text-yellow-400"
+                            : "text-gray-300"
+                        }
+                      `}
+                      aria-label={`Rate ${star} out of 5`}
+                    >
+                      ★
+                    </button>
+                  )
+                )}
+              </div>
+
+              <p className="mt-2 text-center text-sm text-gray-500">
+                {selectedRating ===
+                0
+                  ? "Select a rating"
+                  : `${selectedRating} out of 5`}
+              </p>
+            </div>
+
+            {/* ==================================================
+                COMMENT
+            ================================================== */}
+
+            <div className="mb-6">
+              <label
+                htmlFor="mentor-review-comment"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
+                Comment
+                <span className="ml-1 font-normal text-gray-400">
+                  (optional)
+                </span>
+              </label>
+
+              <textarea
+                id="mentor-review-comment"
+                value={
+                  reviewComment
+                }
+                onChange={(
+                  event
+                ) =>
+                  setReviewComment(
+                    event.target.value
+                  )
+                }
+                disabled={
+                  submittingReview
+                }
+                rows={4}
+                maxLength={500}
+                placeholder="Share your experience with this mentor..."
+                className="w-full resize-none rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 disabled:bg-gray-100"
+              />
+
+              <div className="mt-1 text-right text-xs text-gray-400">
+                {reviewComment.length}/500
+              </div>
+            </div>
+
+            {/* ==================================================
+                ACTIONS
+            ================================================== */}
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={
+                  closeReviewModal
+                }
+                disabled={
+                  submittingReview
+                }
+                className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={
+                  submitReview
+                }
+                disabled={
+                  submittingReview ||
+                  selectedRating === 0
+                }
+                className="rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {submittingReview ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+
+                    Submitting...
+                  </span>
+                ) : (
+                  "Submit Review"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

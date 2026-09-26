@@ -5,13 +5,9 @@ import type {
 
 import prisma from "../../../config/prisma";
 
-import { asyncHandler }
-from "../../../utils/asyncHandler";
+import { asyncHandler } from "../../../utils/asyncHandler";
 
 import { Resend } from "resend";
-
-
-
 
 import {
   bookMentorshipSession,
@@ -20,16 +16,24 @@ import {
   updateMeetingLink,
   getMentorSessions,
   getStudentSessions,
-  getStudentSessionJoinInfo
+  getStudentSessionJoinInfo,
 } from "./session.service";
 
 import {
   getNextSession,
 } from "./session.service";
 
+import {
+  createMentorReview,
+} from "../../mentor/review/mentor.review.service";
+
+
+// ======================================================
+// BOOK SESSION
+// ======================================================
+
 export const bookSession =
   asyncHandler(
-
     async (
       req: Request,
       res: Response
@@ -40,15 +44,10 @@ export const bookSession =
       // ==========================================
 
       if (!req.user) {
-
         return res.status(401).json({
-
           success: false,
-
           message: "Unauthorized",
-
         });
-
       }
 
       // ==========================================
@@ -64,24 +63,16 @@ export const bookSession =
 
       const student =
         await prisma.user.findUnique({
-
           where: {
             id: userId,
           },
-
         });
 
       if (!student) {
-
         return res.status(404).json({
-
           success: false,
-
-          message:
-            "Student not found",
-
+          message: "Student not found",
         });
-
       }
 
       // ==========================================
@@ -101,16 +92,11 @@ export const bookSession =
         !mentorId ||
         !scheduledAt
       ) {
-
         return res.status(400).json({
-
           success: false,
-
           message:
             "mentorId and scheduledAt are required",
-
         });
-
       }
 
       // ==========================================
@@ -119,139 +105,203 @@ export const bookSession =
 
       const session =
         await bookMentorshipSession(
-
           student.id,
-
           mentorId,
-
           scheduledAt
-
         );
 
-        const mentor = await prisma.mentor.findUnique({
-  where: {
-    id: mentorId,
-  },
-  include: {
-    user: true,
-  },
-});
+      const mentor =
+        await prisma.mentor.findUnique({
+          where: {
+            id: mentorId,
+          },
+          include: {
+            user: true,
+          },
+        });
 
-const resend = new Resend(
-  process.env.RESEND_API_KEY
-);
+      const resend =
+        new Resend(
+          process.env.RESEND_API_KEY
+        );
 
-try {
-  // ==========================================
-  // EMAIL TO STUDENT
-  // ==========================================
+      try {
 
-  await resend.emails.send({
-    from: `MentorSala <${process.env.EMAIL_FROM}>`,
-    to: student.email,
-    subject: "Your Mentorship Session is Confirmed 🎉",
-    html: `
-      <h2>Session Confirmed</h2>
+        // ==========================================
+        // EMAIL TO STUDENT
+        // ==========================================
 
-      <p>Hi ${student.name},</p>
+        await resend.emails.send({
+          from:
+            `MentorSala <${process.env.EMAIL_FROM}>`,
 
-      <p>Your mentorship session has been successfully booked.</p>
+          to: student.email,
 
-      <table>
-        <tr>
-          <td><strong>Mentor</strong></td>
-          <td>${mentor?.user?.name}</td>
-        </tr>
+          subject:
+            "Your Mentorship Session is Confirmed 🎉",
 
-        <tr>
-          <td><strong>Date & Time</strong></td>
-          <td>${new Date(session.scheduledAt).toLocaleString()}</td>
-        </tr>
+          html: `
+            <h2>Session Confirmed</h2>
 
-        <tr>
-          <td><strong>Duration</strong></td>
-          <td>${session.duration} Minutes</td>
-        </tr>
-      </table>
+            <p>Hi ${student.name},</p>
 
-      <p>Please join the session on time.</p>
+            <p>
+              Your mentorship session has been successfully booked.
+            </p>
 
-      <br />
+            <table>
+              <tr>
+                <td>
+                  <strong>Mentor</strong>
+                </td>
 
-      <p>Regards,<br />MentorSala Team</p>
-    `,
-  });
+                <td>
+                  ${mentor?.user?.name}
+                </td>
+              </tr>
 
-  // ==========================================
-  // EMAIL TO MENTOR
-  // ==========================================
+              <tr>
+                <td>
+                  <strong>Date & Time</strong>
+                </td>
 
-  await resend.emails.send({
-    from: `MentorSala <${process.env.EMAIL_FROM}>`,
-    to: mentor?.user?.email ?? "",
-    subject: "New Mentorship Session Booked",
-    html: `
-      <h2>New Session Booked</h2>
+                <td>
+                  ${new Date(
+                    session.scheduledAt
+                  ).toLocaleString()}
+                </td>
+              </tr>
 
-      <p>Hi ${mentor?.user?.name},</p>
+              <tr>
+                <td>
+                  <strong>Duration</strong>
+                </td>
 
-      <p>A student has booked a mentorship session with you.
-      Kindly Update the Meeting Link from your Side.
-      </p>
+                <td>
+                  ${session.duration} Minutes
+                </td>
+              </tr>
+            </table>
 
-      <table>
-        <tr>
-          <td><strong>Student</strong></td>
-          <td>${student.name}</td>
-        </tr>
+            <p>
+              Please join the session on time.
+            </p>
 
-        <tr>
-          <td><strong>Email</strong></td>
-          <td>${student.email}</td>
-        </tr>
+            <br />
 
-        <tr>
-          <td><strong>Date & Time</strong></td>
-          <td>${new Date(session.scheduledAt).toLocaleString()}</td>
-        </tr>
+            <p>
+              Regards,<br />
+              MentorSala Team
+            </p>
+          `,
+        });
 
-        <tr>
-          <td><strong>Duration</strong></td>
-          <td>${session.duration} Minutes</td>
-        </tr>
-      </table>
+        // ==========================================
+        // EMAIL TO MENTOR
+        // ==========================================
 
-      <p>Please be available a few minutes before the session starts.</p>
+        await resend.emails.send({
+          from:
+            `MentorSala <${process.env.EMAIL_FROM}>`,
 
-      <br />
+          to:
+            mentor?.user?.email ?? "",
 
-      <p>Regards,<br />MentorSala Team</p>
-    `,
-  });
-} catch (error) {
-  console.error("Failed to send booking emails:", error);
-}
+          subject:
+            "New Mentorship Session Booked",
 
+          html: `
+            <h2>New Session Booked</h2>
 
+            <p>
+              Hi ${mentor?.user?.name},
+            </p>
+
+            <p>
+              A student has booked a mentorship session with you.
+              Kindly Update the Meeting Link from your Side.
+            </p>
+
+            <table>
+              <tr>
+                <td>
+                  <strong>Student</strong>
+                </td>
+
+                <td>
+                  ${student.name}
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <strong>Email</strong>
+                </td>
+
+                <td>
+                  ${student.email}
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <strong>Date & Time</strong>
+                </td>
+
+                <td>
+                  ${new Date(
+                    session.scheduledAt
+                  ).toLocaleString()}
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <strong>Duration</strong>
+                </td>
+
+                <td>
+                  ${session.duration} Minutes
+                </td>
+              </tr>
+            </table>
+
+            <p>
+              Please be available a few minutes before
+              the session starts.
+            </p>
+
+            <br />
+
+            <p>
+              Regards,<br />
+              MentorSala Team
+            </p>
+          `,
+        });
+
+      } catch (error) {
+
+        console.error(
+          "Failed to send booking emails:",
+          error
+        );
+
+      }
 
       // ==========================================
       // RESPONSE
       // ==========================================
 
       return res.status(201).json({
-
         success: true,
-
         message:
           "Session booked successfully",
-
         session,
-
       });
-
     }
-
   );
+
 
 // ======================================================
 // GET STUDENT SESSIONS
@@ -259,46 +309,37 @@ try {
 
 export const getMySessions =
   asyncHandler(
-
     async (
       req: Request,
       res: Response
     ) => {
 
       if (!req.user) {
-
         return res.status(401).json({
-
           success: false,
-
           message: "Unauthorized",
-
         });
-
       }
 
       const sessions =
         await getStudentSessions(
-
           req.user.userId
-
         );
 
       return res.status(200).json({
-
         success: true,
-
         sessions,
-
       });
-
     }
-
   );
+
+
+// ======================================================
+// GET MENTOR UPCOMING SESSIONS
+// ======================================================
 
 export const getMentorUpcomingSessions =
   asyncHandler(
-
     async (
       req: Request,
       res: Response
@@ -309,15 +350,10 @@ export const getMentorUpcomingSessions =
       // ==========================================
 
       if (!req.user) {
-
         return res.status(401).json({
-
           success: false,
-
           message: "Unauthorized",
-
         });
-
       }
 
       // ==========================================
@@ -326,9 +362,7 @@ export const getMentorUpcomingSessions =
 
       const sessions =
         await getMentorSessions(
-
           req.user.userId
-
         );
 
       // ==========================================
@@ -336,75 +370,56 @@ export const getMentorUpcomingSessions =
       // ==========================================
 
       return res.status(200).json({
-
         success: true,
-
         sessions,
-
       });
-
     }
-
   );
 
 
-  // ======================================================
+// ======================================================
 // COMPLETE SESSION
 // ======================================================
 
 export const completeMentorshipSession =
   asyncHandler(
-
     async (
       req: Request,
       res: Response
     ) => {
 
       if (!req.user) {
-
         return res.status(401).json({
-
           success: false,
-
           message: "Unauthorized",
-
         });
-
       }
 
       const sessionId =
-  req.params.sessionId as string;
+        req.params.sessionId as string;
 
       const session =
         await completeSession(
-
           sessionId,
-
           req.user.userId
-
         );
 
       return res.status(200).json({
-
         success: true,
-
         message:
           "Session marked as completed",
-
         session,
-
       });
-
     }
-
   );
+
+
 // ======================================================
 // CANCEL SESSION
 // ======================================================
 
 export const cancelBookedSession =
   asyncHandler(
-
     async (
       req: Request,
       res: Response
@@ -415,15 +430,10 @@ export const cancelBookedSession =
       // ==========================================
 
       if (!req.user) {
-
         return res.status(401).json({
-
           success: false,
-
           message: "Unauthorized",
-
         });
-
       }
 
       // ==========================================
@@ -439,11 +449,8 @@ export const cancelBookedSession =
 
       const session =
         await cancelSession(
-
           sessionId,
-
           req.user.userId
-
         );
 
       // ==========================================
@@ -451,139 +458,108 @@ export const cancelBookedSession =
       // ==========================================
 
       return res.status(200).json({
-
         success: true,
-
         message:
           "Session cancelled successfully",
-
         session,
-
       });
-
     }
-
   );
+
+
+// ======================================================
+// GET NEXT SESSION
+// ======================================================
 
 export const getNextSessionController =
   asyncHandler(
-
     async (
-       req: Request,
+      req: Request,
       res: Response
     ) => {
 
       if (!req.user) {
-
         return res.status(401).json({
-
           success: false,
-
         });
-
       }
 
       const session =
         await getNextSession(
-
           req.user.userId
-
         );
 
       return res.json({
-
         success: true,
-
         session,
-
       });
-
     }
-
   );
+
+
+// ======================================================
+// GET MENTOR SESSIONS
+// ======================================================
 
 export const getMentorSessionsController =
   asyncHandler(
-
     async (
       req: Request,
       res: Response
     ) => {
 
       if (!req.user) {
-
         return res.status(401).json({
-
           success: false,
-
           message: "Unauthorized",
-
         });
-
       }
 
       const mentor =
         await prisma.mentor.findUnique({
-
           where: {
-
             userId:
               req.user.userId,
-
           },
-
         });
 
       if (!mentor) {
-
         return res.status(404).json({
-
           success: false,
-
           message:
             "Mentor not found",
-
         });
-
       }
 
       const sessions =
         await getMentorSessions(
-
           mentor.id
-
         );
 
       return res.status(200).json({
-
         success: true,
-
         sessions,
-
       });
-
     }
-
   );
 
-  export const saveMeetingLink =
-  asyncHandler(
 
+// ======================================================
+// SAVE MEETING LINK
+// ======================================================
+
+export const saveMeetingLink =
+  asyncHandler(
     async (
       req: Request,
       res: Response
     ) => {
 
       if (!req.user) {
-
         return res.status(401).json({
-
           success: false,
-
           message: "Unauthorized",
-
         });
-
       }
 
       const sessionId =
@@ -595,26 +571,18 @@ export const getMentorSessionsController =
 
       const session =
         await updateMeetingLink(
-
           sessionId,
-
           req.user.userId,
-
           meetingLink
-
         );
 
       return res.status(200).json({
-
         success: true,
-
         session,
-
       });
-
     }
-
   );
+
 
 // ======================================================
 // GET STUDENT SESSION JOIN INFO
@@ -626,6 +594,7 @@ export const getStudentSessionJoinInfoController =
       req: Request,
       res: Response
     ) => {
+
       // ==========================================
       // AUTH CHECK
       // ==========================================
@@ -669,6 +638,96 @@ export const getStudentSessionJoinInfoController =
       return res.status(200).json({
         success: true,
         data: joinInfo,
+      });
+    }
+  );
+
+
+// ======================================================
+// CREATE MENTOR REVIEW
+// ======================================================
+
+export const createMentorReviewController =
+  asyncHandler(
+    async (
+      req: Request,
+      res: Response
+    ) => {
+
+      // ==========================================
+      // AUTH CHECK
+      // ==========================================
+
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+      }
+
+      // ==========================================
+      // SESSION ID
+      // ==========================================
+
+      const sessionId =
+        req.params.sessionId as string;
+
+      if (!sessionId) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Session ID is required",
+        });
+      }
+
+      // ==========================================
+      // BODY
+      // ==========================================
+
+      const {
+        rating,
+        comment,
+      } = req.body;
+
+      // ==========================================
+      // VALIDATE RATING
+      // ==========================================
+
+      if (
+        !Number.isInteger(rating) ||
+        rating < 1 ||
+        rating > 5
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Rating must be an integer between 1 and 5.",
+        });
+      }
+
+      // ==========================================
+      // CREATE REVIEW
+      // ==========================================
+
+      const result =
+        await createMentorReview({
+          sessionId,
+          studentId:
+            req.user.userId,
+          rating,
+          comment,
+        });
+
+      // ==========================================
+      // RESPONSE
+      // ==========================================
+
+      return res.status(201).json({
+        success: true,
+        message:
+          "Review submitted successfully",
+        review: result.review,
+        mentor: result.mentor,
       });
     }
   );

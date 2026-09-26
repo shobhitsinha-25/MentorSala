@@ -169,54 +169,35 @@ export const getStudentSessions =
   async (
     studentId: string
   ) => {
-
     const sessions =
       await prisma.mentorshipSession.findMany({
-
         where: {
-
           studentId,
-
         },
 
         include: {
-
           mentor: {
-
             include: {
-
               user: {
-
                 select: {
-
                   id: true,
-
                   name: true,
-
                   email: true,
-
                   avatar: true,
-
                 },
-
               },
-
             },
-
           },
 
+          review: true,
         },
 
         orderBy: {
-
           scheduledAt: "asc",
-
         },
-
       });
 
     return sessions;
-
   };
 
 // ======================================================

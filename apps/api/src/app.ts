@@ -42,6 +42,7 @@ import adminBlogRoutes from "./modules/admin/blog.routes";
 import publicBlogRoutes from "./modules/blog/blog.routes";
 import leaderboardRoutes from "./modules/leaderboard/leaderboard.routes";
 import testProgressRoutes from "./modules/test-progress/test-progress.routes";
+import mentorReviewRoutes from "./modules/mentor/review/mentor.review.routes";
 
 const app = express();
 
@@ -198,6 +199,11 @@ app.use(
 app.use(
   "/api/student/daily-problem",
   studentDailyProblemRoutes
+);
+
+app.use(
+  "/api/student",
+  mentorReviewRoutes
 );
 
 // Payments...

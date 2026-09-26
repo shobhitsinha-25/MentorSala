@@ -163,8 +163,8 @@ model User {
   level            String    @default("Rookie")
   lastPotdSolvedAt DateTime?
   lastActiveAt     DateTime?
-  trialStartedAt DateTime?
-  trialExpiresAt DateTime?
+  trialStartedAt   DateTime?
+  trialExpiresAt   DateTime?
 
   // Soft Delete
   isDeleted Boolean @default(false)
@@ -176,10 +176,10 @@ model User {
   bookedSessions    MentorshipSession[]       @relation("StudentSessions")
   questionAttempts  QuestionAttempt[]
   mentorPreferences StudentMentorPreference[]
-  mentorReviews     MentorReview[]            @relation("StudentReviews") 
+  mentorReviews     MentorReview[]            @relation("StudentReviews")
   tasks             Task[]
-  xpTransactions XPTransaction[]
-  blogs Blog[]
+  xpTransactions    XPTransaction[]
+  blogs             Blog[]
 
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -191,23 +191,22 @@ model User {
 }
 
 model PasswordResetCode {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  email     String
-  codeHash  String
+  email    String
+  codeHash String
 
   expiresAt DateTime
 
-  attempts  Int      @default(0)
+  attempts Int @default(0)
 
-  verified  Boolean  @default(false)
+  verified Boolean @default(false)
 
   createdAt DateTime @default(now())
 
   @@index([email])
   @@index([expiresAt])
 }
-
 
 model XPTransaction {
   id String @id @default(cuid())
@@ -230,14 +229,13 @@ model XPTransaction {
 
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, type, referenceId])
   @@index([userId])
   @@index([userId, createdAt])
   @@index([type])
 }
-
 
 model Blog {
   id String @id @default(cuid())
@@ -258,7 +256,7 @@ model Blog {
 
   authorId String
 
-  author User @relation(fields: [authorId],references: [id],onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   isDeleted Boolean @default(false)
 
@@ -270,7 +268,6 @@ model Blog {
   @@index([authorId])
   @@index([publishedAt])
 }
-
 
 // =====================================================
 // MENTOR MODEL
@@ -478,7 +475,7 @@ model DailyProblem {
   questionId String
   date       DateTime
 
-  question PracticeQuestion @relation(fields: [questionId],references: [id],onDelete: Cascade)
+  question PracticeQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -722,7 +719,7 @@ model SubscriptionPlan {
 // =====================================================
 
 model UserSubscription {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   userId    String
   planId    String
   paymentId String? @unique
@@ -733,9 +730,9 @@ model UserSubscription {
 
   isTrial Boolean @default(false)
 
-  user    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan    SubscriptionPlan  @relation(fields: [planId], references: [id], onDelete: Restrict)
-  payment Payment?          @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan    SubscriptionPlan    @relation(fields: [planId], references: [id], onDelete: Restrict)
+  payment Payment?            @relation(fields: [paymentId], references: [id], onDelete: Restrict)
   usages  SubscriptionUsage[]
 
   createdAt DateTime @default(now())
@@ -927,6 +924,8 @@ model MentorshipSession {
   mentor  Mentor @relation("MentorSessions", fields: [mentorId], references: [id], onDelete: Cascade)
   student User   @relation("StudentSessions", fields: [studentId], references: [id], onDelete: Cascade)
 
+  review MentorReview?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -943,14 +942,14 @@ model SubscriptionUsage {
   subscriptionId String
 
   resource EntitlementResource
-  variant  String @default("DEFAULT")
+  variant  String              @default("DEFAULT")
 
   periodStart DateTime
   periodEnd   DateTime
 
   used Int @default(0)
 
-  subscription UserSubscription @relation(fields: [subscriptionId],references: [id],onDelete: Cascade)
+  subscription UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -960,7 +959,6 @@ model SubscriptionUsage {
   @@index([resource])
   @@index([periodStart, periodEnd])
 }
-
 
 // =====================================================
 // PRACTICE QUESTIONS
@@ -996,19 +994,22 @@ model QuestionAttempt {
 // =====================================================
 
 model MentorReview {
-  id        String  @id @default(cuid())
-  rating    Int
-  comment   String?
+  id      String  @id @default(cuid())
+  rating  Int
+  comment String?
+
   mentorId  String
   studentId String
+  sessionId String @unique
 
-  // ✅ FIXED: Explicit named relation blocks applied to both sides
-  mentor  Mentor @relation("MentorReviews", fields: [mentorId], references: [id], onDelete: Cascade)
-  student User   @relation("StudentReviews", fields: [studentId], references: [id], onDelete: Cascade)
+  mentor Mentor @relation("MentorReviews", fields: [mentorId], references: [id], onDelete: Cascade)
+
+  student User @relation("StudentReviews", fields: [studentId], references: [id], onDelete: Cascade)
+
+  session MentorshipSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
-  @@unique([mentorId, studentId])
   @@index([mentorId])
   @@index([studentId])
 }
